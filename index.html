@@ -202,7 +202,7 @@
     </div>
 
     <script>
-        // --- 🎵 ランダムBGM機能 (MP3に戻しました！) ---
+        // --- 🎵 ランダムBGM機能 (MP3対応・音量調整可) ---
         const bgmPlayer = document.getElementById('bgm-player');
         const bgmBtn = document.getElementById('bgm-btn');
         let isPlaying = false;
@@ -214,7 +214,10 @@
             'bgm/3.mp3'
         ];
 
-        bgmPlayer.volume = 0.3; // 音量
+        // 🔊 ここで音量を調整します（0.0〜1.0）
+        // 0.2 = 20% (標準的なBGMの大きさ)
+        // 0.1 = 10% (控えめ)
+        bgmPlayer.volume = 0.2;
 
         // ランダム再生関数
         function playRandomSong() {
@@ -240,6 +243,9 @@
                 isPlaying = false;
             } else {
                 isPlaying = true;
+                // 再生時も音量を再確認（ここも連動して20%になります）
+                bgmPlayer.volume = 0.2;
+                
                 if (!bgmPlayer.src) {
                     playRandomSong();
                 } else {
