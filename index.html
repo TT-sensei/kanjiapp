@@ -40,7 +40,6 @@
         .main-title {
             font-size: 3rem; text-align: center; margin-bottom: 10px;
             color: #37474F; letter-spacing: 2px;
-            /* タイトルも見やすく */
         }
         
         /* モード切替タブ */
@@ -122,28 +121,37 @@
             display: flex; justify-content: space-between; align-items: center;
             width: 100%; max-width: 400px; margin-bottom: 10px;
         }
+        
+        /* キャンバスエリア */
         .canvas-area {
             background: white; padding: 10px; border-radius: 20px;
             box-shadow: 0 10px 0 rgba(0,0,0,0.1); margin: 10px 0;
             position: relative;
-            /* お手本フォント表示用 */
-            display: flex; flex-direction: column; align-items: center;
-        }
-        
-        /* 正しいフォントのお手本表示エリア */
-        #font-sample-display {
-            position: absolute; top: 10px; left: 10px;
-            font-size: 1.5rem; color: #aaa; pointer-events: none;
-            display: none; /* 必要な場合のみ表示 */
+            display: flex; align-items: center; justify-content: center;
+            width: 320px; height: 320px; /* サイズ固定 */
         }
 
-        #target-div { width: 300px; height: 300px; touch-action: none; }
+        /* 背景に正しい教科書体を置く（ここが重要！） */
+        #background-guide {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            font-size: 260px; /* キャンバスサイズに合わせて調整 */
+            color: #e0e0e0; /* 薄いグレー */
+            font-family: 'Klee One', "游教科書体", "Yu Mincho", serif;
+            z-index: 1; /* canvasの下 */
+            pointer-events: none; /* タッチを邪魔しない */
+            user-select: none;
+            line-height: 1;
+        }
+
+        #target-div { 
+            width: 300px; height: 300px; 
+            position: relative; z-index: 2; /* 文字の上 */
+            touch-action: none; 
+        }
         
-        /* 読みテキストも大きく教科書体で */
         .reading-text { font-size: 2.2rem; margin: 10px 0 5px 0; color: #333; text-align: center; }
         .status-text { height: 30px; font-size: 1.3rem; font-weight: bold; color: #555; }
         
-        /* テスト用インジケーター */
         .test-indicator {
             display: flex; gap: 8px; margin-bottom: 10px;
         }
@@ -152,7 +160,6 @@
         .test-dot.done { background: #43A047; }
         .test-dot.wrong { background: #E53935; }
 
-        /* 結果オーバーレイ */
         #result-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(255,255,255,0.95); z-index: 100;
@@ -225,6 +232,7 @@
         </div>
 
         <div class="canvas-area">
+            <div id="background-guide"></div>
             <div id="target-div"></div>
         </div>
 
@@ -280,7 +288,6 @@
             });
         }
 
-        // --- 設定値 ---
         const colors = {
             1: "#F06292", 2: "#FFB74D", 3: "#81C784", 
             4: "#BA68C8", 5: "#4DB6AC", 6: "#7986CB"
@@ -302,13 +309,11 @@
         let usedHint = false;
         let isGuideOn = true;
 
-        // --- 画面制御 ---
         function showScreen(id) {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
             document.getElementById(id).classList.add('active');
         }
 
-        // --- トップ画面 ---
         function switchTab(mode) {
             currentMode = mode;
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -384,7 +389,6 @@
             showScreen('list-screen');
         }
 
-        // --- リスト画面 ---
         function renderList() {
             const grid = document.getElementById('grade-grid');
             grid.innerHTML = '';
@@ -421,7 +425,6 @@
             showScreen('top-screen');
         }
 
-        // --- 練習 & テスト ---
         function startPractice(item, grade, isFromSearch) {
             currentChar = item;
             currentGrade = grade;
@@ -472,7 +475,7 @@
             document.getElementById('test-controls').style.display = 'flex';
             document.getElementById('msg-area').innerText = `第${testIndex+1}問！わかるかな？`;
             
-            initWriter(false); // ガイドなし
+            initWriter(false);
         }
 
         function setupCanvasScreen(item, grade) {
@@ -484,10 +487,11 @@
             document.getElementById('result-content-practice').style.display = 'none';
             document.getElementById('result-content-test').style.display = 'none';
             
-            // 読み表示と「正しいフォントの文字」の表示
+            // 背景ガイド（正しい教科書体）のセット
+            document.getElementById('background-guide').innerText = item.char;
+
             let displayText = item.reading;
             if(currentMode === 'practice') {
-                 // ここで正しいフォントの漢字をカッコ書きで表示
                  displayText += ` (${item.char})`;
                  document.getElementById('msg-area').innerText = "なぞってみよう！";
             }
@@ -497,20 +501,17 @@
 
         function initWriter(showOutline) {
             try {
-                // 日本語データを優先的に取得するロジック
                 writer = HanziWriter.create('target-div', currentChar.char, {
                     width: 300, height: 300, padding: 10,
                     showOutline: showOutline, 
                     strokeAnimationSpeed: 1, delayBetweenStrokes: 200,
                     radicalColor: colors[currentGrade], 
                     drawingWidth: 25,
-                    // 重要：日本語データをロード
                     charDataLoader: function(char, onComplete) {
                         fetch('https://cdn.jsdelivr.net/gh/mnako/hanzi-writer-data-ja@master/data/' + char + '.json')
                             .then(res => res.ok ? res.json() : Promise.reject())
                             .then(onComplete)
                             .catch(() => {
-                                // 万が一日本語データがない場合は通常版（中国語ベース含む）にフォールバック
                                 fetch('https://cdn.jsdelivr.net/npm/hanzi-writer-data@latest/' + char + '.json')
                                 .then(res => res.json()).then(onComplete);
                             });
