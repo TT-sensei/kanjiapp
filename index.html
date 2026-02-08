@@ -202,7 +202,7 @@
     </div>
 
     <script>
-        // --- 🎵 ランダムBGM機能 (MP3対応・音量調整可) ---
+        // --- 🎵 ランダムBGM機能 (アプリ起動時停止・極小音量) ---
         const bgmPlayer = document.getElementById('bgm-player');
         const bgmBtn = document.getElementById('bgm-btn');
         let isPlaying = false;
@@ -214,48 +214,52 @@
             'bgm/3.mp3'
         ];
 
-        // 🔊 ここで音量を調整します（0.0〜1.0）
-        // 0.2 = 20% (標準的なBGMの大きさ)
-        // 0.1 = 10% (控えめ)
-        bgmPlayer.volume = 0.03;
+        // 🔊 音量は「0.005 (0.5%)」
+        // かなり小さい設定です
+        bgmPlayer.volume = 0.005;
 
         // ランダム再生関数
         function playRandomSong() {
-            // 0から2までのランダムな数字を選ぶ
             const randomIndex = Math.floor(Math.random() * playlist.length);
             bgmPlayer.src = playlist[randomIndex];
             bgmPlayer.play();
         }
 
-        // 1曲終わったら、自動的に次のランダムな曲を流す
+        // ループ処理
         bgmPlayer.addEventListener('ended', () => {
             if(isPlaying) {
                 playRandomSong();
             }
         });
 
-        // ボタンを押したときの処理
+        // ボタンの処理
         function toggleBGM() {
             if (isPlaying) {
-                bgmPlayer.pause();
-                bgmBtn.innerHTML = "🔇 音オフ";
-                bgmBtn.classList.remove('playing');
-                isPlaying = false;
+                stopBGM();
             } else {
-                isPlaying = true;
-                // 再生時も音量を再確認（ここも連動して20%になります）
-                bgmPlayer.volume = 0.2;
-                
-                if (!bgmPlayer.src) {
-                    playRandomSong();
-                } else {
-                    bgmPlayer.play().catch(e => {
-                        playRandomSong();
-                    });
-                }
-                bgmBtn.innerHTML = "🎵 音オン";
-                bgmBtn.classList.add('playing');
+                startBGM();
             }
+        }
+
+        function startBGM() {
+            isPlaying = true;
+            bgmPlayer.volume = 0.005; // 再生時も音量を強制セット
+            if (!bgmPlayer.src) {
+                playRandomSong();
+            } else {
+                bgmPlayer.play().catch(e => {
+                    playRandomSong();
+                });
+            }
+            bgmBtn.innerHTML = "🎵 音オン";
+            bgmBtn.classList.add('playing');
+        }
+
+        function stopBGM() {
+            bgmPlayer.pause();
+            bgmBtn.innerHTML = "🔇 音オフ";
+            bgmBtn.classList.remove('playing');
+            isPlaying = false;
         }
 
         // --- 以下、辞書データと検索ロジック ---
@@ -301,6 +305,9 @@
 
         // アプリ起動
         function launchApp(grade) {
+            // 🛑 ここでBGMを止めます
+            stopBGM();
+
             contentFrame.src = `${grade}.html`;
             appContainer.classList.add('active');
             setTimeout(() => { closeBtn.style.display = "block"; }, 300);
