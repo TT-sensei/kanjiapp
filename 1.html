@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>1ねんせい かんじマスター</title>
+    
+    <script src="https://cdn.jsdelivr.net/npm/hanzi-writer@3.5/dist/hanzi-writer.min.js"></script>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Mochiy+Pop+One&display=swap" rel="stylesheet">
+
+    <style>
+        /* --- デザイン設定 --- */
+        body {
+            font-family: 'Mochiy Pop One', sans-serif;
+            background-color: #FFF3E0;
+            margin: 0; padding: 0;
+            min-height: 100vh; color: #4E342E;
+            overflow-x: hidden; touch-action: manipulation;
+            user-select: none;
+        }
+
+        /* 診断メッセージバー（不具合特定用） */
+        #status-bar {
+            background: #333; color: #FFF;
+            padding: 8px; font-size: 0.9rem; text-align: center;
+            position: fixed; top: 0; width: 100%; z-index: 9999;
+            box-sizing: border-box;
+        }
+
+        /* 画面切り替え */
+        .screen {
+            display: none;
+            flex-direction: column;
+            align-items: center; justify-content: center;
+            width: 100%; min-height: 100vh;
+            padding: 40px 20px 20px; /* 上バーの分あける */
+            box-sizing: border-box;
+            opacity: 0; transition: opacity 0.3s;
+        }
+        .screen.active { display: flex; opacity: 1; }
+
+        /* タイトル画面 */
+        #title-screen { background: linear-gradient(135deg, #FFCC80 0%, #FFAB91 100%); }
+        .game-title {
+            font-size: 3rem; color: #FFF;
+            text-shadow: 3px 3px 0 #BF360C;
+            text-align: center; margin-bottom: 40px;
+        }
+        .mode-btn {
+            width: 280px; font-size: 1.5rem; padding: 15px 0;
+            border-radius: 50px; border: none; cursor: pointer;
+            margin: 10px 0; color: white; display: flex;
+            align-items: center; justify-content: center; gap: 10px;
+            box-shadow: 0 6px 0 rgba(0,0,0,0.2);
+            font-family: inherit;
+        }
+        .mode-btn:active { transform: scale(0.95); box-shadow: 0 3px 0 rgba(0,0,0,0.2); }
+        .btn-practice { background: #4CAF50; }
+        .btn-test { background: #F44336; }
+
+        /* リスト画面 */
+        #list-screen { justify-content: flex-start; }
+        .header-info {
+            background: white; padding: 15px; border-radius: 20px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin-bottom: 20px;
+            display: flex; flex-direction: column; align-items: center;
+            width: 90%; max-width: 600px;
+        }
+        .mode-badge {
+            font-size: 1rem; padding: 5px 15px; border-radius: 20px;
+            color: white; margin-bottom: 5px; font-weight: bold;
+        }
+        #search-box {
+            width: 100%; padding: 10px; font-size: 1.2rem;
+            border: 2px solid #FFCC80; border-radius: 10px;
+            margin-top: 10px; text-align: center; background: #FFF8E1;
+            font-family: inherit;
+        }
+
+        .kanji-grid {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(65px, 1fr));
+            gap: 12px; width: 100%; max-width: 800px; padding-bottom: 50px;
+        }
+        .kanji-card {
+            background: white; aspect-ratio: 1; border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 2rem; cursor: pointer; position: relative;
+            box-shadow: 0 4px 0 #D7CCC8; border: 2px solid transparent;
+        }
+        .kanji-card:active { transform: translateY(2px); box-shadow: 0 2px 0 #D7CCC8; }
+        .mark {
+            position: absolute; top: -8px; right: -8px; font-size: 1.2rem;
+            text-shadow: 1px 1px 0 #FFF; display: none;
+        }
+        .cleared-practice { background: #F1F8E9; border-color: #8BC34A; }
+        .cleared-practice .star-mark { display: block; }
+        .cleared-test { background: #FFEBEE; border-color: #EF5350; }
+        .cleared-test .crown-mark { display: block; }
+
+        /* 練習画面 */
+        #practice-screen { background: #E0F7FA; position: relative; }
+        #practice-screen.test-bg { background: #FFEBEE; }
+        .practice-header {
+            width: 100%; max-width: 500px; display: flex;
+            justify-content: space-between; align-items: center; margin-bottom: 20px;
+        }
+        .nav-btn {
+            background: #607D8B; color: white; border: none; padding: 8px 16px;
+            border-radius: 20px; box-shadow: 0 3px 0 #455A64; font-family: inherit;
+        }
+        .target-char-display {
+            font-size: 1.8rem; color: #006064; font-weight: bold;
+        }
+        .canvas-container {
+            background: white; padding: 15px; border-radius: 20px;
+            box-shadow: 0 8px 0 #B0BEC5; margin-bottom: 20px; position: relative;
+        }
+        #character-target-div { width: 300px; height: 300px; touch-action: none; }
+        #message-area { height: 40px; font-size: 1.2rem; font-weight: bold; text-align: center; }
+
+        /* 結果ポップアップ */
+        #result-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(255,255,255,0.95); display: none;
+            flex-direction: column; align-items: center; justify-content: center;
+            z-index: 200;
+        }
+        #result-overlay.active { display: flex; }
+        .result-btn {
+            width: 240px; padding: 15px; margin: 10px 0; border: none;
+            border-radius: 50px; font-size: 1.3rem; color: white;
+            box-shadow: 0 5px 0 rgba(0,0,0,0.2); font-family: inherit;
+        }
+        .btn-next { background: #4CAF50; }
+        .btn-retry { background: #FF9800; }
+        .btn-home { background: #607D8B; }
+
+    </style>
+</head>
+<body>
+    
+    <div id="status-bar">読み込み中...</div>
+
+    <div id="title-screen" class="screen active">
+        <div class="game-title">1ねんせい<br>かんじ<br>マスター</div>
+        <button class="mode-btn btn-practice" onclick="selectMode('practice')"><span>⭐</span> れんしゅう</button>
+        <button class="mode-btn btn-test" onclick="selectMode('test')"><span>👑</span> テスト</button>
+    </div>
+
+    <div id="list-screen" class="screen">
+        <div class="header-info">
+            <div id="mode-display" class="mode-badge"></div>
+            <div>あつめた数：<span id="star-counter" style="font-weight:bold;">0</span> / 80</div>
+            <input type="text" id="search-box" placeholder="けんさく（よみ・かんじ）" oninput="filterList()">
+            <button class="nav-btn" onclick="showScreen('title-screen')" style="margin-top:10px;">タイトルへ</button>
+        </div>
+        <div class="kanji-grid" id="kanji-grid"></div>
+        <button class="nav-btn" onclick="resetData()" style="margin-top:30px; background:#B0BEC5;">データを消す</button>
+    </div>
+
+    <div id="practice-screen" class="screen">
+        <div class="practice-header">
+            <button class="nav-btn" onclick="showScreen('list-screen')">もどる</button>
+            <div id="current-reading" class="target-char-display">よみ</div>
+            <div style="width: 60px;"></div>
+        </div>
+        <div class="canvas-container">
+            <div id="character-target-div"></div>
+        </div>
+        <div id="message-area">なぞってみよう！</div>
+        
+        <div id="result-overlay">
+            <div class="result-title" id="result-title-text" style="font-size:2.5rem; margin-bottom:20px;">できた！</div>
+            <button class="result-btn btn-next" onclick="goNext()">つぎへ ▶</button>
+            <button class="result-btn btn-retry" onclick="retry()">もういちど ↺</button>
+            <button class="result-btn btn-home" onclick="showScreen('list-screen')">ホーム 🏠</button>
+        </div>
+        <button class="nav-btn" onclick="retry()" style="background:#FF7043; margin-top:10px; z-index:10;">書き直す</button>
+    </div>
+
+    <script>
+        // --- エラー診断機能 ---
+        window.onerror = function(msg, url, line) {
+            const status = document.getElementById('status-bar');
+            status.style.backgroundColor = 'red';
+            status.innerHTML = "⚠️ エラー: " + msg + " (行:" + line + ")";
+            return false; // エラーをコンソールにも出す
+        };
+
+        // --- 漢字データ (音読み・訓読み対応版) ---
+        const kanjiData = [
+            {char:'一', reading:'イチ / ひと-つ'}, {char:'二', reading:'ニ / ふた-つ'}, {char:'三', reading:'サン / みっ-つ'},
+            {char:'四', reading:'シ / よん'}, {char:'五', reading:'ゴ / いつ-つ'}, {char:'六', reading:'ロク / むっ-つ'},
+            {char:'七', reading:'シチ / なな'}, {char:'八', reading:'ハチ / やっ-つ'}, {char:'九', reading:'キュウ / ここの-つ'},
+            {char:'十', reading:'ジュウ / とお'}, {char:'人', reading:'ジン / ひと'}, {char:'日', reading:'ニチ / ひ'},
+            {char:'月', reading:'ゲツ / つき'}, {char:'火', reading:'カ / ひ'}, {char:'水', reading:'スイ / みず'},
+            {char:'木', reading:'モク / き'}, {char:'金', reading:'キン / かね'}, {char:'土', reading:'ド / つち'},
+            {char:'上', reading:'ジョウ / うえ'}, {char:'下', reading:'カ / した'}, {char:'左', reading:'サ / ひだり'},
+            {char:'右', reading:'ウ / みぎ'}, {char:'中', reading:'チュウ / なか'}, {char:'大', reading:'ダイ / おお-きい'},
+            {char:'小', reading:'ショウ / ちい-さい'}, {char:'山', reading:'サン / やま'}, {char:'川', reading:'セン / かわ'},
+            {char:'田', reading:'デン / た'}, {char:'口', reading:'コウ / くち'}, {char:'目', reading:'モク / め'},
+            {char:'耳', reading:'ジ / みみ'}, {char:'手', reading:'シュ / て'}, {char:'足', reading:'ソク / あし'},
+            {char:'力', reading:'リョク / ちから'}, {char:'女', reading:'ジョ / おんな'}, {char:'男', reading:'ダン / おとこ'},
+            {char:'子', reading:'シ / こ'}, {char:'学', reading:'ガク / まな-ぶ'}, {char:'校', reading:'コウ'},
+            {char:'先', reading:'セン / さき'}, {char:'生', reading:'セイ / い-きる'}, {char:'名', reading:'メイ / な'},
+            {char:'字', reading:'ジ / あざ'}, {char:'文', reading:'ブン /
