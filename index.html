@@ -1,16 +1,17 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ja">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>小学校かんじマスター 統合ポータル</title>
-    <link href="https://fonts.googleapis.com/css2?family=Mochiy+Pop+One&display=swap" rel="stylesheet">
-    <style>
-        /* --- モダンUIデザイン設定 --- */
+ <head>
+  <meta charset="UTF-8">
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>小学校かんじマスター 統合ポータル</title>
+  <link href="https://fonts.googleapis.com/css2?family=Mochiy+Pop+One&amp;display=swap" rel="stylesheet">
+  <style>
+        body { box-sizing: border-box; }
+
         :root {
             --bg-color: #F4F7F6;
             --card-shadow: 0 10px 20px rgba(0,0,0,0.08);
-            --card-hover: 0 15px 30px rgba(0,0,0,0.12);
             --g1-color: #FF8A65; --g2-color: #FFD54F; --g3-color: #4FC3F7;
             --g4-color: #81C784; --g5-color: #BA68C8; --g6-color: #7986CB;
         }
@@ -22,257 +23,801 @@
             height: 100vh; overflow: hidden; display: flex; flex-direction: column;
         }
 
-        /* --- ヘッダー --- */
+        /* XPバー周りのデザイン（キャラ拡大に合わせて高さ調整） */
+        #xp-bar-container {
+            background: linear-gradient(135deg, #fff 0%, #f8f9fa 100%);
+            padding: 10px 15px;
+            display: flex; align-items: center; justify-content: space-between;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1); z-index: 200; 
+            height: 100px; /* キャラのサイズに合わせて高さを拡張 */
+            flex-shrink: 0;
+            border-bottom: 3px solid #4FC3F7;
+        }
+        .xp-info { display: flex; align-items: center; gap: 20px; flex-grow: 1; position: relative; }
+        
+        /* キャラアイコンを大きく調整 */
+        .char-icon { 
+            font-size: 4.2rem; /* 3remから大きくしました */
+            animation: big-bounce 1s cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite;
+            cursor: pointer; transition: transform 0.2s;
+            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.2));
+            padding: 5px 10px; 
+            background: linear-gradient(135deg, rgba(255,255,255,0.8), rgba(200,230,255,0.4)); 
+            border-radius: 20px;
+            display: inline-block;
+            margin-left: 5px;
+        }
+        .char-icon:hover { transform: scale(1.2); filter: drop-shadow(0 6px 12px rgba(79, 195, 247, 0.6)); }
+        
+        .xp-stats { display: flex; flex-direction: column; gap: 4px; flex-grow: 1; }
+        .xp-header { display: flex; align-items: baseline; gap: 10px; }
+        .xp-text { font-size: 1.1rem; color: #222; white-space: nowrap; font-weight: 700; }
+        
+        /* 経験値の説明テキスト */
+        .xp-desc { 
+            font-size: 0.75rem; color: #4FC3F7; font-weight: 700; 
+            background: #E1F5FE; padding: 3px 10px; border-radius: 12px;
+            display: inline-block; margin-left: 5px;
+        }
+        
+        .xp-small { font-size: 0.85rem; color: #666; font-weight: 600; text-align: right; margin-right: 15px;}
+        
+        .progress-track {
+            height: 18px; background: #ddd; border-radius: 9px;
+            margin: 5px 15px 0 0; overflow: hidden; position: relative; box-shadow: inset 0 2px 5px rgba(0,0,0,0.15);
+            width: 95%;
+        }
+        .progress-fill {
+            height: 100%; background: linear-gradient(90deg, #4FC3F7, #29B6F6);
+            width: 0%; transition: width 1s cubic-bezier(0.34, 1.56, 0.64, 1); border-radius: 8px;
+            box-shadow: 0 0 20px rgba(79, 195, 247, 0.8);
+        }
+        
+        @keyframes big-bounce { 
+            0%, 100% { transform: translateY(0) scale(1); } 
+            50% { transform: translateY(-8px) scale(1.05); } 
+        }
+
         header {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px); padding: 10px 20px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05); z-index: 100;
-            display: flex; justify-content: space-between; align-items: center;
-            height: 60px; flex-shrink: 0;
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(10px); 
+            padding: 10px 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08); 
+            z-index: 100;
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center;
+            height: 60px; 
+            flex-shrink: 0;
         }
 
-        .logo { font-size: 1.3rem; display: flex; align-items: center; gap: 8px; color: #455A64; cursor: pointer; }
+        .logo { 
+            font-size: 1.3rem; 
+            display: flex; 
+            align-items: center; 
+            gap: 8px; 
+            color: #2c3e50; 
+            font-weight: 700;
+        }
 
-        /* 検索バー */
-        .search-container { position: relative; width: 100%; max-width: 400px; margin: 0 10px; }
+        .search-container { 
+            position: relative; 
+            width: 100%; 
+            max-width: 420px; 
+            margin: 0 15px; 
+        }
         #search-input {
-            width: 100%; padding: 10px 20px; border-radius: 30px;
-            border: 2px solid transparent; background: #ECEFF1;
-            font-size: 1rem; font-family: inherit; outline: none; transition: all 0.3s;
+            width: 100%; 
+            padding: 10px 18px; 
+            border-radius: 30px;
+            border: 2px solid #ddd; 
+            background: #f5f5f5;
+            font-size: 0.95rem; 
+            font-family: inherit; 
+            outline: none; 
+            transition: all 0.3s;
+            font-weight: 600;
         }
-        #search-input:focus { background: #FFF; border-color: #29B6F6; box-shadow: 0 0 0 4px rgba(41, 182, 246, 0.2); }
-
-        /* BGMボタン */
-        #bgm-btn {
-            background: #ECEFF1; border: none; padding: 10px 15px; border-radius: 20px;
-            cursor: pointer; font-family: inherit; font-size: 0.9rem; color: #546E7A;
-            display: flex; align-items: center; gap: 5px; transition: 0.3s;
-            white-space: nowrap; margin-left: 10px;
-        }
-        #bgm-btn:hover { background: #CFD8DC; }
-        #bgm-btn.playing { background: #81C784; color: white; animation: pulse 2s infinite; }
-
-        @keyframes pulse {
-            0% { box-shadow: 0 0 0 0 rgba(129, 199, 132, 0.7); }
-            70% { box-shadow: 0 0 0 10px rgba(129, 199, 132, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(129, 199, 132, 0); }
+        #search-input:focus { 
+            background: #fff; 
+            border-color: #4FC3F7; 
+            box-shadow: 0 0 0 4px rgba(79, 195, 247, 0.25);
         }
 
-        /* 検索結果 */
         #search-results {
-            position: absolute; top: 115%; left: 0; width: 100%;
-            background: white; border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
-            max-height: 60vh; overflow-y: auto;
-            display: none; padding: 10px; box-sizing: border-box;
+            position: absolute; 
+            top: 120%; 
+            left: 0; 
+            width: 100%;
+            background: white; 
+            border-radius: 15px;
+            box-shadow: 0 10px 35px rgba(0,0,0,0.2);
+            max-height: 60vh; 
+            overflow-y: auto;
+            display: none; 
+            padding: 12px; 
+            box-sizing: border-box; 
+            z-index: 200;
         }
         .result-card {
-            display: flex; align-items: center; justify-content: space-between;
-            padding: 12px 15px; margin-bottom: 8px; border-radius: 12px; cursor: pointer;
-            border: 1px solid #eee; transition: background 0.2s;
+            display: flex; 
+            align-items: center; 
+            justify-content: space-between;
+            padding: 13px 16px; 
+            margin-bottom: 10px; 
+            border-radius: 12px; 
+            cursor: pointer;
+            border: 2px solid transparent; 
+            transition: all 0.2s;
+            background: #f8f8f8;
         }
-        .result-card:hover { background-color: #F5F5F5; }
-        .res-left { display: flex; align-items: center; gap: 12px; }
-        .res-char { font-size: 1.8rem; font-weight: bold; width: 40px; text-align: center; }
-        .res-reading { font-size: 0.8rem; color: #78909C; }
-        .res-badge { padding: 4px 10px; border-radius: 15px; color: white; font-size: 0.85rem; white-space: nowrap; }
+        .result-card:hover { 
+            background-color: #e8f4ff; 
+            border-color: #4FC3F7;
+            transform: translateX(4px);
+        }
+        .res-left { 
+            display: flex; 
+            align-items: center; 
+            gap: 13px; 
+        }
+        .res-char { 
+            font-size: 1.8rem; 
+            font-weight: bold; 
+            width: 42px; 
+            text-align: center; 
+        }
+        .res-reading { 
+            font-size: 0.78rem; 
+            color: #888; 
+            font-weight: 600;
+        }
+        .res-badge { 
+            padding: 6px 14px; 
+            border-radius: 15px; 
+            color: white; 
+            font-size: 0.85rem; 
+            white-space: nowrap; 
+            font-weight: 700;
+        }
 
-        /* --- ホーム画面 --- */
         #home-screen {
-            flex-grow: 1; overflow-y: auto; padding: 20px;
-            display: flex; flex-direction: column; align-items: center;
+            flex-grow: 1; 
+            overflow-y: auto; 
+            padding: 25px;
+            display: flex; 
+            flex-direction: column; 
+            align-items: center;
         }
-        .hero-text { text-align: center; margin: 20px 0 30px; }
-        .hero-title { font-size: 2rem; margin-bottom: 5px; color: #37474F; }
-        .hero-subtitle { color: #90A4AE; font-size: 0.9rem; }
+        .hero-text { 
+            text-align: center; 
+            margin: 15px 0 25px; 
+        }
+        .hero-title { 
+            font-size: 1.7rem; 
+            margin-bottom: 8px; 
+            color: #1a1a1a; 
+            font-weight: 800;
+        }
+        .hero-subtitle { 
+            color: #77a3d1; 
+            font-size: 0.9rem; 
+            font-weight: 600;
+        }
 
         .grade-grid {
-            display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-            gap: 15px; width: 100%; max-width: 900px; padding-bottom: 20px;
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(135px, 1fr));
+            gap: 18px; 
+            width: 100%; 
+            max-width: 920px; 
+            padding-bottom: 25px;
         }
-        @media (min-width: 600px) { .grade-grid { grid-template-columns: repeat(3, 1fr); gap: 20px; } }
+        @media (min-width: 600px) { 
+            .grade-grid { 
+                grid-template-columns: repeat(3, 1fr); 
+                gap: 22px; 
+            } 
+        }
 
         .grade-card {
-            background: white; border-radius: 20px; padding: 20px;
-            text-align: center; cursor: pointer; box-shadow: var(--card-shadow);
-            transition: transform 0.2s; position: relative; overflow: hidden;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            height: 160px;
+            background: white; 
+            border-radius: 22px; 
+            padding: 18px;
+            text-align: center; 
+            cursor: pointer; 
+            box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+            transition: all 0.3s; 
+            position: relative; 
+            overflow: hidden;
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center;
+            height: 150px; 
+            border: 2px solid transparent;
         }
-        .grade-card:active { transform: scale(0.96); }
-        .card-icon { font-size: 3.5rem; margin-bottom: 10px; z-index: 2; }
-        .card-title { font-size: 1.3rem; font-weight: bold; color: #546E7A; z-index: 2; }
+        .grade-card:hover { 
+            transform: translateY(-8px); 
+            box-shadow: 0 15px 40px rgba(0,0,0,0.18);
+        }
+        .grade-card:active { transform: scale(0.94); }
+        .card-icon { 
+            font-size: 3.5rem; 
+            margin-bottom: 10px; 
+            z-index: 2; 
+            transition: transform 0.3s;
+        }
+        .grade-card:hover .card-icon { transform: scale(1.2) rotate(5deg); }
+        .card-title { 
+            font-size: 1.15rem; 
+            font-weight: 800; 
+            color: #333; 
+            z-index: 2; 
+        }
         .decoration-circle {
-            position: absolute; width: 120px; height: 120px; border-radius: 50%;
-            opacity: 0.2; z-index: 1; top: -40px; right: -40px;
+            position: absolute; 
+            width: 110px; 
+            height: 110px; 
+            border-radius: 50%;
+            opacity: 0.12; 
+            z-index: 1; 
+            top: -35px; 
+            right: -35px;
         }
 
-        /* --- フッター・注意書き --- */
         .footer-note {
-            width: 100%; max-width: 800px; margin-top: 20px; margin-bottom: 40px;
-            padding: 20px; background-color: #ECEFF1; border-radius: 10px;
-            font-size: 0.75rem; color: #546E7A; line-height: 1.6; font-family: sans-serif;
-        }
-        .copyright-text {
-            margin-top: 15px; padding-top: 15px;
-            border-top: 1px solid #CFD8DC;
-            font-size: 0.7rem; color: #78909C;
+            width: 100%; 
+            max-width: 850px; 
+            margin-top: 25px; 
+            margin-bottom: 20px;
+            padding: 18px; 
+            background-color: #E8F4FF; 
+            border-radius: 12px;
+            font-size: 0.75rem; 
+            color: #446688; 
+            line-height: 1.7; 
+            font-family: sans-serif;
+            border-left: 4px solid #4FC3F7;
         }
 
-        /* --- アプリ表示 --- */
-        #app-container {
-            position: fixed; top: 60px; left: 0; width: 100%; height: calc(100% - 60px);
-            background: white; transform: translateY(100%); transition: transform 0.3s ease-out;
-            z-index: 50; display: flex; flex-direction: column;
+        .settings-area {
+            width: 100%;
+            max-width: 850px;
+            margin-bottom: 80px;
+            display: flex;
+            justify-content: flex-end;
         }
-        #app-container.active { transform: translateY(0); }
-        #content-frame { width: 100%; height: 100%; border: none; }
-        
-        #close-app-btn {
-            position: absolute; top: -50px; right: 20px; background: #CFD8DC; color: #37474F;
-            border: none; padding: 6px 12px; border-radius: 20px; cursor: pointer;
-            font-family: inherit; font-size: 0.9rem; display: none;
+        #reset-btn {
+            background: #FFEBEE;
+            border: 1px solid #FFCDD2;
+            color: #D32F2F;
+            padding: 8px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            font-weight: 700;
+            font-family: inherit;
+            transition: all 0.2s;
+        }
+        #reset-btn:hover {
+            background: #FFCDD2;
+        }
+
+        #change-course-btn {
+            position: fixed; 
+            bottom: 20px; 
+            right: 20px;
+            background: linear-gradient(135deg, #fff 0%, #f0f5ff 100%);
+            border: 2px solid #4FC3F7; 
+            border-radius: 30px;
+            padding: 12px 18px; 
+            font-family: inherit; 
+            font-size: 0.9rem; 
+            color: #333;
+            cursor: pointer; 
+            box-shadow: 0 6px 18px rgba(79, 195, 247, 0.25); 
+            z-index: 300;
+            display: flex; 
+            align-items: center; 
+            gap: 7px; 
+            font-weight: 700;
+            transition: all 0.3s;
+        }
+        #change-course-btn:hover { 
+            transform: translateY(-4px);
+            box-shadow: 0 10px 28px rgba(79, 195, 247, 0.4);
+            border-color: #29B6F6;
+        }
+        #change-course-btn:active { transform: scale(0.93); }
+
+        @keyframes xp-gain {
+            0% { opacity: 1; transform: translateY(0) scale(1); }
+            100% { opacity: 0; transform: translateY(-60px) scale(1.4); }
+        }
+        .xp-gain-effect {
+            position: fixed; 
+            pointer-events: none;
+            font-weight: 800; 
+            color: #29B6F6;
+            font-size: 1.5rem; 
+            animation: xp-gain 1.2s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+            text-shadow: 0 0 15px rgba(79, 195, 247, 0.8);
+            z-index: 999;
+        }
+
+        #levelup-popup {
+            position: fixed; 
+            top: 50%; 
+            left: 50%; 
+            transform: translate(-50%, -50%) scale(0);
+            background: linear-gradient(135deg, #FFD54F 0%, #FFCA28 100%);
+            padding: 35px 50px; 
+            border-radius: 25px; 
+            text-align: center;
+            box-shadow: 0 15px 50px rgba(0,0,0,0.35);
+            z-index: 1000; 
+            transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+            border: 4px solid #fff;
+        }
+        #levelup-popup.show { transform: translate(-50%, -50%) scale(1); }
+        .levelup-text { 
+            font-size: 1.6rem; 
+            color: #fff; 
+            margin: 12px 0; 
+            text-shadow: 0 4px 8px rgba(0,0,0,0.25);
+            font-weight: 800;
+        }
+        .levelup-emoji { 
+            font-size: 3.5rem; 
+            animation: levelup-bounce 0.7s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+        @keyframes levelup-bounce {
+            0% { transform: scale(0); }
+            70% { transform: scale(1.15); }
+            100% { transform: scale(1); }
+        }
+
+        #course-modal {
+            position: fixed; 
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            height: 100%;
+            background: rgba(0,0,0,0.55); 
+            display: none; 
+            align-items: center; 
+            justify-content: center;
+            z-index: 1000; 
+            backdrop-filter: blur(4px);
+        }
+        .modal-content {
+            background: white; 
+            padding: 30px; 
+            border-radius: 25px;
+            width: 90%; 
+            max-width: 420px; 
+            text-align: center;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+        }
+        .modal-title { 
+            font-size: 1.4rem; 
+            margin-bottom: 22px; 
+            color: #1a1a1a; 
+            font-weight: 800;
+        }
+        .course-option {
+            display: flex; 
+            align-items: center; 
+            justify-content: space-between;
+            background: #f5f5f5; 
+            padding: 16px; 
+            margin-bottom: 12px;
+            border-radius: 14px; 
+            cursor: pointer; 
+            border: 2px solid transparent;
+            transition: all 0.3s;
+        }
+        .course-option:hover { 
+            background: #efefef;
+            transform: translateX(5px);
+        }
+        .course-option.active { 
+            border-color: #4FC3F7; 
+            background: linear-gradient(135deg, #E1F5FE, #B3E5FC);
+            box-shadow: 0 4px 15px rgba(79, 195, 247, 0.25);
+        }
+        .co-icon { font-size: 2rem; }
+        .co-name { 
+            font-weight: 800; 
+            font-size: 1rem; 
+            text-align: left; 
+            flex-grow: 1; 
+            margin-left: 14px; 
+            color: #222;
+        }
+        .co-level { 
+            font-size: 0.85rem; 
+            color: #888; 
+            font-weight: 700;
+        }
+        .co-status { 
+            font-size: 0.85rem; 
+            font-weight: 700; 
+            color: #4FC3F7;
+        }
+
+        #modal-close-btn {
+            margin-top: 18px; 
+            padding: 12px 28px; 
+            border-radius: 22px; 
+            border: none;
+            background: #4FC3F7; 
+            color: white; 
+            font-family: inherit; 
+            font-weight: 700;
+            cursor: pointer; 
+            transition: all 0.2s;
+            font-size: 0.95rem;
+        }
+        #modal-close-btn:hover { 
+            background: #29B6F6;
+            transform: translateY(-2px);
+        }
+
+        @media (max-width: 480px) {
+            .hero-title { font-size: 1.4rem; }
+            .card-icon { font-size: 3rem; }
+            .card-title { font-size: 1rem; }
+            #xp-bar-container { height: 90px; }
+            .char-icon { font-size: 3.5rem; }
+            .xp-desc { font-size: 0.65rem; }
         }
     </style>
-</head>
-<body>
-
-    <header>
-        <div class="logo" onclick="closeApp()"><span>🏫</span> 漢字マスター</div>
-        
-        <div class="search-container">
-            <input type="text" id="search-input" placeholder="かんじ・よみ（例：やま）" autocomplete="off">
-            <div id="search-results"></div>
-        </div>
-
-        <button id="bgm-btn" onclick="toggleBGM()">🔇 音オフ</button>
-        <button id="close-app-btn" onclick="closeApp()">🏠 もどる</button>
-    </header>
-
-    <audio id="bgm-player"></audio>
-
-    <div id="home-screen">
-        <div class="hero-text">
-            <div class="hero-title">どの学年をはじめる？</div>
-            <div class="hero-subtitle">全1026文字 ひらがな検索たいおう中！</div>
-        </div>
-
-        <div class="grade-grid">
-            <div class="grade-card" onclick="launchApp(1)" style="border-bottom: 5px solid var(--g1-color);">
-                <div class="decoration-circle" style="background: var(--g1-color);"></div>
-                <div class="card-icon">🐣</div><div class="card-title">1ねんせい</div>
-            </div>
-            <div class="grade-card" onclick="launchApp(2)" style="border-bottom: 5px solid var(--g2-color);">
-                <div class="decoration-circle" style="background: var(--g2-color);"></div>
-                <div class="card-icon">🐹</div><div class="card-title">2ねんせい</div>
-            </div>
-            <div class="grade-card" onclick="launchApp(3)" style="border-bottom: 5px solid var(--g3-color);">
-                <div class="decoration-circle" style="background: var(--g3-color);"></div>
-                <div class="card-icon">🐬</div><div class="card-title">3ねんせい</div>
-            </div>
-            <div class="grade-card" onclick="launchApp(4)" style="border-bottom: 5px solid var(--g4-color);">
-                <div class="decoration-circle" style="background: var(--g4-color);"></div>
-                <div class="card-icon">🦁</div><div class="card-title">4ねんせい</div>
-            </div>
-            <div class="grade-card" onclick="launchApp(5)" style="border-bottom: 5px solid var(--g5-color);">
-                <div class="decoration-circle" style="background: var(--g5-color);"></div>
-                <div class="card-icon">🚀</div><div class="card-title">5ねんせい</div>
-            </div>
-            <div class="grade-card" onclick="launchApp(6)" style="border-bottom: 5px solid var(--g6-color);">
-                <div class="decoration-circle" style="background: var(--g6-color);"></div>
-                <div class="card-icon">👑</div><div class="card-title">6ねんせい</div>
-            </div>
-        </div>
-
-        <div class="footer-note">
-            <strong>⚠️ 保護者・先生方へ</strong><br>
-            本アプリは、教員が学習支援のために自作したものです。漢字のデータは外部のオープンソースを参照しているため、日本の教科書体とは「字の形（特に糸へん等）」や「書き順」が一部異なる場合があります。あくまで学習補助としてご利用いただき、学校のテスト等では教科書の指導に従うようご留意ください。<br>
-            
-            <div class="copyright-text">
-                <strong>🎵 音楽素材について</strong><br>
-                本コンテンツは、「Pokémon Sound Library」の音源を利用しています。<br>
-                ©2025 Pokémon. ©1995-2025 Nintendo/Creatures Inc./GAME FREAK inc.<br>
-                ポケットモンスター・ポケモン・Pokémonは任天堂・クリーチャーズ・ゲームフリークの登録商標です。
-            </div>
-        </div>
+  <style>@view-transition { navigation: auto; }</style>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+  <script src="/_sdk/element_sdk.js" type="text/javascript"></script>
+  <script src="https://cdn.tailwindcss.com" type="text/javascript"></script>
+ </head>
+ <body>
+  <div id="xp-bar-container">
+   <div class="xp-info">
+    <div class="char-icon" id="current-char" onclick="openCourseModal()" title="クリックでコース変更！">
+     🥚
     </div>
-
-    <div id="app-container">
-        <iframe id="content-frame" name="app-view"></iframe>
+    <div class="xp-stats">
+     <div class="xp-header">
+      <div class="xp-text">
+       Lv.<span id="current-lvl">0</span> / 50
+      </div>
+      <div class="xp-desc">
+       まいにち べんきょうすると たまるよ！
+      </div>
+     </div>
+     <div class="progress-track">
+      <div class="progress-fill" id="xp-fill"></div>
+     </div>
+     <div class="xp-small">
+      あと<span id="next-xp">5</span>回
+     </div>
     </div>
+   </div>
+  </div>
+  <header>
+   <div class="logo"><span>🏫</span> 漢字マスター
+   </div>
+   <div class="search-container">
+    <input type="text" id="search-input" placeholder="かんじ・よみ（例：かた）" autocomplete="off">
+    <div id="search-results"></div>
+   </div>
+  </header>
+  <div id="home-screen">
+   <div class="hero-text">
+    <div class="hero-title">
+     どの学年をはじめる？
+    </div>
+    <div class="hero-subtitle">
+     全1026文字 ひらがな検索対応中！
+    </div>
+   </div>
+   <div class="grade-grid">
+    <div class="grade-card" onclick="launchApp(1)" style="border-bottom: 5px solid var(--g1-color);">
+     <div class="decoration-circle" style="background: var(--g1-color);"></div>
+     <div class="card-icon">
+      🐣
+     </div>
+     <div class="card-title">
+      1ねんせい
+     </div>
+    </div>
+    <div class="grade-card" onclick="launchApp(2)" style="border-bottom: 5px solid var(--g2-color);">
+     <div class="decoration-circle" style="background: var(--g2-color);"></div>
+     <div class="card-icon">
+      🐹
+     </div>
+     <div class="card-title">
+      2ねんせい
+     </div>
+    </div>
+    <div class="grade-card" onclick="launchApp(3)" style="border-bottom: 5px solid var(--g3-color);">
+     <div class="decoration-circle" style="background: var(--g3-color);"></div>
+     <div class="card-icon">
+      🐬
+     </div>
+     <div class="card-title">
+      3ねんせい
+     </div>
+    </div>
+    <div class="grade-card" onclick="launchApp(4)" style="border-bottom: 5px solid var(--g4-color);">
+     <div class="decoration-circle" style="background: var(--g4-color);"></div>
+     <div class="card-icon">
+      🦁
+     </div>
+     <div class="card-title">
+      4ねんせい
+     </div>
+    </div>
+    <div class="grade-card" onclick="launchApp(5)" style="border-bottom: 5px solid var(--g5-color);">
+     <div class="decoration-circle" style="background: var(--g5-color);"></div>
+     <div class="card-icon">
+      🚀
+     </div>
+     <div class="card-title">
+      5ねんせい
+     </div>
+    </div>
+    <div class="grade-card" onclick="launchApp(6)" style="border-bottom: 5px solid var(--g6-color);">
+     <div class="decoration-circle" style="background: var(--g6-color);"></div>
+     <div class="card-icon">
+      👑
+     </div>
+     <div class="card-title">
+      6ねんせい
+     </div>
+    </div>
+   </div>
+   <div class="footer-note">
+    <strong>⚠️ 保護者・先生方へ</strong><br>
+     本アプリは、教員が学習支援のために自作したものです。外部の教材サイト（Canva）へリンクします。<br>
+    漢字のデータは日本の学習指導要領（全1026字）を参照しています。
+   </div>
+   <div class="settings-area"><button id="reset-btn">🗑️ データをけす（リセット）</button>
+   </div>
+  </div><button id="change-course-btn" onclick="openCourseModal()"> <span>🎮</span> コースをかえる </button>
+  <div id="levelup-popup">
+   <div class="levelup-emoji" id="levelup-emoji">
+    ✨
+   </div>
+   <div class="levelup-text">
+    レベルアップ！
+   </div>
+   <div class="levelup-text" style="font-size: 1.2rem; opacity: 0.95;" id="levelup-char"></div>
+  </div>
+  <div id="course-modal" onclick="closeCourseModal(event)">
+   <div class="modal-content">
+    <div class="modal-title">
+     🎮 コースをえらんでね
+    </div>
+    <div id="course-list"></div><button id="modal-close-btn" onclick="document.getElementById('course-modal').style.display='none'">とじる</button>
+   </div>
+  </div>
+  <script>
+        const MAX_LEVEL = 50;
+        const EVOLUTION_STEP = 5;
+        const MAX_DAILY_XP = 3;
 
-    <script>
-        // --- 🎵 ランダムBGM機能 (アプリ起動時停止・極小音量) ---
-        const bgmPlayer = document.getElementById('bgm-player');
-        const bgmBtn = document.getElementById('bgm-btn');
-        let isPlaying = false;
+        const COURSES = {
+            A: {
+                name: "冒険コース",
+                chars: ["🥚", "🐣", "🗡️", "🛡️", "🐴", "🏰", "🧚", "🐉", "⚔️", "👑", "🌟"]
+            },
+            B: {
+                name: "自然コース",
+                chars: ["🌱", "💧", "🌿", "🍀", "🍄", "🌷", "🌻", "🌳", "🍎", "🥧", "🌈"]
+            },
+            C: {
+                name: "乗物コース",
+                chars: ["🚶", "🛴", "🚲", "🛵", "🏍️", "🚌", "🚅", "🚢", "✈️", "🚀", "🛸"]
+            },
+            D: {
+                name: "アイドル",
+                chars: ["🎵", "🩰", "🎀", "💄", "👗", "🎤", "🎸", "🎹", "💃", "📸", "👸"]
+            },
+            E: {
+                name: "和風・忍者",
+                chars: ["🐵", "🍙", "🥋", "📜", "🗡️", "🥷", "🏯", "👺", "👹", "🎌", "🌸"]
+            }
+        };
+
+        const STORAGE_KEY = 'kanjiMasterProgress_v5';
+        let resetConfirming = false;
         
-        // 3曲のリスト (.mp3)
-        const playlist = [
-            'bgm/1.mp3',
-            'bgm/2.mp3',
-            'bgm/3.mp3'
-        ];
-
-        // 🔊 音量は「0.005 (0.5%)」
-        // かなり小さい設定です
-        bgmPlayer.volume = 0.005;
-
-        // ランダム再生関数
-        function playRandomSong() {
-            const randomIndex = Math.floor(Math.random() * playlist.length);
-            bgmPlayer.src = playlist[randomIndex];
-            bgmPlayer.play();
+        function getProgress() {
+            const defaultData = {
+                visitedGrades: {},
+                lastLoginDate: "",
+                dailyCount: 0,
+                currentCourse: "A",
+                xp: { A: 0, B: 0, C: 0, D: 0, E: 0 }
+            };
+            const data = localStorage.getItem(STORAGE_KEY);
+            return data ? { ...defaultData, ...JSON.parse(data) } : defaultData;
+        }
+        
+        function saveProgress(progress) {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(progress));
         }
 
-        // ループ処理
-        bgmPlayer.addEventListener('ended', () => {
-            if(isPlaying) {
-                playRandomSong();
+        function showXPGainEffect(x, y, amount) {
+            const effect = document.createElement('div');
+            effect.className = 'xp-gain-effect';
+            effect.textContent = `+${amount} XP`;
+            effect.style.left = (x - 25) + 'px';
+            effect.style.top = y + 'px';
+            document.body.appendChild(effect);
+            setTimeout(() => effect.remove(), 1200);
+        }
+
+        function showLevelUpPopup(newLevel, char) {
+            const popup = document.getElementById('levelup-popup');
+            document.getElementById('levelup-emoji').textContent = char;
+            document.getElementById('levelup-char').textContent = `Lv.${newLevel} に進化！`;
+            popup.classList.add('show');
+            setTimeout(() => popup.classList.remove('show'), 2500);
+        }
+
+        function updateXP() {
+            let progress = getProgress();
+            const today = new Date().toDateString();
+
+            if (progress.lastLoginDate !== today) {
+                progress.lastLoginDate = today;
+                progress.dailyCount = 0;
+            }
+
+            if (progress.dailyCount < MAX_DAILY_XP) {
+                progress.dailyCount++;
+                const course = progress.currentCourse;
+                const oldXP = progress.xp[course];
+                
+                if (oldXP < MAX_LEVEL) {
+                    progress.xp[course]++;
+                    const newXP = progress.xp[course];
+                    
+                    const oldStage = Math.floor(oldXP / EVOLUTION_STEP);
+                    const newStage = Math.floor(newXP / EVOLUTION_STEP);
+                    if (newStage > oldStage) {
+                        const newChar = COURSES[course].chars[newStage];
+                        showLevelUpPopup(newXP, newChar);
+                    }
+                    
+                    const barContainer = document.getElementById('xp-bar-container');
+                    const rect = barContainer.getBoundingClientRect();
+                    showXPGainEffect(rect.left + 100, rect.top + 50, 1);
+                }
+            }
+            
+            saveProgress(progress);
+            renderTopBar();
+        }
+
+        function renderTopBar() {
+            const progress = getProgress();
+            const courseID = progress.currentCourse;
+            const currentXP = progress.xp[courseID];
+            
+            const stageIndex = Math.min(Math.floor(currentXP / EVOLUTION_STEP), 10);
+            const char = COURSES[courseID].chars[stageIndex];
+
+            const nextEvo = (stageIndex + 1) * EVOLUTION_STEP;
+            const remaining = (currentXP >= MAX_LEVEL) ? 0 : (nextEvo - currentXP);
+            
+            let percent;
+            if (currentXP >= MAX_LEVEL) {
+                percent = 100;
+            } else {
+                const currentStageStart = stageIndex * EVOLUTION_STEP;
+                percent = ((currentXP - currentStageStart) / EVOLUTION_STEP) * 100;
+            }
+
+            document.getElementById('current-char').textContent = char;
+            document.getElementById('current-lvl').textContent = currentXP;
+            const fillEl = document.getElementById('xp-fill');
+            fillEl.style.width = percent + "%";
+            
+            if (currentXP >= MAX_LEVEL) {
+                 document.getElementById('next-xp').textContent = "MAX";
+                 fillEl.style.background = "linear-gradient(90deg, #FFD54F, #FFCA28)";
+            } else {
+                 document.getElementById('next-xp').textContent = remaining;
+                 fillEl.style.background = "linear-gradient(90deg, #4FC3F7, #29B6F6)";
+            }
+        }
+        
+        // リセット機能
+        const resetBtn = document.getElementById('reset-btn');
+        resetBtn.addEventListener('click', function() {
+            if(!resetConfirming) {
+                // 最初のクリック：確認ボタンに変更
+                this.textContent = '本当？ 確認する';
+                this.style.background = '#FFB3BA';
+                resetConfirming = true;
+                
+                // 3秒後に元に戻る
+                const timeoutId = setTimeout(() => {
+                    if(resetConfirming) {
+                        resetBtn.textContent = '🗑️ データをけす（リセット）';
+                        resetBtn.style.background = '#FFEBEE';
+                        resetConfirming = false;
+                    }
+                }, 3000);
+                
+                resetBtn.dataset.timeoutId = timeoutId;
+            } else {
+                // 2回目のクリック：データ削除
+                clearTimeout(resetBtn.dataset.timeoutId);
+                localStorage.clear();
+                resetBtn.textContent = '✓ けしました！';
+                resetBtn.style.background = '#C8E6C9';
+                resetConfirming = false;
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1000);
             }
         });
 
-        // ボタンの処理
-        function toggleBGM() {
-            if (isPlaying) {
-                stopBGM();
-            } else {
-                startBGM();
+        function openCourseModal() {
+            const progress = getProgress();
+            const list = document.getElementById('course-list');
+            list.innerHTML = '';
+
+            Object.keys(COURSES).forEach(key => {
+                const course = COURSES[key];
+                const myXP = progress.xp[key] || 0;
+                const stageIndex = Math.min(Math.floor(myXP / EVOLUTION_STEP), 10);
+                const char = course.chars[stageIndex];
+                
+                const div = document.createElement('div');
+                div.className = `course-option ${progress.currentCourse === key ? 'active' : ''}`;
+                const status = progress.currentCourse === key ? '選択中✓' : '選ぶ';
+                div.innerHTML = `
+                    <div class="co-icon">${char}</div>
+                    <div class="co-name">${course.name}</div>
+                    <div>
+                        <div class="co-level">Lv.${myXP}</div>
+                        <div class="co-status">${status}</div>
+                    </div>
+                `;
+                div.onclick = () => changeCourse(key);
+                list.appendChild(div);
+            });
+
+            document.getElementById('course-modal').style.display = 'flex';
+        }
+
+        function changeCourse(courseKey) {
+            let progress = getProgress();
+            progress.currentCourse = courseKey;
+            saveProgress(progress);
+            document.getElementById('course-modal').style.display = 'none';
+            renderTopBar();
+        }
+
+        function closeCourseModal(e) {
+            if (e.target.id === 'course-modal') {
+                e.target.style.display = 'none';
             }
         }
 
-        function startBGM() {
-            isPlaying = true;
-            bgmPlayer.volume = 0.005; // 再生時も音量を強制セット
-            if (!bgmPlayer.src) {
-                playRandomSong();
-            } else {
-                bgmPlayer.play().catch(e => {
-                    playRandomSong();
-                });
-            }
-            bgmBtn.innerHTML = "🎵 音オン";
-            bgmBtn.classList.add('playing');
-        }
-
-        function stopBGM() {
-            bgmPlayer.pause();
-            bgmBtn.innerHTML = "🔇 音オフ";
-            bgmBtn.classList.remove('playing');
-            isPlaying = false;
-        }
-
-        // --- 以下、辞書データと検索ロジック ---
         const rawData = `
-        1|一:いち,いつ,ひと|右:う,ゆう,みぎ|雨:う,あめ,あま|円:えん,まる|王:おう|音:おん,いん,おと,ね|下:か,げ,した,しも,もと,さ|火:か,ひ,ほ|花:か,はな|貝:かい|学:がく,まな|気:き,け|九:きゅう,く,ここの|休:きゅう,やす|玉:ぎょく,たま|金:きん,こん,かね,かな|空:くう,そら,あ,から,す|月:げつ,がつ,つき|犬:けん,いぬ|見:けん,み|五:ご,いつ|口:こう,く,くち|校:こう|左:さ,ひだり|三:さん,み|山:さん,やま|子:し,す,こ,ね|四:し,よ,よん,よっ|糸:し,いと|字:じ,あざ|耳:じ,みみ|七:しち,なな,なの|車:しゃ,くるま|手:しゅ,ず,て,た|十:じゅう,じっ,とお,と|出:しゅつ,すい,で,だ|女:じょ,にょ,にょう,おんな,め|小:しょう,ちい,こ,お|上:じょう,しょう,うえ,うわ,かみ,あ,のぼ|森:しん,もり|人:じん,にん,ひと|水:すい,みず|正:せい,しょう,ただ,まさ|生:せい,しょう,い,う,お,は,き,なま|青:せい,しょう,あお|夕:せき,ゆう|石:せき,しゃく,こく,いし|赤:せき,しゃく,あか|千:せん,ち|川:せん,かわ|先:せん,さき,ま|早:そう,さっ,はや|草:そう,くさ|足:そく,あし,た|村:そん,むら|大:だい,たい,おお|男:だん,なん,おとこ|竹:ちく,たけ|中:ちゅう,なか|虫:ちゅう,むし|町:ちょう,まち|天:てん,あめ,あま|田:でん,た|土:ど,と,つち|二:に,ふた|日:にち,じつ,ひ,か|入:にゅう,はい,い|年:ねん,とし|白:はく,びゃく,しろ,しら|八:はち,や,やっ,よう|百:ひゃく,もも|文:ぶん,もん,ふみ|木:ぼく,もく,き,こ|本:ほん,もと|名:めい,みょう,な|目:もく,ぼく,め,ま|立:りつ,りゅう,た,だ|力:りょく,りき,ちから|林:りん,はやし|六:ろく,む,むっ
-        2|引:いん,ひ|羽:う,は,はね|雲:うん,くも|園:えん,その|遠:えん,おん,とお|何:か,なに,なん|科:か|夏:か,げ,なつ|家:か,け,いえ,や|歌:か,うた|画:が,かく|回:かい,え,まわ|会:かい,え,あ|海:かい,うみ|絵:かい,え|外:がい,げ,そと,ほか,はず|角:かく,かど,つの|楽:がく,らく,たの|活:かつ|間:かん,けん,あいだ,ま|丸:がん,まる|岩:がん,いわ|顔:がん,かお|汽:き|記:き,しる|帰:き,かえ|弓:きゅう,ゆみ|牛:ぎゅう,うし|魚:ぎょ,うお,さかな|京:きょう,けい,きん|強:きょう,ごう,つよ,し|教:きょう,おし,おそ|近:きん,ちか|兄:けい,きょう,あに|形:けい,ぎょう,かた,かたち|計:けい,はか|元:げん,がん,もと|言:げん,ごん,い,こと|原:げん,はら|戸:こ,と|古:こ,ふる|午:ご|後:ご,こう,のち,うし,あと,おく|語:ご,かた|工:こう,く|公:こう,おおやけ|広:こう,ひろ|交:こう,まじ,ま,か|光:こう,ひかり,ひか|考:こう,かんが|行:こう,ぎょう,あん,い,ゆ,おこな|高:こう,たか|黄:こう,おう,き,こ|合:ごう,がっ,かっ,あ|谷:こく,たに|国:こく,くに|黒:こく,くろ|今:こん,きん,いま|才:さい|細:さい,ほそ,こま|作:さく,さ,つく|算:さん|止:し,と,や|市:し,いち|矢:し,や|姉:し,あね|思:し,おも|紙:し,かみ|寺:じ,てら|自:じ,し,みずか|時:じ,とき|室:しつ,むろ|社:しゃ,やしろ|弱:じゃく,よわ|首:しゅ,くび|秋:しゅう,あき|週:しゅう|春:しゅん,はる|書:しょ,か|少:しょう,すく,すこ|場:じょう,ば|色:しょく,しき,いろ|食:しょく,じき,た,く|心:しん,こころ|新:しん,あたら,あら,にい|親:しん,おや,した|図:ず,と,はか|数:すう,す,かず,かぞ|西:せい,さい,にし|声:せい,しょう,こえ,こわ|星:せい,しょう,ほし|晴:せい,は|切:せつ,さい,き|雪:せつ,ゆき|船:せん,ふね,ふな|線:せん|前:ぜん,まえ|組:そ,く,くみ|走:そう,はし|多:た,おお|太:たい,た,ふと|体:たい,てい,からだ|台:だい,たい|地:ち,じ|池:ち,いけ|知:ち,し|茶:ちゃ,さ|昼:ちゅう,ひる|長:ちょう,なが|鳥:ちょう,とり|朝:ちょう,あさ|直:ちょく,じき,なお,ただ|通:つう,とお,かよ|弟:てい,だい,で,おとうと|店:てん,みせ|点:てん|電:でん|刀:とう,かたな|冬:とう,ふゆ|当:とう,あ|東:とう,ひがし|答:とう,こた|頭:とう,ず,ト,あたま,かしら|同:どう,おな|道:どう,とう,みち|読:どく,とく,とう,よ|内:ない,だい,うち|南:なん,な,みなみ|肉:にく|馬:ば,うま,ま|売:ばい,う|買:ばい,か|麦:ばく,むぎ|半:はん,なか|番:ばん|父:ふ,ちち|風:ふう,ふ,かぜ,かざ|分:ぶん,ふん,ぶ,わ|聞:ぶん,もん,き|米:べい,まい,こめ|歩:ほ,ぶ,ふ,ある,あゆ|母:ぼ,はは|方:ほう,かた|北:ほく,きた|妹:まい,いもうと|毎:まい|万:まん,ばん|明:めい,みょう,あ,あか,あき|鳴:めい,な|毛:もう,け|門:もん,かど|夜:や,よ,よる|野:や,の|友:ゆう,とも|用:よう,もち|曜:よう|来:らい,く,きた,こ|里:り,さと|理:り|話:わ,はなし,はな
-        3|悪:あく,お,わる|安:あん,やす|暗:あん,くら|医:い|委:い,ゆだ|意:い|育:いく,そだ|員:いん|院:いん|飲:いん,の|運:うん,はこ|泳:えい,およ|駅:えき|央:おう|横:おう,よこ|屋:おく,や|温:おん,あたた|化:か,け,ば|荷:か,に|界:かい|開:かい,ひら,あ|階:かい|寒:かん,さむ|感:かん|漢:かん|館:かん,やかた|岸:がん,きし|起:き,お|期:き|客:きゃく,かく|究:きゅう,きわ|急:きゅう,いそ|級:きゅう|宮:きゅう,ぐう,く,みや|球:きゅう,たま|去:きょ,こ,さ|橋:きょう,はし|業:ぎょう,ごう,わざ|曲:きょく,ま|局:きょく|銀:ぎん|区:く|苦:く,くる,にが|具:ぐ|君:くん,きみ|係:けい,かか,かかり|軽:けい,かる|血:けつ,ち|決:けつ,き|研:けん,と|県:けん|庫:こ,く|湖:こ,みずうみ|向:こう,む|幸:こう,さいわ,さち,しあわ|港:こう,みなと|号:ごう|根:こん,ね|祭:さい,まつ|皿:さら|仕:し,じ,つか|死:し,し|使:し,つか|始:し,はじ|指:し,ゆび,さ|歯:し,は|詩:し|次:じ,し,つぎ|事:じ,ず,こと|持:じ,も|式:しき|実:じつ,み,みの|写:しゃ,うつ|者:しゃ,もの|主:しゅ,す,ぬし,おも|守:しゅ,す,まも,もり|取:しゅ,と|酒:しゅ,さけ,さか|受:じゅ,う|州:しゅう,す|拾:しゅう,じゅう,ひろ|終:しゅう,お|習:しゅう,なら|集:しゅう,あつ|住:じゅう,す|重:じゅう,ちょう,え,おも,かさ|宿:しゅく,やど|所:しょ,ところ|暑:しょ,あつ|助:じょ,たす,すけ|昭:しょう|消:しょう,き,け|商:しょう,あきな|章:しょう|勝:しょう,か,まさ|乗:じょう,の|植:しょく,う|申:しん,もう|身:しん,み|神:しん,じん,かみ,かん|真:しん,ま|深:しん,ふか|進:しん,すす|世:せい,せ,よ|整:せい,ととの|昔:せき,しゃく,むかし|全:ぜん,まった,すべ|相:そう,しょう,あい|送:そう,おく|想:そう,そ|息:そく,いき|速:そく,はや,すみ|族:ぞく|他:た,ほか|打:だ,う|対:たい,つい|待:たい,ま|代:だい,たい,か,よ,しろ|第:だい|題:だい|炭:たん,すみ|短:たん,みじか|談:だん|着:ちゃく,じゃく,き,つ|注:ちゅう,そそ|柱:ちゅう,はしら|丁:ちょう,てい|帳:ちょう|調:ちょう,しら,ととの|追:つい,お|定:てい,じょう,さだ|庭:てい,にわ|笛:てき,ふえ|鉄:てつ|転:てん,ころ|都:と,つ,みやこ|度:ど,と,たく,たび|投:とう,な|豆:とう,ず,まめ|島:とう,しま|湯:とう,ゆ|登:とう,と,のぼ|等:とう,ひと,など|動:どう,うご|童:どう,わらべ|農:のう|波:は,なみ|配:はい,くば|倍:ばい|箱:はこ|畑:はた,はたけ|発:はつ,ほつ|反:はん,ほん,たん,そ|坂:はん,さか|板:はん,いた|皮:ひ,かわ|悲:ひ,かな|美:び,うつく|鼻:び,はな|筆:ひつ,ふで|氷:ひょう,こおり,ひ|表:ひょう,おもて,あらわ|秒:びょう|病:びょう,やまい,や|品:ひん,しな|負:ふ,ま,お|部:ぶ|服:ふく|福:ふく|物:ぶつ,もつ,もの|平:へい,びょう,たい,ひら|返:へん,かえ|勉:べん|放:ほう,はな|味:み,あじ|命:めい,みょう,いのち|面:めん,おも,おもて,つら|問:もん,と|役:やく,えき|薬:やく,くすり|由:ゆ,ユウ,よし|油:ゆ,あぶら|有:ゆう,う,あ|遊:ゆう,ゆ,あそ|予:よ|羊:よう,ひつじ|洋:よう|葉:よう,は|陽:よう,ひ|様:よう,さま|落:らく,お|流:りゅう,る,なが|旅:りょ,たび|両:りょう|緑:りょく,ろく,みどり|礼:れい,らい|列:れつ|練:れん,ね|路:ろ,じ,みち|和:わ,オ,やわ,なご
-        4|愛:あい|案:あん|以:い|衣:い,ころも|位:い,くらい|囲:い,かこ|胃:い|印:いん,しるし|英:えい|栄:えい,さか,は|塩:えん,しお|億:おく|加:か,くわ|貨:か|課:か|芽:が,め|改:かい,あらた|械:かい|害:がい|街:がい,かい,まち|各:かく,おのおの|覚:かく,おぼ,さ|完:かん|官:かん|管:かん,くだ|関:かん,せき,かか|観:かん,み|願:がん,ねが|希:き|季:き|紀:き|喜:き,よろこ|旗:き,はた|器:き,うつわ|機:き,はた|議:ぎ|求:きゅう,もと|泣:きゅう,な|救:きゅう,すく|給:きゅう,たま|挙:きょ,あ|漁:ぎょ,りょう|共:きょう,とも|協:きょう|鏡:きょう,かがみ|競:きょう,けい,きそ,せ|極:きょく,ごく,きわ|訓:くん|軍:ぐん|郡:ぐん|径:けい|型:けい,かた|景:けい|芸:げい|欠:けつ,か|結:けつ,むす,ゆ|建:けん,こん,た|健:けん,すこ|験:けん|固:こ,かた|功:こう|好:こう,この,す|候:こう|航:こう|康:こう|告:こく,つ|差:さ,さ|菜:さい,な|最:さい,もっと|材:ざい|昨:さく|札:さつ,ふだ|刷:さつ,す|殺:さつ,さい,ころ|察:さつ|参:さん,まい|産:さん,う|散:さん,ち|残:ざん,のこ|士:し|氏:し,うじ|史:し|司:し|試:し,こころ,ため|児:じ,に|治:じ,ち,おさ,なお|辞:じ,や|失:しつ,うしな|借:しゃく,か|種:しゅ,たね|周:しゅう,まわ|祝:しゅく,しゅう,いわ|順:じゅん|初:しょ,はじ,はつ,うい|松:しょう,まつ|笑:しょう,わら,え|唱:しょう,とな|焼:しょう,や|象:しょう,ぞう|照:しょう,て|賞:しょう|臣:しん,じん|信:しん|成:せい,じょう,な|省:せい,しょう,かえり,はぶ|清:せい,しょう,きよ|静:せい,じょう,しず|席:せき|積:せき,つ|折:せつ,お|節:せつ,せち,ふし|説:せつ,ぜい,と|浅:せん,あさ|戦:せん,いくさ,たたか|選:せん,えら|然:ぜん,ねん|争:そう,あらそ|倉:そう,くら|巣:そう,す|束:そく,たば|側:そく,がわ|続:ぞく,つづ|卒:そつ|孫:そん,まご|帯:たい,おび|隊:たい|達:たつ,たち|単:たん|置:ち,お|仲:ちゅう,なか|貯:ちょ,た|兆:ちょう,きざ|腸:ちょう|低:てい,ひく|底:てい,そこ|停:てい|的:てき,まと|典:てん|伝:でん,つた|徒:と|努:ど,つと|灯:とう,ひ|堂:どう|働:どう,はたら|特:とく|得:とく,え,う|毒:どく|熱:ねつ,あつ|念:ねん|敗:はい,やぶ|梅:ばい,うめ|博:はく|飯:はん,めし|飛:ひ,と|費:ひ,つい|必:ひつ,かなら|票:ひょう|標:ひょう|不:ふ,ぶ|夫:ふ,ふう,おっと|付:ふ,つ|府:ふ|副:ふく|粉:ふん,こ,こな|兵:へい,ひょう|別:べつ,わか|辺:へん,あた|変:へん,か|包:ほう,つつ|法:ほう|望:ぼう,もち,のぞ|牧:ぼく,まき|末:まつ,ばつ,すえ|満:まん,み|未:み|脈:みゃく|民:みん,たみ|無:む,ぶ,な|約:やく|勇:ゆう,いさ|要:よう,い|養:よう,やしな|浴:よく,あ|利:り,き|陸:りく|良:りょう,よ|料:りょう|量:りょう,はか|輪:りん,わ|類:るい|令:れい|冷:れい,つめ,ひ,さ|例:れい,たと|歴:れき|連:れん,つら,つ|老:ろう,お|労:ろう|録:ろく
-        5|圧:あつ|移:い,うつ|因:いん,よ|永:えい,なが|営:えい,いとな|衛:えい|易:えき,い,やさ|益:えき,やく|液:えき|演:えん|応:おう,こた|往:おう|桜:おう,さくら|恩:おん|可:か|仮:か,け,かり|価:か,あたい|河:か,かわ|過:か,す,あやま|賀:が|快:かい,こころよ|解:かい,げ,と|格:かく,こう|確:かく,たし|額:がく,ひたい|刊:かん|幹:かん,みき|慣:かん,な|眼:がん,げん,まなこ|基:き,もと|寄:き,よ|規:き|技:ぎ,わざ|義:ぎ|逆:ぎゃく,さか|久:きゅう,ひさ|旧:きゅう|居:きょ,い|許:きょ,ゆる|境:きょう,けい,さかい|均:きん|禁:きん|句:く|群:ぐん,む|経:けい,きょう,へ,た|潔:けつ,いさぎよ|件:けん|券:けん|険:けん,けわ|検:けん|限:げん,かぎ|現:げん,あらわ|減:げん,へ|故:こ,ゆえ,ふる|個:こ|護:ご,まも|効:こう,き|厚:こう,あつ|耕:こう,たがや|鉱:こう|構:こう,かま|興:こう,きょう,おこ|講:こう|混:こん,ま|査:さ|再:さい,さ,ふたた|災:さい,わざわ|妻:さい,つま|採:さい,と|際:さい,きわ|在:ざい,あ|財:ざい,さい|罪:ざい,つみ|雑:ざつ,ぞう|酸:さん,す|賛:さん|支:し,ささ|志:し,こころざし|枝:し,えだ|師:し|資:し|飼:し,か|示:じ,し,しめ|似:じ,に|識:しき|質:しつ,しち,たち|舎:しゃ|謝:しゃ,あやま|授:じゅ,さず|修:しゅう,しゅ,おさ|述:じゅつ,の|術:じゅつ,すべ|準:じゅん|序:じょ|招:しょう,まね|承:しょう,うけたまわ|証:しょう|条:じょう|状:じょう|常:じょう,つね,とこ|情:じょう,なさ|織:しょく,しき,お|職:しょく|制:せい|性:せい,しょう|政:せい,しょう,まつりごと|勢:せい,いきお|精:せい,しょう|製:せい|税:ぜい|責:せき,せ|績:せき|接:せつ,つ|設:せつ,もう|舌:ぜつ,した|絶:ぜつ,た|銭:せん,ぜに|祖:そ|素:そ,す|総:そう|造:ぞう,つく|像:ぞう|増:ぞう,ま,ふ|則:そく|測:そく,はか|属:ぞく|率:そつ,りつ,ひき|損:そん,そこ|退:たい,しりぞ|貸:たい,か|態:たい|団:だん,とん|断:だん,ことわ,た|築:ちく,きず|張:ちょう,は|提:てい,さ|程:てい,ほど|適:てき|敵:てき,かたき|統:とう,す|導:どう,みちび|銅:どう|徳:とく|独:どく,ひと|任:にん,まか|燃:ねん,も|能:のう|破:は,やぶ|犯:はん,おか|判:はん,ばん|版:はん|比:ひ,くら|肥:ひ,こ|非:ひ|備:び,そな|俵:ひょう,たわら|評:ひょう|貧:ひん,びん,まず|布:ふ,ぬの|婦:ふ|富:ふ,ふう,と,とみ|武:ぶ,む|復:ふく|複:ふく|仏:ぶつ,ほとけ|編:へん,あ|弁:べん|保:ほ,たも|墓:ぼ,はか|報:ほう,むく|豊:ほう,ゆた|防:ぼう,ふせ|貿:ぼう|暴:ぼう,あば|務:む,つと|夢:む,ゆめ|迷:めい,まよ|綿:めん,わた|輸:ゆ|余:よ,あま|預:よ,あず|容:よう|略:りゃく|留:りゅう,る,と|領:りょう
-        6|異:い,こと|遺:い|域:いき|宇:う|映:えい,うつ,は|延:えん,の|沿:えん,そ|我:が,われ,わ|灰:かい,はい|拡:かく|革:かく,かわ|閣:かく|割:かつ,わ|株:かぶ|干:かん,ほ,ひ|巻:かん,ま|看:かん|簡:かん|危:き,あぶ,あや|机:き,つくえ|揮:き|貴:き,とうと,たっと|疑:ぎ,うたが|吸:きゅう,す|供:きょう,く,とも,そな|胸:きょう,むね,むな|郷:きょう,ごう|勤:きん,ごん,つと|筋:きん,すじ|系:けい|敬:けい,うやま|警:けい|劇:げき|激:げき,はげ|穴:けつ,あな|絹:けん,きぬ|権:けん,ごん|憲:けん|源:げん,みなもと|厳:げん,ごん,きび,いか|己:こ,き,おのれ|呼:こ,よ|誤:ご,あやま|后:こう,きさき|孝:こう|皇:こう,おう|紅:こう,べに,くれない|降:こう,お,ふ|鋼:こう,はがね|刻:こく,きざ|穀:こく|骨:こつ,ほね|困:こん,こま|砂:さ,しゃ,すな|座:ざ,すわ|済:さい,す|裁:さい,さば,た|策:さく|冊:さつ,さく|蚕:さん,かいこ|至:し,いた|私:し,わたくし,わたし|姿:し,すがた|視:し|詞:し|誌:し|磁:じ|射:しゃ,い|捨:しゃ,す|尺:しゃく|若:じゃく,にゃく,わか|樹:じゅ,き|収:しゅう,おさ|宗:しゅう,そう|就:しゅう,じゅ,つ|衆:しゅう,しゅ|従:じゅう,しょう,ジュ,したが|縦:じゅう,たて|縮:しゅく,ちぢ|熟:じゅく,う|純:じゅん|処:しょ|署:しょ|諸:しょ,もろ|除:じょ,じ,のぞ|将:しょう|傷:しょう,きず,いた|障:しょう,さわ|城:じょう,しろ|蒸:じょう,む|針:しん,はり|仁:じん,に|垂:すい,た|推:すい,お|寸:すん|盛:せい,じょう,も,さか|聖:せい,しょう|誠:せい|宣:せん,のたま|専:せん,もっぱ|泉:せん,いずみ|洗:せん,あら|染:せん,そ,し|善:ぜん,よ|奏:そう,かな|窓:そう,まど|創:そう,つく|装:そう,しょう,よそお|層:そう|操:そう,みさお,あやつ|蔵:ぞう,くら|臓:ぞう|存:そん,ぞん|尊:そん,とうと,たっと|宅:たく|担:たん,かつ,にな|探:たん,さが,さぐ|誕:たん|段:だん|暖:だん,あたた|値:ち,あたい,ね|宙:ちゅう|忠:ちゅう|著:ちょ,いちじる,あらわ|庁:ちょう|頂:ちょう,いただき|潮:ちょう,しお|賃:ちん|痛:つう,いた|展:てん|討:とう,う|党:とう|糖:とう|届:とど|難:なん,むずか,かた|乳:にゅう,ちち,ち|認:にん,みと|納:のう,おさ|脳:のう|派:は|拝:はい,おが|背:はい,せ,せい,そむ|肺:はい|俳:はい|班:はん|晩:ばん|否:ひ,いな|批:ひ|秘:ひ,ひめ|腹:ふく,はら|奮:ふん,ふる|並:へい,なみ,なら|陛:へい|閉:へい,と,し|片:へん,かた|補:ほ,おぎな|暮:ぼ,く|宝:ほう,たから|訪:ほう,おとず,たず|亡:ぼう,もう,な|忘:ぼう,わす|棒:ぼう|枚:まい|幕:まく,ばく|密:みつ|盟:めい|模:も,ぼ|訳:やく,わけ|郵:ゆう|優:ゆう,やさ,すぐ|幼:よう,おさな|欲:よく,ほっ,ほ|翌:よく|乱:らん,みだ|卵:らん,たまご|覧:らん|裏:り,うら|律:りつ,りち|臨:りん,のぞ|朗:ろう,ほが|論:ろん
+        1|一:いち,いつ,ひと|右:う,ゆう,みぎ|雨:う,あめ,あま|円:えん,まる|王:おう|音:おん,いん,おと,ね|下:か,げ,した,しも,もと,さ|火:か,ひ,ほ|花:か,はな|貝:かい|学:がく,まな|気:き,け|九:きゅう,く,ここの|休:きゅう,やす|玉:ぎょく,たま|金:きん,こん,かね,かな|空:くう,そら,あ,から,す|月:げつ,がつ,つき|犬:けん,いぬ|見:けん,み|五:ご,いつ|口:こう,く,くち|校:こう|左:さ,ひだり|三:さん,み|山:さん,やま|子:し,す,こ,ね|四:し,よ,よん,よっ|糸:し,いと|字:じ,あざ|耳:じ,みみ|七:しち,なな,なの|車:しゃ,くるま|手:しゅ,ず,て,た|十:じゅう,じゅっ,とお,と|出:しゅつ,すい,だ,で|女:じょ,にょ,にょう,おんな,め|小:しょう,ちい,こ,お|上:じょう,しょう,うえ,うわ,かみ,あ,のぼ|森:しん,もり|人:じん,にん,ひと|水:すい,みず|正:せい,しょう,ただ,まさ|生:せい,しょう,い,う,お,は,き,なま|青:せい,しょう,あお|夕:せき,ゆう|石:せき,しゃく,こく,いし|赤:せき,しゃく,あか|千:せん,ち|川:せん,かわ|先:せん,さき,ま|早:そう,さっ,はや|草:そう,くさ|足:そく,あし,た|村:そん,むら|大:だい,たい,おお|男:だん,なん,おとこ|竹:ちく,たけ|中:ちゅう,なか|虫:ちゅう,むし|町:ちょう,まち|天:てん,あめ,あま|田:でん,た|土:ど,と,つち|二:に,ふた|日:にち,じつ,ひ,か|入:にゅう,はい,い|年:ねん,とし|白:はく,びゃく,しろ,しら|八:はち,や,やっ,よう|百:ひゃく,もも|文:ぶん,もん,ふみ|木:ぼく,もく,き,こ|本:ほん,もと|名:めい,みょう,な|目:もく,ぼく,め,ま|立:りつ,りゅう,た,だ|力:りょく,ちから,ちか|林:りん,はやし|六:ろく,む,むっ
+        2|引:いん,ひ|羽:う,は,はね|雲:うん,くも|園:えん,その|遠:えん,おん,とお|何:か,なに,なん|科:か|夏:か,げ,なつ|家:か,け,いえ,や|歌:か,うた|画:が,かく|回:かい,え,まわ|会:かい,え,あ|海:かい,うみ|絵:かい,え|外:がい,げ,そと,ほか,はず|角:かく,かど,つの|楽:がく,らく,たの|活:かつ|間:かん,けん,あいだ,ま|丸:がん,まる|岩:がん,いわ|顔:がん,かお|汽:き|記:き,しる|帰:き,かえ|弓:きゅう,ゆみ|牛:ぎゅう,うし|魚:ぎょ,うお,さかな|京:きょう,けい,きん|強:きょう,ごう,つよ,し|教:きょう,おし,おそ|近:きん,ちか|兄:けい,きょう,あに|形:けい,ぎょう,かた,かたち|計:けい,はか|元:げん,がん,もと|言:げん,ごん,い,こと|原:げん,はら|戸:こ,と|古:こ,ふる|午:ご|後:ご,こう,のち,うし,あと,おく|語:ご,かた|工:こう,く|公:こう,おおやけ|広:こう,ひろ|交:こう,まじ,ま,か|光:こう,ひかり,ひか|考:こう,かんが|行:こう,ぎょう,あん,い,ゆ,おこな|高:こう,たか|黄:こう,おう,き,こ|合:ごう,がっ,かっ,あ|谷:こく,たに|国:こく,くに|黒:こく,くろ|今:こん,きん,いま|才:さい|細:さい,ほそ,こま|作:さく,さ,つく|算:さん|止:し,と,や|市:し,いち|矢:し,や|姉:し,あね|思:し,おも|紙:し,かみ|寺:じ,てら|自:じ,し,みずか|時:じ,とき|室:しつ,むろ|社:しゃ,やしろ|弱:じゃく,よわ|首:しゅ,くび|秋:しゅう,あき|週:しゅう|春:しゅん,はる|書:しょ,か|少:しょう,すく,すこ|場:じょう,ば|色:しょく,しき,いろ|食:しょく,じき,た,く|心:しん,こころ|新:しん,あたら,あら,にい|親:しん,おや,した|図:ず,と,はか|数:すう,す,かず,かぞ|西:せい,さい,にし|声:せい,しょう,こえ,こわ|星:せい,しょう,ほし|晴:せい,は|切:せつ,さい,き|雪:せつ,ゆき|船:せん,ふね,ふな|線:せん|前:ぜん,まえ|組:そ,くみ|走:そう,はし|多:た,おお|太:たい,た,ふと|体:たい,てい,からだ|台:たい,たい|地:ち,じ|池:ち,いけ|知:ち,し|茶:ちゃ,さ|昼:ちゅう,ひる|長:ちょう,なが|鳥:ちょう,とり|朝:ちょう,あさ|直:ちょく,じき,なお,ただ|通:つう,とお,かよ|弟:てい,だい,で,おとうと|店:てん,みせ|点:てん|電:でん|刀:とう,かたな|冬:とう,ふゆ|当:とう,あ|東:とう,ひがし|答:とう,こた|頭:とう,ず,ト,あたま,かしら|同:どう,おな|道:どう,とう,みち|読:どく,とく,とう,よ|内:ない,だい,うち|南:なん,な,みなみ|肉:にく|馬:ば,うま,ま|売:ばい,う|買:ばい,か|麦:ばく,むぎ|半:はん,なか|番:ばん|父:ふ,ちち|風:ふう,ふ,かぜ,かざ|分:ぶん,ふん,ぶ,わ|聞:ぶん,もん,き|米:べい,まい,こめ|歩:ほ,ぶ,ふ,ある,あゆ|母:ぼ,はは|方:ほう,かた|北:ほく,きた|妹:まい,いもうと|毎:まい|万:まん,ばん|明:めい,みょう,あ,あか,あき|鳴:めい,な|毛:もう,け|門:もん,かど|夜:や,よ,よる|野:や,の|友:ゆう,とも|用:よう,もち|曜:よう|来:らい,く,きた,こ|里:り,さと|理:り|話:わ,はなし,はな
+        3|悪:あく,お,わる|安:あん,やす|暗:あん,くら|医:い|依:い,よ,ゆだ|意:い|育:いく,そだ|員:いん|院:いん|飲:いん,の|運:うん,はこ|泳:えい,およ|駅:えき|央:おう|横:おう,よこ|屋:おく,や|温:おん,あたた|化:か,け,ば|荷:か,に|界:かい|開:かい,ひら,あ|階:かい|寒:かん,さむ|感:かん|漢:かん|館:かん,やかた|岸:がん,きし|起:き,お|期:き|客:きゃく,かく|究:きゅう,きわ|急:きゅう,いそ|級:きゅう|宮:きゅう,ぐう,く,みや|球:きゅう,たま|去:きょ,こ,さ|橋:きょう,はし|業:ぎょう,ごう,わざ|曲:きょく,ま|局:きょく|銀:ぎん|区:く|苦:く,くる,にが|具:ぐ|君:くん,きみ|係:けい,かか,かかり|軽:けい,かる|血:けつ,ち|決:けつ,き|研:けん,と|県:けん|庫:こ,く|湖:こ,みずうみ|向:こう,む|幸:こう,さいわ,さち,しあわ|港:こう,みなと|号:ごう|根:こん,ね|祭:さい,まつ|皿:さら|仕:し,じ,つか|死:し,し|使:し,つか|始:し,はじ|指:し,ゆび,さ|歯:し,は|詩:し|次:じ,し,つぎ|事:じ,ず,こと|持:じ,も|式:しき|実:じつ,み,みの|写:しゃ,うつ|者:しゃ,もの|主:しゅ,す,ぬし,おも|守:しゅ,す,まも,もり|取:しゅ,と|酒:しゅ,さけ,さか|受:じゅ,う|州:しゅう,す|拾:しゅう,じゅう,ひろ|終:しゅう,お|習:しゅう,なら|集:しゅう,あつ|住:じゅう,す|重:じゅう,ちょう,え,おも,かさ|宿:しゅく,やど|所:しょ,ところ|暑:しょ,あつ|助:じょ,たす,すけ|昭:しょう|消:しょう,き,け|商:しょう,あきな|章:しょう|勝:しょう,か,まさ|乗:じょう,の|植:しょく,う|申:しん,もう|身:しん,み|神:しん,じん,かみ,かん|真:しん,ま|深:しん,ふか|進:しん,すす|世:せい,せ,よ|整:せい,ととの|昔:せき,しゃく,むかし|全:ぜん,まった,すべ|相:そう,しょう,あい|送:そう,おく|想:そう,そ|息:そく,いき|速:そく,はや,すみ|族:ぞく|他:た,ほか|打:だ,う|対:たい,つい|待:たい,ま|代:だい,たい,か,よ,しろ|第:だい|題:だい|炭:たん,すみ|短:たん,みじか|談:だん|着:ちゃく,じゃく,き,つ|注:ちゅう,そそ|柱:ちゅう,はしら|丁:ちょう,てい|帳:ちょう|調:ちょう,しら,ととの|追:つい,お|定:てい,じょう,さだ|庭:てい,にわ|笛:てき,ふえ|鉄:てつ|転:てん,ころ|都:と,つ,みやこ|度:ど,と,たく,たび|投:とう,な|豆:とう,ず,まめ|島:とう,しま|湯:とう,ゆ|登:とう,と,のぼ|等:とう,ひと,など|動:どう,うご|童:どう,わらべ|農:のう|波:は,なみ|配:はい,くば|倍:ばい|箱:はこ|畑:はた,はたけ|発:はつ,ほつ|反:はん,ほん,たん,そ|坂:はん,さか|板:はん,いた|皮:ひ,かわ|悲:ひ,かな|美:び,うつく|鼻:び,はな|筆:ひつ,ふで|氷:ひょう,こおり,ひ|表:ひょう,おもて,あらわ|秒:びょう|病:びょう,やまい,や|品:ひん,しな|負:ふ,ま,お|部:ぶ|服:ふく|福:ふく|物:ぶつ,もつ,もの|平:へい,びょう,たい,ひら|返:へん,かえ|勉:べん|放:ほう,はな|味:み,あじ|命:めい,みょう,いのち|面:めん,おも,おもて,つら|問:もん,と|役:やく,えき|薬:やく,くすり|由:ゆ,ユウ,よし|油:ゆ,あぶら|有:ゆう,う,あ|遊:ゆう,ゆ,あそ|予:よ|羊:よう,ひつじ|洋:よう|葉:よう,は|陽:ようひ|様:よう,さま|落:らく,お|流:りゅう,る,なが|旅:りょ,たび|両:りょう|緑:りょく,ろく,みどり|礼:れい,らい|列:れつ|練:れん,ね|路:ろ,じ,みち|和:わ,オ,やわ,なご
+        4|愛:あい,いと|案:あん|以:い,もっ|衣:い,ころも|位:い,くらい|印:いん,しるし|英:えい|栄:えい,さか|塩:えん,しお|億:おく|加:か,くわ|果:か,は|貨:か|課:か|芽:が,め|改:かい,あらた|械:かい|害:がい|街:がい,かい,まち|各:かく,おのおの|覚:かく,おぼ|完:かん|官:かん|管:かん,くだ|関:かん,せき,かか|観:かん,み|願:がん,ねが|希:き|季:き|旗:き,はた|器:き,うつわ|機:き,はた|議:ぎ|求:きゅう,もと|泣:きゅう,な|給:きゅう|挙:きょ,あ|漁:ぎょ,りょう|共:きょう,とも|協:きょう|鏡:きょう,かがみ|競:きょう,けい,きそ|極:きょく,ごく,きわ|訓:くん|軍:ぐん|郡:ぐん|径:けい|景:けい|芸:げい|欠:けつ,か|結:けつ,むす|建:けん,こん,た|健:けん,すこ|験:けん|固:こ,かた|功:こう,く|好:こう,す|候:こう|康:こう|差:さ,さ|菜:さい,な|最:さい,もっと|材:ざい|昨:さく|札:さつ,ふだ|刷:さつ,す|察:さつ|参:さん,まい|産:さん,う|散:さん,ち|残:ざん,のこ|氏:し,うじ|司:し,つかさど|試:し,こころ|児:じ,こ|治:じ,ち,おさ|辞:じ,や|失:しつ,うしな|借:しゃく,か|種:しゅ,たね|周:しゅう,まわ|祝:しゅう,しゅく,いわ|順:じゅん|初:しょ,はじ,はつ,うい|松:しょう,まつ|笑:しょう,わら|唱:しょう,とな|焼:しょう,や|照:しょう,て|賞:しょう|臣:しん,じん|信:しん|成:せい,じょう,な|省:せい,しょう,かえり|清:せい,しょう,きよ|静:せい,じょう,しず|席:せき|積:せき,つ|折:せつ,お|節:せつ,ふし|説:せつ,と|浅:せん,あさ|戦:せん,いくさ|選:せん,えら|然:ぜん|争:そう,あらそ|倉:そう,くら|巣:そう,す|束:そく,たば|側:そく,がわ|続:ぞく,つづ|卒:そつ|孫:そん,まご|帯:たい,おび|隊:たい|達:たつ,たち|単:たん|置:ち,お|仲:ちゅう,なか|兆:ちょう,きざ|低:てい,ひく|底:てい,そこ|的:てき,まと|典:てん|伝:でん,つた|徒:と|努:ど,つと|灯:とう,ひ|働:どう,はたら|特:とく|熱:ねつ,あつ|念:ねん|敗:はい,やぶ|梅:ばい,うめ|博:はく,ばく|飯:はん,めし|非:ひ,と|必:ひつ,かなら|票:ひょう|標:ひょう,しるべ|不:ふ,ぶ|夫:ふ,ふう,おっと|付:ふ,つ|府:ふ|副:ふく|兵:へい,ひょう|別:べつ,わか|辺:へん,あた|変:へん,か|便:べん,たより|包:ほう,つつ|法:ほう|望:ぼう,のぞ|牧:ぼく,まき|末:まつ,すえ|満:まん,み|未:み|民:みん,たみ|無:む,な|約:やく|勇:ゆう,いさ|要:よう,い|養:よう,やしな|浴:よく,あ|利:り,き|陸:りく|良:りょう,よ|料:りょう|量:りょう,はか|輪:りん,わ|類:るい|令:れい|冷:れい,つめ|例:れい,たと|連:れん,つら|老:ろう,お|労:ろう|録:ろく|賀:が|群:ぐん|徳:とく|富:ふ,と|城:じょう,しろ,き|茨:いば,いばら|媛:えん,ひめ|岡:こう,おか|潟:せき,かた,がた|岐:き,ぎ|熊:くま|香:こう,かおり|佐:さ|埼:さい,さき|崎:き,さき|滋:じ,しげ|鹿:ろく,しか|縄:じょう,なわ|井:せい,しょう,い|沖:ちゅう,おき|栃:とち|奈:な|梨:り,なし|阪:はん,さか|阜:ふ
+        5|圧:あつ|移:い,うつ|因:いん,よ|永:えい,なが|営:えい,なりわい,と|衛:えい|易:えき,い,やさ|役:えき,やく|液:えき|演:えん|応:おう,こた|往:おう|桜:おう,さくら|恩:おん|可:か|仮:か,け,かり|価:か,あたい|河:か,かわ|過:か,す,あやま|賀:が|快:かい,こころよ|解:かい,げ,と|格:かく,こう|確:かく,たし|額:がく,ひたい|刊:かん|幹:かん,みき|慣:かん,な|眼:がん,げん,まなこ|基:き,もと|寄:き,よ|規:き|技:ぎ,わざ|義:ぎ|逆:ぎゃく,さか|久:きゅう,ひさ|旧:きゅう|居:きょ,い|許:きょ,ゆる|境:きょう,けい,さかい|均:きん|禁:きん|句:く|群:ぐん,む|経:けい,きょう,へ,た|潔:けつ,いさぎよ|件:けん|券:けん|険:けん,けわ|検:けん|限:げん,かぎ|現:げん,あらわ|減:げん,へ|故:こ,ゆえ,ふる|個:こ|護:ご,まも|効:こう,き|厚:こう,あつ|耕:こう,たがや|鉱:こう|構:こう,かま|興:こう,きょう,おこ|講:こう|混:こん,ま|査:さ|再:さい,さ,ふたた|災:さい,わざわい|妻:さい,つま|採:さい,と|際:さい,きわ|在:ざい,あ|財:ざい,さい|罪:ざい,つみ|雑:ざつ,ぞう|酸:さん,す|賛:さん|支:し,ささ|志:し,こころざし|枝:し,えだ|師:し|資:し|飼:し,か|示:じ,し,しめ|似:じ,に|識:しき|質:しつ,しち,たち|舎:しゃ|謝:しゃ,あやま|授:じゅ,さず|修:しゅう,しゅ,おさ|述:じゅつ,の|術:じゅつ,すべ|準:じゅん|序:じょ|招:しょう,まね|承:しょう,うけたまわ|証:しょう|条:じょう|状:じょう|常:じょう,つね,とこ|情:じょう,なさ|織:しょく,しき,お|職:しょく|制:せい|性:せい,しょう|政:せい,しょう,まつりごと|勢:せい,いきお|精:せい,しょう|製:せい|税:ぜい|責:せき,せ|績:せき|接:せつ,つ|設:せつ,もう|舌:ぜつ,した|絶:ぜつ,た|銭:せん,ぜに|祖:そ|素:そ,す|総:そう|造:ぞう,つく|像:ぞう|増:ぞう,ま,ふ|則:そく|測:そく,はか|属:ぞく|率:そつ,りつ,ひき|損:そん,そこ|退:たい,しりぞ|貸:たい,か|態:たい|団:だん,とん|断:だん,ことわ,た|築:ちく,きず|張:ちょう,は|提:てい,さ|程:てい,ほど|適:てき|敵:てき,かたき|統:とう,す|導:どう,みちび|銅:どう|徳:とく|独:どく,ひと|任:にん,まか|燃:ねん,も|能:のう|破:は,やぶ|犯:はん,おか|判:はん,ばん|版:はん|比:ひ,くら|肥:ひ,こ|費:ひ|備:び,そな|俵:ひょう,たわら|評:ひょう|貧:ひん,びん,まず|布:ふ,ぬの|婦:ふ|富:ふ,ふう,と,とみ|武:ぶ,む|復:ふく|複:ふく|仏:ぶつ,ほとけ|編:へん,あ|弁:べん|保:ほ,たも|墓:ぼ,はか|報:ほう,むく|豊:ほう,ゆた|防:ぼう,ふせ|貿:ぼう|暴:ぼう,あば|務:む,つと|夢:む,ゆめ|迷:めい,まよ|綿:めん,わた|輸:ゆ|余:よ,あま|預:よ,あず|容:よう|略:りゃく|留:りゅう,る,と|領:りょう
+        6|異:い,こと|遺:い|域:いき|宇:う|映:えい,うつ,は|延:えん,の|沿:えん,そ|我:が,われ,わ|灰:かい,はい|拡:かく|革:かく,かわ|閣:かく|割:かつ,わ|株:かぶ|干:かん,ほ,ひ|巻:かん,ま|看:かん|簡:かん|危:き,あぶ,あや|机:き,つくえ|揮:き|貴:き,とうと,たっと|疑:ぎ,うたが|吸:きゅう,す|供:きょう,く,とも,そな|胸:きょう,むね,むな|郷:きょう,ごう|勤:きん,ごん,つと|筋:きん,すじ|系:けい|敬:けい,うやま|警:けい|劇:げき|激:げき,はげ|穴:けつ,あな|絹:けん,きぬ|権:けん,ごん|憲:けん|源:げん,みなもと|厳:げん,ごん,きび,いか|己:こ,き,おのれ|呼:こ,よ|誤:ご,あやま|后:こう,きさき|孝:こう|皇:こう,おう|紅:こう,べに,くれない|降:こう,お,ふ|鋼:こう,はがね|刻:こく,きざ|穀:こく|骨:こつ,ほね|困:こん,こま|砂:さ,しゃ,すな|座:ざ,すわ|済:さい,す|裁:さい,さば,た|策:さく|冊:さつ,さく|蚕:さん,かいこ|至:し,いた|私:し,わたくし,わたし|姿:し,すがた|視:し|詞:し|誌:し|磁:じ|射:しゃ,い|捨:しゃ,す|尺:しゃく|若:じゃく,にゃく,わか|樹:じゅ,き|収:しゅう,おさ|宗:しゅう,そう|就:しゅう,じゅ,つ|衆:しゅう,しゅ|従:じゅう,しょう,じゅ,したが|縦:じゅう,たて|縮:しゅく,ちぢ|熟:じゅく,う|純:じゅん|処:しょ|署:しょ|諸:しょ,もろ|除:じょ,じ,のぞ|将:しょう|傷:しょう,きず,いた|障:しょう,さわ|城:じょう,しろ|蒸:じょう,む|針:しん,はり|仁:じん,に|垂:すい,た|推:すい,お|寸:すん|盛:せい,じょう,も,さか|聖:せい,しょう|誠:せい|宣:せん,のたま|専:せん,もっぱら|泉:せん,いずみ|洗:せん,あら|染:せん,そ,し|銭:ぜん,よ|奏:そう,かな|窓:そう,まど|想:そう,つく|装:そう,しょう,よそお|層:そう|操:そう,みさお,あやつ|蔵:ぞう,くら|臓:ぞう|存:そん,ぞん|尊:そん,とうと,たっと|宅:たく|担:たん,かつ,にな|探:たん,さが,さぐ|誕:たん|段:だん|暖:だん,あたた|値:ち,あたい,ね|宙:ちゅう|忠:ちゅう|著:ちょ,いちじる,あらわ|庁:ちょう|頂:ちょう,いただき|潮:ちょう,しお|賃:ちん|痛:つう,いた|展:てん|討:とう,う|党:とう|糖:とう|届:とど|難:なん,むずか,かた|乳:にゅう,ちち,ち|認:にん,みと|納:のう,おさ|脳:のう|派:は|拝:はい,おが|背:はい,せ,せい,そむ|肺:はい|俳:はい|班:はん|晩:ばん|否:ひ,いな|批:ひ|秘:ひ,ひめ|腹:ふく,はら|奮:ふん,ふる|並:へい,なみ,なら|陛:へい|閉:へい,と,し|片:へん,かた|補:ほ,おぎな|暮:ぼ,く|宝:ほう,たから|訪:ほう,おとず,たず|亡:ぼう,もう,な|忘:ぼう,わ|棒:ぼう|枚:まい|幕:まく,ばく|密:みつ|名:めい|模:も,ぼ|訳:やく,わけ|郵:ゆう|優:ゆう,やさ,すぐ|幼:よう,ちいさ|欲:よく,ほっ,ほ|翌:よく|乱:らん,みだ|卵:らん,たまご|覧:らん|裏:り,うら|律:りつ,りち|臨:りん,のぞ|朗:ろう,ほが|論:ろん
         `;
 
-        // 検索DB作成
         const searchDB = [];
         const gradeColors = { 1:"#FF8A65", 2:"#FFD54F", 3:"#4FC3F7", 4:"#81C784", 5:"#BA68C8", 6:"#7986CB" };
 
@@ -290,37 +835,33 @@
                 searchDB.push({
                     char: char,
                     readings: readings,
-                    grade: grade,
-                    searchStr: char + readings.join('')
+                    grade: grade
                 });
             }
         });
 
-        // DOM要素
         const searchInput = document.getElementById('search-input');
         const searchResults = document.getElementById('search-results');
-        const appContainer = document.getElementById('app-container');
-        const contentFrame = document.getElementById('content-frame');
-        const closeBtn = document.getElementById('close-app-btn');
 
-        // アプリ起動
+        const gradeUrls = {
+            1: "https://nakaichi1nen.my.canva.site/c17ce6tbkfxcwwyn",
+            2: "https://nakaichi1nen.my.canva.site/c17nbf63h22jd78n",
+            3: "https://nakaichi1nen.my.canva.site/c17eg90gvdkdd1c0",
+            4: "https://nakaichi1nen.my.canva.site/c17ew79w8skjttrf",
+            5: "https://nakaichi1nen.my.canva.site/c17f6jdg6v2gjbts",
+            6: "https://nakaichi1nen.my.canva.site/c17fhd71k2g1nkz4"
+        };
+
         function launchApp(grade) {
-            // 🛑 ここでBGMを止めます
-            stopBGM();
-
-            contentFrame.src = `${grade}.html`;
-            appContainer.classList.add('active');
-            setTimeout(() => { closeBtn.style.display = "block"; }, 300);
+            const targetUrl = gradeUrls[grade];
+            if (targetUrl) {
+                // 別タブで開く
+                window.open(targetUrl, '_blank', 'noopener,noreferrer');
+                // 経験値更新
+                updateXP();
+            }
         }
 
-        // アプリ終了
-        function closeApp() {
-            appContainer.classList.remove('active');
-            contentFrame.src = "";
-            closeBtn.style.display = "none";
-        }
-
-        // 検索機能
         searchInput.addEventListener('input', (e) => {
             const query = e.target.value.trim();
             searchResults.innerHTML = '';
@@ -330,10 +871,13 @@
                 return;
             }
 
-            // 検索ロジック
+            const queryLower = query.toLowerCase();
             const matches = searchDB.filter(item => {
                 if (item.char === query) return true;
-                return item.readings.some(r => r.startsWith(query) || r.includes(query));
+                return item.readings.some(r => {
+                    const rLower = r.toLowerCase();
+                    return rLower.includes(queryLower);
+                });
             }).slice(0, 20);
 
             if (matches.length > 0) {
@@ -372,6 +916,9 @@
                 searchResults.style.display = 'none';
             }
         });
+        
+        // 初期表示更新
+        renderTopBar();
     </script>
-</body>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9cc31512f7c2b740',t:'MTc3MDgwNDg5OC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
