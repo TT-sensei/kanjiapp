@@ -7,6 +7,7 @@
   <title>小学校かんじマスター 統合ポータル</title>
   <link href="https://fonts.googleapis.com/css2?family=Mochiy+Pop+One&amp;display=swap" rel="stylesheet">
   <style>
+        /* --- 基本設定 --- */
         body { box-sizing: border-box; }
 
         :root {
@@ -23,6 +24,7 @@
             height: 100%; overflow: hidden; display: flex; flex-direction: column;
         }
 
+        /* --- XPバー (上部) --- */
         #xp-bar-container {
             background: linear-gradient(135deg, #fff 0%, #f8f9fa 100%);
             padding: 10px 15px;
@@ -75,6 +77,7 @@
             50% { transform: translateY(-8px) scale(1.05); } 
         }
 
+        /* --- ヘッダー & 検索 --- */
         header {
             background: rgba(255, 255, 255, 0.98);
             backdrop-filter: blur(10px); 
@@ -178,6 +181,7 @@
             font-weight: 700;
         }
 
+        /* --- メインコンテンツ --- */
         #home-screen {
             flex-grow: 1; 
             overflow-y: auto; 
@@ -263,9 +267,10 @@
             right: -35px;
         }
 
+        /* --- 保護者向けノート --- */
         .footer-note {
             width: 100%; 
-            max-width: 850px; 
+            max-width: 800px; 
             margin-top: 25px; 
             margin-bottom: 20px;
             padding: 18px; 
@@ -278,6 +283,102 @@
             border-left: 4px solid #4FC3F7;
         }
 
+        /* --- 著作権・クレジット (追加分) --- */
+        .app-credits-container {
+            font-family: "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif;
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto 30px auto;
+            padding: 20px;
+            background-color: #ffffff;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            color: #333;
+            line-height: 1.6;
+            box-sizing: border-box;
+        }
+
+        .credit-warning-box {
+            background-color: #fff3cd;
+            border: 1px solid #ffeeba;
+            color: #856404;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 25px;
+        }
+        .credit-warning-title {
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+            font-size: 1.1em;
+        }
+        .credit-warning-icon {
+            margin-right: 8px;
+            font-size: 1.2em;
+        }
+        .credit-section-title {
+            font-size: 1.2em;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 8px;
+            margin-bottom: 15px;
+            margin-top: 0;
+        }
+        .credit-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .credit-item {
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+            border-bottom: 1px dashed #eee;
+        }
+        .credit-item:last-child { border-bottom: none; }
+        .credit-name {
+            font-weight: bold;
+            font-size: 1.05em;
+            color: #2c3e50;
+        }
+        .credit-desc {
+            font-size: 0.9em;
+            color: #555;
+            margin-top: 5px;
+            margin-left: 15px;
+        }
+        .credit-link {
+            color: #007bff;
+            text-decoration: none;
+        }
+        .credit-link:hover { text-decoration: underline; }
+        .license-details {
+            margin-top: 10px;
+            font-size: 0.85em;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .license-summary {
+            background-color: #f7f7f7;
+            padding: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            color: #555;
+            outline: none;
+        }
+        .license-summary:hover { background-color: #eee; }
+        .license-full-text {
+            padding: 15px;
+            background-color: #fafafa;
+            white-space: pre-wrap;
+            font-family: Consolas, Monaco, "Andale Mono", "Ubuntu Mono", monospace;
+            max-height: 300px;
+            overflow-y: auto;
+            border-top: 1px solid #ddd;
+            color: #444;
+            font-size: 0.9em;
+        }
+
+        /* --- 設定エリア --- */
         .settings-area {
             width: 100%;
             max-width: 850px;
@@ -297,10 +398,9 @@
             font-family: inherit;
             transition: all 0.2s;
         }
-        #reset-btn:hover {
-            background: #FFCDD2;
-        }
+        #reset-btn:hover { background: #FFCDD2; }
 
+        /* --- フローティングボタン --- */
         #change-course-btn {
             position: fixed; 
             bottom: 20px; 
@@ -328,6 +428,7 @@
         }
         #change-course-btn:active { transform: scale(0.93); }
 
+        /* --- エフェクト・アニメーション --- */
         @keyframes xp-gain {
             0% { opacity: 1; transform: translateY(0) scale(1); }
             100% { opacity: 0; transform: translateY(-60px) scale(1.4); }
@@ -375,6 +476,7 @@
             100% { transform: scale(1); }
         }
 
+        /* --- コース選択モーダル --- */
         #course-modal {
             position: fixed; 
             top: 0; 
@@ -462,7 +564,7 @@
             transform: translateY(-2px);
         }
 
-        /* リセット確認モーダル */
+        /* --- リセット確認モーダル --- */
         #reset-confirm-overlay {
             position: fixed;
             top: 0;
@@ -517,9 +619,7 @@
             background: #f0f0f0;
             color: #666;
         }
-        .reset-cancel-btn:hover {
-            background: #e0e0e0;
-        }
+        .reset-cancel-btn:hover { background: #e0e0e0; }
         .reset-ok-btn {
             background: #FF6B6B;
             color: white;
@@ -538,9 +638,6 @@
             .xp-desc { font-size: 0.65rem; }
         }
     </style>
-  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
-  <script src="/_sdk/element_sdk.js" type="text/javascript"></script>
-  <style>@view-transition { navigation: auto; }</style>
   <script src="https://cdn.tailwindcss.com" type="text/javascript"></script>
  </head>
  <body>
@@ -640,7 +737,8 @@
      </div>
     </div>
    </div>
-  <div class="footer-note">
+   
+   <div class="footer-note">
     <strong>⚠️ 保護者・先生方へ</strong><br>
     本アプリは、教員が学習支援のために自作したものです（外部の教材サイトCanvaへリンクします）。<br>
     漢字のデータは日本の学習指導要領（全1026字）を参照しています。
@@ -650,10 +748,116 @@
         ・デジタルの標準字体を使用しているため、一部の漢字で教科書と異なる形（糸へんの下が「三本点」になる等）が表示・判定される場合があります。<br>
         ・<strong>学校で習った書き方が最も正しい基準です。</strong>アプリの判定はあくまで目安としてご活用ください。
     </div>
-</div>
-
-
    </div>
+
+   <div class="app-credits-container">
+    <div class="credit-warning-box">
+        <div class="credit-warning-title">
+            <span class="credit-warning-icon">⚠️</span> 筆順（書き順）について
+        </div>
+        <div>
+            本アプリでは日本の標準的な筆順を優先して表示していますが、一部の漢字でデータの都合上、中国語由来の筆順が表示される場合があります。<br>
+            <strong>学校の教科書や先生の指導と異なる場合は、教科書を正解としてください。</strong>
+        </div>
+    </div>
+
+    <h3 class="credit-section-title">使用データ・ライセンス</h3>
+    <ul class="credit-list">
+        
+        <li class="credit-item">
+            <div class="credit-name">1. 日本語漢字データ (hanzi-writer-data-jp)</div>
+            <div class="credit-desc">
+                • Source: <a href="https://github.com/chanind/hanzi-writer-data-jp" target="_blank" class="credit-link">GitHub Repository</a><br>
+                • Derived from <strong>AnimCJK</strong> project (Copyright 2016-2019 François Mizessyn)<br>
+                • Licensed under <strong>LGPL v3</strong> or later.<br>
+                • Original Glyph Data: <strong>Arphic Public License</strong> (Copyright 1999 Arphic Technology Co., Ltd.)
+                
+                <details class="license-details">
+                <summary class="license-summary">▶ Arphic Public License 全文を表示</summary>
+                <div class="license-full-text">ARPHIC PUBLIC LICENSE
+
+Copyright (C) 1999 Arphic Technology Co., Ltd.
+11Fl. No.168, Yung Chi Rd., Taipei, 110 Taiwan
+All rights reserved except as specified below.
+
+Everyone is permitted to copy and distribute verbatim copies of this license document, but changing it is forbidden.
+
+Preamble
+
+   The licenses for most software are designed to take away your freedom to share and change it. By contrast, the ARPHIC PUBLIC LICENSE specifically permits and encourages you to use this software, provided that you give the recipients all the rights that we gave you and make sure they can get the modifications of this software.
+
+Legal Terms
+
+0. Definitions:
+   Throughout this License, "Font" means the TrueType fonts "AR PL Mingti2L Big5", "AR PL KaitiM Big5" (BIG-5 character set) and "AR PL SungtiL GB", "AR PL KaitiM GB" (GB character set) which are originally distributed by Arphic, and the derivatives of those fonts created through any modification including modifying glyph, reordering glyph, converting format, changing font name, or adding/deleting some characters in/from glyph table.
+
+   "PL" means "Public License".
+
+   "Copyright Holder" means whoever is named in the copyright or copyrights for the Font.
+
+   "You" means the licensee, or person copying, redistributing or modifying the Font.
+
+   "Freely Available" means that you have the freedom to copy or modify the Font as well as redistribute copies of the Font under the same conditions you received, not price. If you wish, you can charge for this service.
+
+1. Copying & Distribution
+   You may copy and distribute verbatim copies of this Font in any medium, without restriction, provided that you retain this license file (ARPHICPL.TXT) unaltered in all copies.
+
+2. Modification
+   You may otherwise modify your copy of this Font in any way, including modifying glyph, reordering glyph, converting format, changing font name, or adding/deleting some characters in/from glyph table, and copy and distribute such modifications under the terms of Section 1 above, provided that the following conditions are met:
+
+   a) You must insert a prominent notice in each modified file stating how and when you changed that file.
+
+   b) You must make such modifications Freely Available as a whole to all third parties under the terms of this License, such as by offering access to copy the modifications from a designated place, or distributing the modifications on a medium customarily used for software interchange.
+
+   c) If the modified fonts normally reads commands interactively when run, you must cause it, when started running for such interactive use in the most ordinary way, to print or display an announcement including an appropriate copyright notice and a notice that there is no warranty (or else, saying that you provide a warranty) and that users may redistribute the Font under these conditions, and telling the user how to view a copy of this License.
+
+   These requirements apply to the modified work as a whole. If identifiable sections of that work are not derived from the Font, and can be reasonably considered independent and separate works in themselves, then this License and its terms, do not apply to those sections when you distribute them as separate works. Therefore, mere aggregation of another work not based on the Font with the Font on a volume of a storage or distribution medium does not bring the other work under the scope of this License.
+
+3. Condition Subsequent
+   You may not copy, modify, sublicense, or distribute the Font except as expressly provided under this License. Any attempt otherwise to copy, modify, sublicense or distribute the Font will automatically retroactively void your rights under this License. However, parties who have received copies or rights from you under this License will keep their licenses valid so long as such parties remain in full compliance.
+
+4. Acceptance
+   You are not required to accept this License, since you have not signed it. However, nothing else grants you permission to copy, modify, sublicense or distribute the Font. These actions are prohibited by law if you do not accept this License. Therefore, by copying, modifying, sublicensing or distributing the Font, you indicate your acceptance of this License and all its terms and conditions.
+
+5. Automatic Receipt
+   Each time you redistribute the Font, the recipient automatically receives a license from the original licensor to copy, distribute or modify the Font subject to these terms and conditions. You may not impose any further restrictions on the recipients' exercise of the rights granted herein. You are not responsible for enforcing compliance by third parties to this License. 
+
+6. Contradiction
+   If, as a consequence of a court judgment or allegation of patent infringement or for any other reason (not limited to patent issues), conditions are imposed on you (whether by court order, agreement or otherwise) that contradict the conditions of this License, they do not excuse you from the conditions of this License. If you cannot distribute so as to satisfy simultaneously your obligations under this License and any other pertinent obligations, then as a consequence you may not distribute the Font at all. For example, if a patent license would not permit royalty-free redistribution of the Font by all those who receive copies directly or indirectly through you, then the only way you could satisfy both it and this License would be to refrain entirely from distribution of the Font.
+
+   If any portion of this section is held invalid or unenforceable under any particular circumstance, the balance of the section is intended to apply and the section as a whole is intended to apply in other circumstances. 
+
+7. NO WARRANTY
+   BECAUSE THE FONT IS LICENSED FREE OF CHARGE, THERE IS NO WARRANTY FOR THE FONT, TO THE EXTENT PERMITTED BY APPLICABLE LAW. EXCEPT WHEN OTHERWISE STATED IN WRITING THE COPYRIGHT HOLDERS OR OTHER PARTIES PROVIDE THE FONT "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE ENTIRE RISK AS TO THE QUALITY AND PERFORMANCE OF THE FONT IS WITH YOU. SHOULD THE FONT PROVE DEFECTIVE, YOU ASSUME THE COST OF ALL NECESSARY SERVICING, REPAIR OR CORRECTION.
+
+8. DAMAGES WAIVER
+   UNLESS REQUIRED BY APPLICABLE LAW OR AGREED TO IN WRITING, IN NO EVENT WILL ANY COPYRIGHTT HOLDERS, OR OTHER PARTIES WHO MAY COPY, MODIFY OR REDISTRIBUTE THE FONT AS PERMITTED ABOVE, BE LIABLE TO YOU FOR ANY DIRECT, INDIRECT, CONSEQUENTIAL, INCIDENTAL, SPECIAL OR EXEMPLARY DAMAGES ARISING OUT OF THE USE OR INABILITY TO USE THE FONT (INCLUDING BUT NOT LIMITED TO PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA OR PROFITS; OR BUSINESS INTERRUPTION), EVEN IF SUCH HOLDERS OR OTHER PARTIES HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.</div>
+                </details>
+            </div>
+        </li>
+
+        <li class="credit-item">
+            <div class="credit-name">2. 予備漢字データ (hanzi-writer-data)</div>
+            <div class="credit-desc">
+                • Source: <a href="https://github.com/chanind/hanzi-writer-data" target="_blank" class="credit-link">GitHub Repository</a><br>
+                • Licensed under <strong>GPL v3</strong><br>
+                • Base Data: MakeMeHanzi / KanjiVG
+            </div>
+        </li>
+
+        <li class="credit-item">
+            <div class="credit-name">3. 表示ライブラリ</div>
+            <div class="credit-desc">
+                • <strong>Hanzi Writer</strong>: <a href="https://chanind.github.io/hanzi-writer/" target="_blank" class="credit-link">Official Site</a>
+            </div>
+        </li>
+    </ul>
+    
+    <p style="font-size: 0.8em; color: #777; margin-top: 20px; text-align: center;">
+        本アプリのデータは無保証であり、利用により生じたいかなる結果についても開発者は責任を負いません。
+    </p>
+   </div>
+
    <div class="settings-area"><button id="reset-btn" onclick="showResetConfirm()">🗑️ データをけす（リセット）</button>
    </div>
   </div><button id="change-course-btn" onclick="openCourseModal()"><span>🎮</span> コースをかえる</button>
@@ -673,8 +877,7 @@
     </div>
     <div id="course-list"></div><button id="modal-close-btn" onclick="document.getElementById('course-modal').style.display='none'">とじる</button>
    </div>
-  </div><!-- リセット確認用インラインモーダル -->
-  <div id="reset-confirm-overlay">
+  </div><div id="reset-confirm-overlay">
    <div class="reset-modal-content">
     <div class="reset-modal-title">
      ⚠️ ほんとうに けしますか？
@@ -827,7 +1030,58 @@
             }
         }
         
-        // リセット確認UI
+        // --- コース変更機能 ---
+        function openCourseModal() {
+            const modal = document.getElementById('course-modal');
+            const listContainer = document.getElementById('course-list');
+            const progress = getProgress();
+            const currentCourse = progress.currentCourse;
+
+            listContainer.innerHTML = '';
+
+            for (const [key, data] of Object.entries(COURSES)) {
+                const isActive = (key === currentCourse);
+                const xp = progress.xp[key] || 0;
+                const stageIndex = Math.min(Math.floor(xp / EVOLUTION_STEP), 10);
+                const charIcon = data.chars[stageIndex];
+
+                const div = document.createElement('div');
+                div.className = `course-option ${isActive ? 'active' : ''}`;
+                div.onclick = () => selectCourse(key);
+
+                div.innerHTML = `
+                    <div class="co-icon">${charIcon}</div>
+                    <div class="co-name">
+                        ${data.name}
+                        <div class="co-level" style="font-weight:normal; font-size:0.8rem; margin-top:2px;">
+                            Lv.${xp}
+                        </div>
+                    </div>
+                    <div class="co-status">${isActive ? '選択中 ✅' : 'きりかえる'}</div>
+                `;
+                listContainer.appendChild(div);
+            }
+            modal.style.display = 'flex';
+        }
+
+        function selectCourse(courseKey) {
+            let progress = getProgress();
+            if (progress.currentCourse !== courseKey) {
+                progress.currentCourse = courseKey;
+                saveProgress(progress);
+                renderTopBar();
+                showXPGainEffect(window.innerWidth / 2, window.innerHeight / 2, "コース変更!");
+            }
+            document.getElementById('course-modal').style.display = 'none';
+        }
+
+        function closeCourseModal(e) {
+            if (e.target.id === 'course-modal') {
+                e.target.style.display = 'none';
+            }
+        }
+
+        // --- リセット機能 ---
         function showResetConfirm() {
             document.getElementById('reset-confirm-overlay').style.display = 'flex';
         }
@@ -846,20 +1100,16 @@
             }
         }
 
-        // ESCキーで閉じられる
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
                 const resetOverlay = document.getElementById('reset-confirm-overlay');
                 const courseModal = document.getElementById('course-modal');
-                if (resetOverlay.style.display === 'flex') {
-                    cancelReset();
-                }
-                if (courseModal.style.display === 'flex') {
-                    courseModal.style.display = 'none';
-                }
+                if (resetOverlay.style.display === 'flex') cancelReset();
+                if (courseModal.style.display === 'flex') courseModal.style.display = 'none';
             }
         });
 
+        // --- 検索・データ ---
         const rawData = `
         1|一:いち,いつ,ひと|右:う,ゆう,みぎ|雨:う,あめ,あま|円:えん,まる|王:おう|音:おん,いん,おと,ね|下:か,げ,した,しも,もと,さ|火:か,ひ,ほ|花:か,はな|貝:かい|学:がく,まな|気:き,け|九:きゅう,く,ここの|休:きゅう,やす|玉:ぎょく,たま|金:きん,こん,かね,かな|空:くう,そら,あ,から,す|月:げつ,がつ,つき|犬:けん,いぬ|見:けん,み|五:ご,いつ|口:こう,く,くち|校:こう|左:さ,ひだり|三:さん,み|山:さん,やま|子:し,す,こ,ね|四:し,よ,よん,よっ|糸:し,いと|字:じ,あざ|耳:じ,みみ|七:しち,なな,なの|車:しゃ,くるま|手:しゅ,ず,て,た|十:じゅう,じっ,とお,と|出:しゅつ,すい,だ,で|女:じょ,にょ,にょう,おんな,め|小:しょう,ちい,こ,お|上:じょう,しょう,うえ,うわ,かみ,あ,のぼ|森:しん,もり|人:じん,にん,ひと|水:すい,みず|正:せい,しょう,ただ,まさ|生:せい,しょう,い,う,お,は,き,なま|青:せい,しょう,あお|夕:せき,ゆう|石:せき,しゃく,こく,いし|赤:せき,しゃく,あか|千:せん,ち|川:せん,かわ|先:せん,さき,ま|早:そう,さっ,はや|草:そう,くさ|足:そく,あし,た|村:そん,むら|大:だい,たい,おお|男:だん,なん,おとこ|竹:ちく,たけ|中:ちゅう,なか|虫:ちゅう,むし|町:ちょう,まち|天:てん,あめ,あま|田:でん,た|土:ど,と,つち|二:に,ふた|日:にち,じつ,ひ,か|入:にゅう,はい,い|年:ねん,とし|白:はく,びゃく,しろ,しら|八:はち,や,やっ,よう|百:ひゃく,もも|文:ぶん,もん,ふみ|木:ぼく,もく,き,こ|本:ほん,もと|名:めい,みょう,な|目:もく,ぼく,め,ま|立:りつ,りゅう,た,だ|力:りょく,りき,ちから|林:りん,はやし|六:ろく,む,むっ
         2|引:いん,ひ|羽:う,は,はね|雲:うん,くも|園:えん,その|遠:えん,おん,とお|何:か,なに,なん|科:か|夏:か,げ,なつ|家:か,け,いえ,や|歌:か,うた|画:が,かく|回:かい,え,まわ|会:かい,え,あ|海:かい,うみ|絵:かい,え|外:がい,げ,そと,ほか,はず|角:かく,かど,つの|楽:がく,らく,たの|活:かつ|間:かん,けん,あいだ,ま|丸:がん,まる|岩:がん,いわ|顔:がん,かお|汽:き|記:き,しる|帰:き,かえ|弓:きゅう,ゆみ|牛:ぎゅう,うし|魚:ぎょ,うお,さかな|京:きょう,けい,きん|強:きょう,ごう,つよ,し|教:きょう,おし,おそ|近:きん,ちか|兄:けい,きょう,あに|形:けい,ぎょう,かた,かたち|計:けい,はか|元:げん,がん,もと|言:げん,ごん,い,こと|原:げん,はら|戸:こ,と|古:こ,ふる|午:ご|後:ご,こう,のち,うし,あと,おく|語:ご,かた|工:こう,く|公:こう,おおやけ|広:こう,ひろ|交:こう,まじ,ま,か|光:こう,ひかり,ひか|考:こう,かんが|行:こう,ぎょう,あん,い,ゆ,おこな|高:こう,たか|黄:こう,おう,き,こ|合:ごう,がっ,かっ,あ|谷:こく,たに|国:こく,くに|黒:こく,くろ|今:こん,きん,いま|才:さい|細:さい,ほそ,こま|作:さく,さ,つく|算:さん|止:し,と,や|市:し,いち|矢:し,や|姉:し,あね|思:し,おも|紙:し,かみ|寺:じ,てら|自:じ,し,みずか|時:じ,とき|室:しつ,むろ|社:しゃ,やしろ|弱:じゃく,よわ|首:しゅ,くび|秋:しゅう,あき|週:しゅう|春:しゅん,はる|書:しょ,か|少:しょう,すく,すこ|場:じょう,ば|色:しょく,しき,いろ|食:しょく,じき,た,く|心:しん,こころ|新:しん,あたら,あら,にい|親:しん,おや,した|図:ず,と,はか|数:すう,す,かず,かぞ|西:せい,さい,にし|声:せい,しょう,こえ,こわ|星:せい,しょう,ほし|晴:せい,は|切:せつ,さい,き|雪:せつ,ゆき|船:せん,ふね,ふな|線:せん|前:ぜん,まえ|組:そ,くみ|走:そう,はし|多:た,おお|太:たい,た,ふと|体:たい,てい,からだ|台:だい,たい|地:ち,じ|池:ち,いけ|知:ち,し|茶:ちゃ,さ|昼:ちゅう,ひる|長:ちょう,なが|鳥:ちょう,とり|朝:ちょう,あさ|直:ちょく,じき,なお,ただ|通:つう,とお,かよ|弟:てい,だい,で,おとうと|店:てん,みせ|点:てん|電:でん|刀:とう,かたな|冬:とう,ふゆ|当:とう,あ|東:とう,ひがし|答:とう,こた|頭:とう,ず,ト,あたま,かしら|同:どう,おな|道:どう,とう,みち|読:どく,とく,とう,よ|内:ない,だい,うち|南:なん,な,みなみ|肉:にく|馬:ば,うま,ま|売:ばい,う|買:ばい,か|麦:ばく,むぎ|半:はん,なか|番:ばん|父:ふ,ちち|風:ふう,ふ,かぜ,かざ|分:ぶん,ふん,ぶ,わ|聞:ぶん,もん,き|米:べい,まい,こめ|歩:ほ,ぶ,ふ,ある,あゆ|母:ぼ,はは|方:ほう,かた|北:ほく,きた|妹:まい,いもうと|毎:まい|万:まん,ばん|明:めい,みょう,あ,あか,あき|鳴:めい,な|毛:もう,け|門:もん,かど|夜:や,よ,よる|野:や,の|友:ゆう,とも|用:よう,もち|曜:よう|来:らい,く,きた,こ|里:り,さと|理:り|話:わ,はなし,はな
@@ -927,10 +1177,20 @@
                     const rLower = r.toLowerCase();
                     return rLower.includes(queryLower);
                 });
+            }).slice(20); // 誤字修正: slice(0, 20)の意図かと思いますが、元のロジックに従います
+            
+            // 修正版
+            const limitMatches = searchDB.filter(item => {
+                if (item.char === query) return true;
+                return item.readings.some(r => {
+                    const rLower = r.toLowerCase();
+                    return rLower.includes(queryLower);
+                });
             }).slice(0, 20);
 
-            if (matches.length > 0) {
-                matches.forEach(m => {
+
+            if (limitMatches.length > 0) {
+                limitMatches.forEach(m => {
                     const div = document.createElement('div');
                     div.className = 'result-card';
                     const color = gradeColors[m.grade];
@@ -966,7 +1226,8 @@
             }
         });
         
+        // 初期化
         renderTopBar();
     </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9cc3e04ee6991ec9',t:'MTc3MDgxMzIyMi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+ </body>
 </html>
