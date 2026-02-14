@@ -21,7 +21,7 @@
             font-family: 'Mochiy Pop One', sans-serif;
             background-color: var(--bg-color);
             margin: 0; padding: 0; color: #37474F;
-            height: 100%; overflow: hidden; display: flex; flex-direction: column;
+            min-height: 100vh; overflow-y: auto; display: flex; flex-direction: column;
         }
 
         /* --- XPバー (上部) --- */
@@ -652,7 +652,7 @@
        Lv.<span id="current-lvl">0</span> / 50
       </div>
       <div class="xp-desc">
-       まいにち べんきょうすると たまるよ！
+       まいにち べんきょうすると たまるよ！（1日3回まで）
       </div>
      </div>
      <div class="progress-track">
