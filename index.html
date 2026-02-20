@@ -398,6 +398,21 @@
         }
         @keyframes spin { 100% { transform: rotate(360deg); } }
 
+        /* ======== ここから追加：画面はみ出し修正用のCSS ======== */
+        #levelup-overlay .result-content {
+            max-height: 85vh;
+            overflow-y: auto;
+        }
+        #levelup-overlay .levelup-anim {
+            font-size: 4rem; /* 少し縮小 */
+            margin: 10px 0;
+        }
+        #levelup-overlay #levelup-mascot {
+            font-size: 4rem !important; /* 少し縮小 */
+            margin: 10px 0 !important;
+        }
+        /* ======================================================= */
+
     </style>
 </head>
 <body>
@@ -423,6 +438,8 @@
 
         <button class="menu-btn btn-practice" onclick="selectMode('practice')">✏️ れんしゅう</button>
         <button class="menu-btn btn-test" onclick="selectMode('test')">📝 テスト</button>
+        
+        <button class="menu-btn" style="background: #9C27B0; color: white;" onclick="startRandomTest()">🎲 ランダム10問</button>
         
         <div style="margin-top:20px; font-size:0.8rem; color:rgba(255,255,255,0.7);">
             <span onclick="resetData()" style="text-decoration: underline; cursor:pointer;">データリセット</span>
@@ -461,68 +478,6 @@
                         • Derived from <strong>AnimCJK</strong> project (Copyright 2016-2019 François Mizessyn)<br>
                         • Licensed under <strong>LGPL v3</strong> or later.<br>
                         • Original Glyph Data: <strong>Arphic Public License</strong> (Copyright 1999 Arphic Technology Co., Ltd.)
-                        
-                        <details class="license-details">
-                        <summary class="license-summary">▶ Arphic Public License 全文を表示</summary>
-                        <div class="license-full-text">ARPHIC PUBLIC LICENSE
-
-Copyright (C) 1999 Arphic Technology Co., Ltd.
-11Fl. No.168, Yung Chi Rd., Taipei, 110 Taiwan
-All rights reserved except as specified below.
-
-Everyone is permitted to copy and distribute verbatim copies of this license document, but changing it is forbidden.
-
-Preamble
-
-   The licenses for most software are designed to take away your freedom to share and change it. By contrast, the ARPHIC PUBLIC LICENSE specifically permits and encourages you to use this software, provided that you give the recipients all the rights that we gave you and make sure they can get the modifications of this software.
-
-Legal Terms
-
-0. Definitions:
-   Throughout this License, "Font" means the TrueType fonts "AR PL Mingti2L Big5", "AR PL KaitiM Big5" (BIG-5 character set) and "AR PL SungtiL GB", "AR PL KaitiM GB" (GB character set) which are originally distributed by Arphic, and the derivatives of those fonts created through any modification including modifying glyph, reordering glyph, converting format, changing font name, or adding/deleting some characters in/from glyph table.
-
-   "PL" means "Public License".
-
-   "Copyright Holder" means whoever is named in the copyright or copyrights for the Font.
-
-   "You" means the licensee, or person copying, redistributing or modifying the Font.
-
-   "Freely Available" means that you have the freedom to copy or modify the Font as well as redistribute copies of the Font under the same conditions you received, not price. If you wish, you can charge for this service.
-
-1. Copying & Distribution
-   You may copy and distribute verbatim copies of this Font in any medium, without restriction, provided that you retain this license file (ARPHICPL.TXT) unaltered in all copies.
-
-2. Modification
-   You may otherwise modify your copy of this Font in any way, including modifying glyph, reordering glyph, converting format, changing font name, or adding/deleting some characters in/from glyph table, and copy and distribute such modifications under the terms of Section 1 above, provided that the following conditions are met:
-
-   a) You must insert a prominent notice in each modified file stating how and when you changed that file.
-
-   b) You must make such modifications Freely Available as a whole to all third parties under the terms of this License, such as by offering access to copy the modifications from a designated place, or distributing the modifications on a medium customarily used for software interchange.
-
-   c) If the modified fonts normally reads commands interactively when run, you must cause it, when started running for such interactive use in the most ordinary way, to print or display an announcement including an appropriate copyright notice and a notice that there is no warranty (or else, saying that you provide a warranty) and that users may redistribute the Font under these conditions, and telling the user how to view a copy of this License.
-
-   These requirements apply to the modified work as a whole. If identifiable sections of that work are not derived from the Font, and can be reasonably considered independent and separate works in themselves, then this License and its terms, do not apply to those sections when you distribute them as separate works. Therefore, mere aggregation of another work not based on the Font with the Font on a volume of a storage or distribution medium does not bring the other work under the scope of this License.
-
-3. Condition Subsequent
-   You may not copy, modify, sublicense, or distribute the Font except as expressly provided under this License. Any attempt otherwise to copy, modify, sublicense or distribute the Font will automatically retroactively void your rights under this License. However, parties who have received copies or rights from you under this License will keep their licenses valid so long as such parties remain in full compliance.
-
-4. Acceptance
-   You are not required to accept this License, since you have not signed it. However, nothing else grants you permission to copy, modify, sublicense or distribute the Font. These actions are prohibited by law if you do not accept this License. Therefore, by copying, modifying, sublicensing or distributing the Font, you indicate your acceptance of this License and all its terms and conditions.
-
-5. Automatic Receipt
-   Each time you redistribute the Font, the recipient automatically receives a license from the original licensor to copy, distribute or modify the Font subject to these terms and conditions. You may not impose any further restrictions on the recipients' exercise of the rights granted herein. You are not responsible for enforcing compliance by third parties to this License. 
-
-6. Contradiction
-   If, as a consequence of a court judgment or allegation of patent infringement or for any other reason (not limited to patent issues), conditions are imposed on you (whether by court order, agreement or otherwise) that contradict the conditions of this License, they do not excuse you from the conditions of this License. If you cannot distribute so as to satisfy simultaneously your obligations under this License and any other pertinent obligations, then as a consequence you may not distribute the Font at all. For example, if a patent license would not permit royalty-free redistribution of the Font by all those who receive copies directly or indirectly through you, then the only way you could satisfy both it and this License would be to refrain entirely from distribution of the Font.
-
-   If any portion of this section is held invalid or unenforceable under any particular circumstance, the balance of the section is intended to apply and the section as a whole is intended to apply in other circumstances. 
-
-7. NO WARRANTY
-   BECAUSE THE FONT IS LICENSED FREE OF CHARGE, THERE IS NO WARRANTY FOR THE FONT, TO THE EXTENT PERMITTED BY APPLICABLE LAW. EXCEPT WHEN OTHERWISE STATED IN WRITING THE COPYRIGHT HOLDERS OR OTHER PARTIES PROVIDE THE FONT "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE ENTIRE RISK AS TO THE QUALITY AND PERFORMANCE OF THE FONT IS WITH YOU. SHOULD THE FONT PROVE DEFECTIVE, YOU ASSUME THE COST OF ALL NECESSARY SERVICING, REPAIR OR CORRECTION.
-
-8. DAMAGES WAIVER
-   UNLESS REQUIRED BY APPLICABLE LAW OR AGREED TO IN WRITING, IN NO EVENT WILL ANY COPYRIGHTT HOLDERS, OR OTHER PARTIES WHO MAY COPY, MODIFY OR REDISTRIBUTE THE FONT AS PERMITTED ABOVE, BE LIABLE TO YOU FOR ANY DIRECT, INDIRECT, CONSEQUENTIAL, INCIDENTAL, SPECIAL OR EXEMPLARY DAMAGES ARISING OUT OF THE USE OR INABILITY TO USE THE FONT (INCLUDING BUT NOT LIMITED TO PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA OR PROFITS; OR BUSINESS INTERRUPTION), EVEN IF SUCH HOLDERS OR OTHER PARTIES HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.</div>
-                        </details>
                     </div>
                 </li>
 
@@ -613,21 +568,21 @@ Legal Terms
             <div class="levelup-anim">✨</div>
             <div style="font-size:1.5rem; margin:10px 0;">Lv.<span id="new-level-num">2</span> になった！</div>
             <div style="font-size:3rem; margin:20px 0;" id="levelup-mascot">🐣</div>
-            <p>あたらしい なかま に しんか したよ！</p>
+            <p id="levelup-text">あたらしい なかま に しんか したよ！</p>
             <button class="next-btn" onclick="closeLevelUp()">やったー！</button>
         </div>
     </div>
 
     <script>
-        // --- 全学年漢字データ（圧縮形式） ---
-        const compressedKanjiData = {
-            1: "一:イチ/ひと-つ,二:ニ/ふた-つ,三:サン/みっ-つ,四:シ/よん,五:ゴ/いつ-つ,六:ロク/ろっ-つ,七:シチ/なな,八:ハチ/やっ-つ,九:キュウ/ここの-つ,十:ジュウ/とお,人:ジン/ひと,日:ニチ/ひ,月:ゲツ/つき,火:カ/ひ,水:スイ/みず,木:モク/き,金:キン/かね,土:ド/つち,上:ジョウ/うえ,下:カ/した,左:サ/ひだり,右:ウ/みぎ,中:チュウ/なか,大:ダイ/おお-きい,小:ショウ/ちい-さい,山:サン/やま,川:セン/かわ,田:デン/た,口:コウ/くち,目:モク/め,耳:ジ/みみ,手:シュ/て,足:ソク/あし,力:リョク/ちから,女:ジョ/おんな,男:ダン/おとこ,子:シ/こ,学:ガク/まな-ぶ,校:コウ,先:セン/さき,生:セイ/い-きる,名:メイ/な,字:ジ/あざ,文:ブン/ふみ,本:ホン/もと,正:セイ/ただ-しい,白:ハク/しろ,青:セイ/あお,赤:セキ/あか,花:カ/はな,草:ソウ/くさ,林:リン/はやし,森:シン/もり,空:クウ/そら,天:テン/あめ,雨:ウ/あめ,石:セキ/いし,車:シャ/くるま,音:オン/おと,円:エン/まる,王:オウ,玉:ギョク/たま,虫:チュウ/むし,町:チョウ/まち,村:ソン/むら,竹:チク/たけ,早:ソウ/はや-い,立:リツ/た-つ,見:ケン/み-る,貝:バイ/かい,気:キ,休:キュウ/やす-む,糸:シ/いと,入:ニュウ/はい-る,出:シュツ/で-る,犬:ケン/いぬ,夕:セキ/ゆう,千:セン/ち,百:ヒャク,年:ネン/とし",
-            2: "引:イン/ひ-く,羽:ウ/は,雲:ウン/くも,園:エン/その,遠:エン/とお-い,何:カ/なに,科:カ,夏:カ/なつ,家:カ/いえ,歌:カ/うた,画:ガ/かく,回:カイ/まわ-る,会:カイ/あ-う,海:カイ/うみ,絵:カイ/え,外:ガイ/そと,角:カク/つの,楽:ガク/たの-しい,活:カツ,間:カン/あいだ,丸:ガン/まる,岩:ガン/いわ,顔:ガン/かお,汽:キ,記:キ/しる-す,帰:キ/かえ-る,弓:キュウ/ゆみ,牛:ギュウ/うし,魚:ギョ/さかな,京:キョウ,強:キョウ/つよ-い,教:キョウ/おし-える,近:キン/ちか-い,兄:ケイ/あに,形:ケイ/かたち,計:ケイ/はか-る,元:ゲン/もと,言:ゲン/い-う,原:ゲン/はら,戸:コ/と,古:コ/ふる-い,午:ゴ,後:ゴ/あと,語:ゴ/かた-る,工:コウ,公:コウ,広:コウ/ひろ-い,交:コウ/まじ-わる,光:コウ/ひか-る,考:コウ/かんが-える,行:コウ/い-く,高:コウ/たか-い,黄:コウ/き,合:ゴウ/あ-う,谷:コク/たに,国:コク/くに,黒:コク/くろ,今:コン/いま,才:サイ,細:サイ/ほそ-い,作:サク/つく-る,算:サン,止:シ/と-まる,市:シ/いち,矢:シ/や,姉:シ/あね,思:シ/おも-う,紙:シ/かみ,寺:ジ/てら,自:ジ/みずか-ら,時:ジ/とき,室:シツ,社:シャ/やしろ,弱:ジャク/よわ-い,首:シュ/くび,秋:シュウ/あき,週:シュウ,春:シュン/はる,書:ショ/か-く,少:ショウ/すく-ない,場:ジョウ/ば,色:ショク/いろ,食:ショク/た-べる,心:シン/こころ,新:シン/あたら-しい,親:シン/おや,図:ズ/はか-る,数:スウ/かず,西:セイ/にし,声:セイ/こえ,星:セイ/ほし,晴:セイ/は-れる,切:セツ/き-る,雪:セツ/ゆき,船:セン/ふね,線:セン,前:ゼン/まえ,組:ソ/く-む,走:ソウ/はし-る,多:タ/おお-い,太:タイ/ふと-い,体:タイ/からだ,台:ダイ,地:チ,池:チ/いけ,知:チ/し-る,茶:チャ,昼:チュウ/ひる,長:チョウ/なが-い,鳥:チョウ/とり,朝:チョウ/あさ,直:チョク/なお-す,通:ツウ/とお-る,弟:テイ/おとうと,店:テン/みせ,点:テン,電:デン,刀:トウ/かたな,冬:トウ/ふゆ,当:トウ/あ-たる,東:トウ/ひがし,答:トウ/こた-え,頭:トウ/あたま,同:ドウ/おな-じ,道:ドウ/みち,読:ドク/よ-む,内:ナイ/うち,南:ナン/みなみ,肉:ニク,馬:バ/うま,売:バイ/う-る,買:バイ/か-う,麦:バク/むぎ,半:ハン/なか-ば,番:バン,父:フ/ちち,風:フウ/かぜ,分:ブン/わ-ける,聞:ブン/き-く,米:ベイ/こめ,歩:ホ/ある-く,母:ボ/はは,方:ホウ/かた,北:ホク/きた,毎:マイ,妹:マイ/いもうと,万:マン,明:メイ/あか-るい,鳴:メイ/な-く,毛:モウ/け,門:モン,夜:ヤ/よる,野:ヤ/の,友:ユウ/とも,用:ヨウ/もち-いる,曜:ヨウ,来:ライ/く-る,里:リ/さと,理:リ,話:ワ/はなし",
-            3: "悪:アク/わる-い,安:アン/やす-い,暗:アン/くら-い,医:イ,委:イ/ゆだ-ねる,意:イ,育:イク/そだ-つ,員:イン,院:イン,飲:イン/の-む,運:ウン/はこ-ぶ,泳:エイ/およ-ぐ,駅:エキ,央:オウ,横:オウ/よこ,屋:オク/や,温:オン/あたた-かい,化:カ/ば-ける,荷:カ/に,界:カイ,開:カイ/ひら-く,階:カイ,寒:カン/さむ-い,感:カン,漢:カン,館:カン,岸:ガン/きし,起:キ/お-きる,期:キ,客:キャク,究:キュウ/きわ-める,急:キュウ/いそ-ぐ,級:キュウ,宮:キュウ/みや,球:キュウ/たま,去:キョ/さ-る,橋:キョウ/はし,業:ギョウ/わざ,曲:キョク/ま-がる,局:キョク,銀:ギン,区:ク,苦:ク/くる-しい,具:グ,君:クン/きみ,係:ケイ/かかり,軽:ケイ/かる-い,血:ケツ/ち,決:ケツ/き-める,研:ケン/と-ぐ,県:ケン,庫:コ,湖:コ/みずうみ,向:コウ/む-かう,幸:コウ/しあわ-せ,港:コウ/みなと,号:ゴウ,根:コン/ね,祭:サイ/まつ-り,皿:サラ,仕:シ/つか-える,死:シ/し-ぬ,使:シ/つか-う,始:シ/はじ-める,指:シ/ゆび,歯:シ/は,詩:シ,次:ジ/つぎ,事:ジ/こと,持:ジ/も-つ,式:シキ,実:ジツ/み,写:シャ/うつ-す,者:シャ/もの,主:シュ/ぬし,守:シュ/まも-る,取:シュ/と-る,酒:シュ/さけ,受:ジュ/う-ける,州:シュウ,拾:シュウ/ひろ-う,終:シュウ/お-わる,習:シュウ/なら-う,集:シュウ/あつ-める,住:ジュウ/す-む,重:ジュウ/おも-い,宿:シュク/やど,所:ショ/ところ,暑:ショ/あつ-い,助:ジョ/たす-ける,昭:ショウ,消:ショウ/き-える,商:ショウ/あきな-う,章:ショウ,勝:ショウ/か-つ,乗:ジョウ/の-る,植:ショク/う-える,申:シン/もう-す,身:シン/み,神:シン/かみ,真:シン/ま,深:シン/ふか-い,進:シン/すす-む,世:セイ/よ,整:セイ/ととの-える,昔:セキ/むかし,全:ゼン/すべ-て,相:ソウ/あい,送:ソウ/おく-る,想:ソウ,息:ソク/いき,速:ソク/はや-い,族:ゾク,他:タ/ほか,打:ダ/う-つ,対:タイ,待:タイ/ま-つ,代:ダイ/か-わる,第:ダイ,題:ダイ,炭:タン/すみ,短:タン/みじか-い,談:ダン,着:チャク/き-る,注:チュウ/そそ-ぐ,柱:チュウ/はしら,丁:チョウ,帳:チョウ,調:チョウ/しら-べる,追:ツイ/お-う,定:テイ/さだ-める,庭:テイ/にわ,笛:テキ/ふえ,鉄:テツ,転:テン/ころ-ぶ,都:ト/みやこ,度:ド/たび,投:トウ/な-げる,豆:トウ/まめ,島:トウ/しま,湯:トウ/ゆ,登:トウ/のぼ-る,等:トウ/ひと-しい,動:ドウ/うご-く,童:ドウ/わらべ,農:ノウ,波:ハ/なみ,配:ハイ/くば-る,倍:バイ,箱:ハコ,畑:はたけ,発:ハツ,反:ハン/そ-る,坂:ハン/さか,板:ハン/いた,皮:ヒ/かわ,悲:ヒ/かな-しい,美:ビ/うつく-しい,鼻:ビ/はな,筆:ヒツ/ふで,氷:ヒョウ/こおり,表:ヒョウ/おもて,秒:ビョウ,病:ビョウ/やまい,品:ヒン/しな,負:フ/ま-ける,部:ブ,服:フク,福:フク,物:ブツ/もの,平:ヘイ/たい-ら,返:ヘン/かえ-す,勉:ベン,放:ホウ/はな-す,味:ミ/あじ,命:メイ/いのち,面:メン/おも,問:モン/と-う,役:ヤク,薬:ヤク/くすり,由:ユ/よし,油:ユ/あぶら,有:ユウ/あ-る,遊:ユウ/あそ-ぶ,予:ヨ,羊:ヨウ/ひつじ,洋:ヨウ,葉:ヨウ/は,陽:ヨウ/ひ,様:ヨウ/さま,落:ラク/お-ちる,流:リュウ/なが-れる,旅:リョ/たび,両:リョウ,緑:リョク/みどり,礼:レイ,列:レツ,練:レン/ね-る,路:ロ/じ,和:ワ/やわ-らぐ",
-            4: "愛:アイ,案:アン,以:イ,衣:イ/ころも,位:イ/くらい,囲:イ/かこ-む,胃:イ,印:イン/しるし,英:エイ,栄:エイ/さか-える,塩:エン/しお,億:オク,加:カ/くわ-える,果:カ/は-たす,貨:カ,課:カ,芽:ガ/め,改:カイ/あらた-める,械:カイ,害:ガイ,各:カク/おのおの,覚:カク/おぼ-える,完:カン,官:カン,管:カン/くだ,関:カン/せき,観:カン/み-る,願:ガン/ねが-う,希:キ,季:キ,紀:キ,喜:キ/よろこ-ぶ,旗:キ/はた,器:キ/うつわ,機:キ,議:ギ,求:キュウ/もと-める,泣:キュウ/な-く,救:キュウ/すく-う,給:キュウ/たま-う,挙:キョ/あ-げる,漁:ギョ,共:キョウ/とも,協:キョウ,鏡:キョウ/かがみ,競:キョウ/きそ-う,極:キョク/きわ-める,訓:クン,軍:グン,郡:グン,径:ケイ,型:ケイ/かた,景:ケイ,芸:ゲイ,欠:ケツ/か-ける,結:ケツ/むす-ぶ,建:ケン/た-てる,健:ケン/すこ-やか,験:ケン,固:コ/かた-める,候:コウ,功:コウ,好:コウ/す-き,札:サツ/ふだ,刷:サツ/す-る,殺:サツ/ころ-す,察:サツ,参:サン/まい-る,産:サン/う-む,散:サン/ち-る,残:ザン/のこ-る,士:シ,氏:シ/うじ,史:シ,司:シ,試:シ/こころ-みる,児:ジ,治:ジ/おさ-める,辞:ジ/や-める,失:シツ/うしな-う,借:シャク/か-りる,種:シュ/たね,周:シュウ/まわ-り,祝:シュク/いわ-う,順:ジュン,初:ショ/はじ-め,松:ショウ/まつ,笑:ショウ/わら-う,唱:ショウ/とな-える,焼:ショウ/や-く,象:ショウ,照:ショウ/て-らす,賞:ショウ,臣:シン,信:シン/しん-じる,成:セイ/な-る,省:セイ/はぶ-く,清:セイ/きよ-い,静:セイ/しず-か,席:セキ,積:セキ/つ-む,折:セツ/お-る,節:セツ/ふし,説:セツ/と-く,浅:セン/あさ-い,戦:セン/たたか-う,選:セン/えら-ぶ,然:ゼン,争:ソウ/あらそ-う,倉:ソウ/くら,巣:ソウ/す,束:ソク/たば,側:ソク/がわ,続:ゾク/つづ-く,卒:ソツ,孫:ソン/まご,帯:タイ/おび,隊:タイ,達:タツ,単:タン,置:チ/お-く,仲:チュウ/なか,貯:チョ,兆:チョウ/きざ-し,腸:チョウ,低:テイ/ひく-い,底:テイ/そこ,停:テイ,的:テキ/まと,典:テン,伝:デン/つた-える,徒:ト,努:ド/つと-める,灯:トウ/ひ,堂:ドウ,働:ドウ/はたら-く,特:トク,得:トク/え-る,毒:ドク,熱:ネツ/あつ-い,念:ネン,敗:ハイ/やぶ-る,梅:バイ/うめ,博:ハク,飯:ハン/めし,飛:ヒ/と-ぶ,費:ヒ/つい-やす,必:ヒツ/かなら-ず,票:ヒョウ,標:ヒョウ/しるべ,不:フ,夫:フ/おっと,付:フ/つ-く,府:フ,副:フク,粉:フン/こな,兵:ヘイ/つわもの,別:ベツ/わか-れる,辺:ヘン/あた-り,変:ヘン/か-わる,便:ベン/たよ-り,包:ホウ/つつ-む,法:ホウ,望:ボウ/のぞ-む,牧:ボク/まき,末:マツ/すえ,満:マン/み-ちる,未:ミ/いま-だ,脈:ミャク,民:ミン/たみ,無:ム/な-い,約:ヤク,勇:ユウ/いさ-む,要:ヨウ/い-る,養:ヨウ/やしな-う,浴:ヨク/あ-びる,利:リ/き-く,陸:リク,良:リョウ/よ-い,料:リョウ,量:リョウ/はか-る,輪:リン/わ,類:ルイ,令:レイ,冷:レイ/つめ-たい,例:レイ/たと-える,歴:レキ,連:レン/つら-なる,老:ロウ/お-いる,労:ロウ,録:ロク",
-            5: "圧:アツ,移:イ/うつ-る,因:イン/よ-る,永:エイ/なが-い,営:エイ/いとな-む,衛:エイ,易:エキ/やさ-しい,益:エキ,液:エキ,演:エン,応:オウ,往:オウ,桜:オウ/さくら,恩:オン,可:カ,仮:カ/かり,価:カ/あたい,河:カ/かわ,過:カ/す-ぎる,賀:ガ,快:カイ/こころよ-い,解:カイ/と-く,格:カク,確:カク/たし-か,額:ガク/ひたい,刊:カン,幹:カン/みき,慣:カン/な-れる,眼:ガン/まなこ,基:キ/もと,寄:キ/よ-る,規:キ,技:ギ/わざ,義:ギ,逆:ギャク/さか,久:キュウ/ひさ-しい,旧:キュウ,居:キョ/い-る,許:キョ/ゆる-す,境:キョウ/さかい,均:キン,禁:キン,句:ク,群:グン/む-れる,経:ケイ/へ-る,潔:ケツ/いさぎよ-い,件:ケン,券:ケン,険:ケン/けわ-しい,検:ケン,限:ゲン/かぎ-る,現:ゲン/あらわ-れる,減:ゲン/へ-る,故:コ/ゆえ,個:コ,護:ゴ/まも-る,効:コウ/き-く,厚:コウ/あつ-い,耕:コウ/たがや-す,鉱:コウ,構:コウ/かま-える,興:コウ/おこ-す,講:コウ,混:コン/ま-ぜる,査:サ,再:サイ/ふたた-び,災:サイ/わざわ-い,妻:サイ/つま,採:サイ/と-る,際:サイ/きわ,在:ザイ/あ-る,財:ザイ,罪:ザイ/つみ,雑:ザツ,酸:サン/す-い,賛:サン,支:シ/ささ-える,志:シ/こころざし,枝:シ/えだ,師:シ,資:シ,飼:シ/か-う,示:ジ/しめ-す,似:ジ/に-る,識:シキ,質:シツ,舎:シャ,謝:シャ/あやま-る,授:ジュ/さず-ける,修:シュウ/おさ-める,述:ジュツ/の-べる,術:ジュツ/すべ,準:ジュン,序:ジョ,招:ショウ/まね-く,承:ショウ/うけたまわ-る,証:ショウ,条:ジョウ,状:ジョウ,常:ジョウ/つね,情:ジョウ/なさ-け,織:ショク/お-る,職:ショク,制:セイ,性:セイ,政:セイ/まつりごと,勢:セイ/いきお-い,精:セイ,製:セイ,税:ゼイ,責:セキ/せ-める,績:セキ,接:セツ/つ-ぐ,設:セツ/もう-ける,舌:ゼツ/した,絶:ゼツ/た-える,銭:セン/ぜに,祖:ソ,素:ソ/もと,総:ソウ/すべ-て,造:ゾウ/つく-る,像:ゾウ,増:ゾウ/ま-す,則:ソク,測:ソク/はか-る,属:ゾク,率:ソツ/ひき-いる,損:ソン/そこ-なう,退:タイ/しりぞ-く,貸:タイ/か-す,態:タイ,団:ダン,断:ダン/ことわ-る,築:チク/きず-く,張:チョウ/は-る,提:テイ/さ-げる,程:テイ/ほど,適:テキ,敵:テキ/かたき,統:トウ/す-べる,銅:ドウ,導:ドウ/みちび-く,徳:トク,独:ドク/ひと-り,任:ニン/まか-せる,燃:ネン/も-える,能:ノウ,破:ハ/やぶ-る,犯:ハン/おか-す,判:ハン,版:ハン,比:ヒ/くら-べる,肥:ヒ/こ-える,非:ヒ,備:ビ/そな-える,俵:ヒョウ/たわら,評:ヒョウ,貧:ヒン/まず-しい,布:フ/ぬの,婦:フ,富:フ/と-む,武:ブ,復:フク,複:フク,仏:ブツ/ほとけ,編:ヘン/あ-む,弁:ベン,保:ホ/たも-つ,墓:ボ/はか,報:ホウ/むく-いる,豊:ホウ/ゆた-か,防:ボウ/ふせ-ぐ,貿:ボウ,暴:ボウ/あば-れる,務:ム/つと-める,夢:ム/ゆめ,迷:メイ/まよ-う,綿:メン/わた,輸:ユ,余:ヨ/あま-る,預:ヨ/あず-ける,容:ヨウ,略:リャク,留:リュウ/と-まる,領:リョウ",
-            6: "異:イ/こと,遺:イ,域:イキ,宇:ウ,映:エイ/うつ-る,延:エン/の-びる,沿:エン/そ-う,我:ガ/われ,灰:カイ/はい,拡:カク,革:カク/かわ,閣:カク,割:カツ/わ-る,株:カブ,干:カン/ほ-す,巻:カン/ま-く,看:カン,簡:カン,危:キ/あぶ-ない,机:キ/つくえ,揮:キ,貴:キ/とうと-い,疑:ギ/うたが-う,吸:キュウ/す-う,供:キョウ/とも,胸:キョウ/むね,郷:キョウ,勤:キン/つと-める,筋:キン/すじ,系:ケイ,敬:ケイ/うやま-う,警:ケイ,劇:ゲキ,激:ゲキ/はげ-しい,穴:ケツ/あな,絹:ケン/きぬ,権:ケン,憲:ケン,源:ゲン/みなもと,厳:ゲン/きび-しい,己:コ/おのれ,呼:コ/よ-ぶ,誤:ゴ/あやま-る,后:コウ,孝:コウ,皇:コウ,紅:コウ/べに,降:コウ/お-りる,鋼:コウ/はがね,刻:コク/きざ-む,穀:コク,骨:コツ/ほね,困:コン/こま-る,砂:サ/すな,座:ザ/すわ-る,済:サイ/す-む,裁:サイ/さば-く,策:サク,冊:サツ,蚕:サン/かいこ,至:シ/いた-る,私:シ/わたし,姿:シ/すがた,視:シ,詞:シ,誌:シ,磁:ジ,射:シャ/い-る,捨:シャ/す-てる,尺:シャク,若:ジャク/わか-い,樹:ジュ,収:シュウ/おさ-める,宗:シュウ,就:シュウ/つ-く,衆:シュウ,従:ジュウ/したが-う,縦:ジュウ/たて,縮:シュク/ちぢ-む,熟:ジュク/う-れる,純:ジュン,処:ショ,署:ショ,諸:ショ,除:ジョ/のぞ-く,将:ショウ,傷:ショウ/きず,障:ショウ/さわ-る,城:ジョウ/しろ,蒸:ジョウ/む-す,針:シン/はり,仁:ジン,垂:スイ/た-れる,推:スイ/お-す,寸:スン,盛:セイ/も-る,聖:セイ,誠:セイ/まこと,宣:セン,専:セン/もっぱ-ら,泉:セン/いずみ,洗:セン/あら-う,染:セン/そ-める,善:ゼン/よ-い,奏:ソウ/かな-でる,窓:ソウ/まど,創:ソウ/つく-る,装:ソウ/よそお-う,層:ソウ,操:ソウ/あやつ-る,蔵:ゾウ/くら,臓:ゾウ,存:ゾン,尊:ソン/とうと-い,宅:タク,担:タン/かつ-ぐ,探:タン/さが-す,誕:タン,段:ダン,暖:ダン/あたた-かい,値:チ/あたい,宙:チュウ,忠:チュウ,著:チョ/あらわ-す,庁:チョウ,頂:チョウ/いただき,潮:チョウ/しお,賃:チン,痛:ツウ/いた-い,展:テン,討:トウ/う-つ,党:トウ,糖:トウ,届:トド/とど-く,難:ナン/むずか-しい,乳:ニュウ/ちち,認:ニン/みと-める,納:ノウ/おさ-める,脳:ノウ,派:ハ,拝:ハイ/おが-む,背:ハイ/せ,肺:ハイ,俳:ハイ,班:ハン,晩:バン,否:ヒ,批:ヒ,秘:ヒ/ひ-める,腹:フク/はら,奮:フン/ふる-う,並:ヘイ/なら-ぶ,陛:ヘイ,閉:ヘイ/し-める,片:ヘン/かた,補:ホ/おぎな-う,暮:ボ/く-らす,宝:ホウ/たから,訪:ホウ/おとず-れる,亡:ボウ/な-く,忘:ボウ/わす-れる,棒:ボウ,枚:マイ,幕:マク,密:ミツ,盟:メイ,模:モ,訳:ヤク/わけ,郵:ユウ,優:ユウ/やさ-しい,幼:ヨウ/おさな-い,欲:ヨク/ほっ-する,翌:ヨク,乱:ラン/みだ-れる,卵:ラン/たまご,覧:ラン,裏:リ/うら,律:リツ,臨:リン/のぞ-む,朗:ロウ/ほが-らか,論:ロン"
-        };
+        // --- 全学年漢字データ（簡易化形式） ---
+        const const compressedKanjiData = {
+         1:"一:いち,いつ,ひと(つ)|右:う,ゆう,みぎ|雨:う,あめ,あま|円:えん,まる(い)|王:おう|音:おん,いん,おと,ね|下:か,げ,した,しも,もと,くだ(る),お(ろす),さ(がる),お(りる)|火:か,ひ|花:か,はな|貝:かい|学:がく,まな(ぶ)|気:き,け|九:きゅう,く,ここの(つ)|休:きゅう,やす(む)|玉:ぎょく,たま|金:きん,こん,かね,かな|空:くう,そら,あ(く),から|月:げつ,がつ,つき|犬:けん,いぬ|見:けん,み(る),み(せる)|五:ご,いつ(つ)|口:こう,く,くち|校:こう|左:さ,ひだり|三:さん,み(っつ)|山:さん,やま|子:し,す,こ|四:し,よ(っつ),よん,よ|糸:し,いと|字:じ,あざ|耳:じ,みみ|七:しち,なな,なな(つ)|車:しゃ,くるま|手:しゅ,て,た|十:じゅう,じっ,とお,と|出:しゅつ,すい,で(る),だ(す)|女:じょ,にょ,おんな,め|小:しょう,ちい(さい),こ,お|上:じょう,うえ,うわ,かみ,あ(げる),のぼ(る)|森:しん,もり|人:じん,にん,ひと|水:すい,みず|正:せい,しょう,ただ(しい),まさ|生:せい,しょう,い(きる),う(まれる),お(う),は(える),き,なま|青:せい,あお,あお(い)|夕:せき,ゆう|石:せき,しゃく,こく,いし|赤:せき,しゃく,あか,あか(い)|千:せん,ち|川:せん,かわ|先:せん,さき|早:そう,さっ,はや(い)|草:そう,くさ|足:そく,あし,た(りる),た(す)|村:そん,むら|大:だい,たい,おお,おお(きい)|男:だん,なん,おとこ|竹:ちく,たけ|中:ちゅう,なか|虫:ちゅう,むし|町:ちょう,まち|天:てん,あま|田:でん,た|土:ど,と,つち|二:に,ふた(つ)|日:にち,じつ,ひ,か|入:にゅう,はい(る),い(れる)|年:ねん,とし|白:はく,びゃく,しろ,しろ(い),しら|八:はち,や(っつ),や,よう|百:ひゃく|文:ぶん,もん,ふみ|木:もく,ぼく,き,こ|本:ほん,もと|名:めい,みょう,な|目:もく,め,ま|立:りつ,た(つ),た(てる)|力:りょく,りき,ちから|林:りん,はやし|六:ろく,む(っつ),む,むい",
+         2:"引:いん,ひ(く),ひっぱられる|羽:う,はね,は|雲:うん,くも|園:えん|遠:えん,とお(く)|何:なに,なん|科:か|夏:か,なつ|家:か,け,いえ,や|歌:か,うた,うた(う)|画:が,かく|回:かい,まわ(す),まわ(る)|会:かい,あ(う)|海:かい,うみ|絵:かい,え|外:がい,そと,ほか,はず(す),はず(れる)|角:かく,かど,つの|楽:がく,らく,たの(しい),たの(しむ)|活:かつ|間:かん,けん,あいだ,ま|丸:がん,まる,まる(い),まる(める)|岩:がん,いわ|顔:がん,かお|汽:き|記:き,しる(す)|帰:き,かえ(る),かえ(す)|弓:きゅう,ゆみ|牛:ぎゅう,うし|魚:ぎょ,さかな,うお|京:きょう,けい|強:きょう,ごう,つよ(い),つよ(まる),つよ(める)|教:きょう,おし(える),おそ(わる)|近:きん,ちか(く)|兄:きょう,けい,あに|形:けい,ぎょう,かたち|計:けい,はか(る),はか(らう)|元:げん,がん,もと|言:げん,ごん,い(う),こと|原:げん,はら|戸:こ,と|古:こ,ふる(い),ふる(す)|午:ご|後:ご,こう,のち,うし(ろ),あと|語:ご,かた(る),かた(らう)|工:こう,く|公:こう|広:こう,ひろ(い),ひろ(まる),ひろ(める),ひろ(がる),ひろ(げる)|交:こう,まじ(わる),まじ(える),ま(じる),ま(ざる),ま(ぜる),か(う)|光:こう,ひかり,ひか(る)|考:こう,かんが(える)|行:こう,ぎょう,あん,い(く),ゆ(く),おこな(う)|高:こう,たか(い),たか(まる),たか(める)|黄:おう,こう,き,こ|合:ごう,がっ,かっ,あ(う),あ(わせる),あ(わす)|谷:こく,たに|国:こく,くに|黒:こく,くろ,くろ(い)|今:こん,キン,いま|才:さい|細:さい,ほそ(い),ほそ(る),こま(かい)|作:さく,さ,つく(る)|算:さん|止:し,と(まる),と(める)|市:し,いち|矢:し,や|姉:し,あね|思:し,おも(う)|紙:し,かみ|寺:じ,てら|自:じ,し,みずか(ら)|時:じ,とき|室:しつ|社:しゃ,やしろ|弱:じゃく,よわ(い),よわ(る),よわ(まる),よわ(める)|首:しゅ,くび|秋:しゅう,あき|週:しゅう|春:しゅん,はる|書:しょ,か(く)|少:しょう,すく(ない),すこ(し)|場:じょう,ば|色:しょく,しき,いろ|食:しょく,じき,た(べる),く(う)|心:しん,こころ|新:しん,あたら(しい),あら(た)|親:しん,おや,した(しむ),した(しい)|図:ず,と,はか(る)|数:すう,す,かず,かぞ(える)|西:せい,さい,にし|声:せい,ショウ,こえ,こわ|星:せい,ショウ,ほし|晴:せい,は(れる),は(らす)|切:せつ,さい,き(る),き(れる)|雪:せつ,ゆき|船:せん,ふね,ふな|線:せん|前:ぜん,まえ|組:そ,くみ,く(む)|走:そう,はし(る)|多:た,おお(い)|太:たい,た,ふと(い),ふと(る)|体:たい,てい,からだ|台:だい,タイ|地:ち,じ|池:ち,いけ|知:ち,し(る)|茶:ちゃ,さ|昼:ちゅう,ひる|長:ちょう,なが(い)|鳥:ちょう,とり|朝:ちょう,あさ|直:ちょく,じき,ただ(ちに),なお(す),なお(る)|通:つう,とお(る),とお(す),かよ(う)|弟:だい,で,テイ,おとうと|店:てん,みせ|点:てん|電:でん|刀:とう,かたな|冬:とう,ふゆ|当:とう,あ(たる),あ(てる)|東:とう,ひがし|答:とう,こた(える),こた(え)|頭:とう,ズ,ト,あたま,かしら|同:どう,おな(じ)|道:どう,トウ,みち|読:どく,トウ,トク,よ(む)|内:ない,ダイ,うち|南:なん,ナ,みなみ|肉:にく|馬:ば,うま,ま|売:ばい,う(る),う(れる)|買:ばい,か(う)|麦:ばく,むぎ|半:はん,なか(ば)|番:ばん|父:ふ,ちち|風:ふう,フ,かぜ,かざ|分:ぶん,ふん,ぶ,わ(ける),わ(かれる),わ(かる),わ(かつ)|聞:ぶん,もん,き(く),き(こえる)|米:べい,マイ,こめ|歩:ほ,ぶ,フ,ある(く),あゆ(む)|母:ぼ,はは|方:ほう,かた|北:ほく,きた|毎:まい|妹:まい,いもうと|万:まん,ばん|明:めい,みょう,ミン,あ(かり),あか(るい),あき(らか),あ(ける),あ(く),あ(くる),あ(かす)|鳴:めい,な(く),な(る),な(らす)|毛:もう,け|門:もん,かど|夜:や,よ,よる|野:や,の|友:ゆう,とも|用:よう,もち(いる)|曜:よう|来:らい,く(る),きた(る),きた(す)|里:り,さと|理:り|話:わ,はなし,はな(す)",
+         3:"悪:あく,わる(い)|安:あん,やす(い)|暗:あん,くら(い)|医:い|委:い|意:い|育:いく,そだ(てる),そだ(つ)|員:いん|院:いん|飲:いん,の(む)|運:うん,はこ(ぶ)|泳:えい,およ(ぐ)|駅:えき|央:おう|横:おう,よこ|屋:おく,や,や(ね)|温:おう,あたた(かい),あたた(める),あたた(まる)|化:か,ば(かす),ば(け)|荷:か,に|界:かい|開:かい,あ(ける),ひら(く),あ(く)|階:かい|寒:かん,さむ(い)|感:かん|漢:かん|館:かん|岸:がん,きし|起:き,お(きる),お(こす),お(こる)|期:き|客:きゃく|究:きゅう,きわ(める)|急:きゅう,いそ(ぐ)|級:きゅう|宮:きゅう,みや|球:きゅう,たま|去:きょ,こ,さ(る)|橋:きょう,はし|業:ぎょう|曲:きょく,ま(がる),ま(げる)|局:きょく|銀:ぎん|区:く|苦:く,くる(しい),くる(しめる),くる(しむ),にが(い)|具:ぐ|君:くん,きみ|係:けい,かかり|軽:けい,かる(い)|血:けつ,ち|決:けつ,き(める),き(まる)|研:けん|県:けん|庫:こ|湖:こ,みずうみ|向:こう,む(く),む(かう),む(ける),む(こう)|幸:こう,しあわ(せ),さいわ(い)|港:こう,みなと|号:ごう|根:こん,ね|祭:さい,まつ(り),まつ(る)|皿:さら|仕:し,つか(える)|死:し,し(ぬ)|使:し,つか(う)|始:し,はじ(める),はじ(まる)|指:し,ゆび,さ(す)|歯:し,は|詩:し|次:じ,つ(ぐ),つぎ|事:じ,こと|持:じ,も(つ)|式:しき|実:じつ,み,みの(る)|写:しゃ,うつ(す),うつ(る)|者:しゃ,もの|主:しゅ,ぬし,おも|守:しゅ,す,まも(る)|取:しゅ,と(る)|酒:しゅ,さけ,さか|受:じゅ,う(ける),う(かる)|州:しゅう|拾:しゅう,ひろ(う)|終:しゅう,お(わる),お(える)|習:しゅう,なら(う)|集:しゅう,あつ(める),あつ(まる)|住:じゅう,す(む),す(まい)|重:じゅう,ちょう,おも(い),かさ(ねる),かさ(なる)|宿:しゅく,やど,やど(す)|所:しょ,ところ|暑:しょ,あつ(い)|助:じょ,たす(ける),たす(かる)|昭:しょう|消:しょう,け(す),き(える)|商:しょう|章:しょう|勝:しょう,か(つ)|乗:じょう,の(る),の(せる)|植:しょく,う(える),う(わる)|申:しん,もう(す)|身:しん,み|神:しん,じん,かみ|真:しん,ま|深:しん,ふか(い),ふか(まる),ふか(める)|進:しん,すす(む),すす(める)|世:せい,よ|整:せい,ととの(える),ととの(う)|昔:せき,むかし|全:ぜん,まった(く)|相:そう,しょう,あい|送:そう,おく(る)|想:そう|息:そく,いき|速:そく,はや(い),はや(める)|族:ぞく|他:た|打:だ,う(つ)|対:たい|待:たい,ま(つ)|代:だい,か(わる),か(える)|第:だい|題:だい|炭:たん,すみ|短:たん,みじか(い)|談:だん|着:ちゃく,き(る),つ(く),つ(ける)|注:ちゅう,そそ(ぐ)|柱:ちゅう,はしら|丁:ちょう|帳:ちょう|調:ちょう,しら(べる)|追:つい,お(う)|定:てい,さだ(まる)|庭:てい,にわ|笛:てき,ふえ|鉄:てつ|転:てん,ころ(ぶ),ころ(がる),ころ(げる),ころ(がす)|都:と,みやこ|度:ど|投:とう,な(げる)|豆:とう,まめ|島:とう,しま|湯:とう,ゆ|登:とう,と,のぼ(る)|等:とう,ひと(しい)|動:どう,うご(かす),うご(く)|童:どう|農:のう|波:は,なみ|配:はい,くば(る)|倍:ばい|箱:はこ|畑:はたけ|発:はつ,ほっ|反:はん,そ(らす),そ(る)|坂:さか|板:ばん,いた|皮:ひ,かわ|悲:ひ,かな(しい),かな(しむ)|美:び,うつく(しい)|鼻:び,はな|筆:ひつ,ふで|氷:ひょう,こおり|表:ひょう,おもて,あらわ(す),あらわ(れる)|秒:びょう|病:びょう,やまい,や(む)|品:ひん,しな|負:ふ,ま(ける),ま(かす),お(う)|部:ぶ|服:ふく|福:ふく|物:ぶつ,もつ,もの|平:へい,びょう,たい(ら),ひら(たい)|返:へん,かえ(す),かえ(る)|勉:べん|放:ほう,はな(す),はな(つ),はな(れる)|味:み,あじ,あじ(わう)|命:めい,いのち|面:めん,おも|問:もん,と(う),と(い)|役:やく|薬:やく,くすり|由:ゆ,ゆう,ゆい|油:ゆ,あぶら|有:ゆう,あ(る)|遊:ゆう,あそ(ぶ)|予:よ|羊:よう,ひつじ|洋:よう|様:よう|葉:よう,は|陽:よう|落:らく,お(ちる),お(とす)|流:りゅう,なが(れる),なが(す)|旅:りょ,たび|両:りょう|緑:りょく,みどり|礼:れい|列:れつ|練:れん,ね(る)|路:ろ,じ|和:わ",
+         4:"愛:あい|案:あん|位:い,くら(い)|以:い,もっ(て)|衣:い,ころも|茨:いばら|印:いん,しるし|英:えい|栄:えい,さか(える),は(え)|媛:えん,ひめ|塩:えん,しお|億:おく|岡:こう,おか|沖:ちゅう,おき|加:か,くわ(える),くわ(わる)|果:か,は(たす),は(てる),は(て)|貨:か|課:か|賀:が|芽:が,め|改:かい,あらた(める),あらた(まる)|械:かい|害:がい|各:かく,おのおの|覚:かく,おぼ(える),さ(ます),さ(める)|潟:かた|完:かん|官:かん|管:かん,くだ|関:かん,せき,かか(わる)|観:かん,み(る)|願:がん,ねが(う)|希:き|季:き|旗:き,はた|器:き,うつわ|機:き,はた|岐:き|議:ぎ|求:きゅう,もと(める)|泣:きゅう,な(く)|給:きゅう,たま(う)|挙:きょ,あ(げる),あ(がる)|漁:ぎょ,りょう|共:きょう,とも|協:きょう|鏡:きょう,かがみ|競:きょう,けい,きそ(う),せ(る)|極:きょく,ごく,きわ(める),きわ(まる)|熊:ゆう,くま|訓:くん|軍:ぐん|郡:ぐん|群:ぐん,む(れる),む(れ)|径:けい|景:けい|芸:げい|欠:けつ,か(ける),か(く)|結:けつ,むす(ぶ),ゆ(う),ゆ(わえる)|建:けん,た(てる),た(つ)|健:けん,すこ(やか)|験:けん|固:こ,かた(める),かた(まる),かた(い)|功:こう|好:こう,す(き),この(む)|候:こう,そうろう|香:こう,きょう,か,かお(り)|最:さい,もっと(も)|埼:さい|材:ざい|昨:さく|佐:さ|崎:き,さき|札:さつ,ふだ|刷:さつ,す(る)|察:さつ|参:さん,まい(る)|産:さん,う(む),う(まれる)|散:さん,ち(る),ち(らす),ち(らかる)|残:ざん,のこ(る),のこ(す)|氏:し,うじ|滋:じ|司:し,つかさど(る)|試:し,こころ(みる),ため(す)|児:じ|治:じ,ち,おさ(める),おさ(まる),なお(る),なお(す)|鹿:しか|式:しき|失:しつ,うしな(う)|借:しゃく,か(りる)|種:しゅ,たね|周:しゅう,まわ(り)|祝:しゅく,いわ(う)|順:じゅん|初:しょ,はじ(め),はじ(めて),はつ,うい|松:しょう,まつ|笑:しょう,わら(う),え(む)|唱:しょう,とな(える)|焼:しょう,や(く),や(ける)|照:しょう,て(る),て(らす),て(れる)|城:じょう,しろ|縄:じょう,なわ|臣:しん|信:しん|井:せい,しょう,い|成:せい,な(る),な(す)|省:しょう,せい,はぶ(く),かえり(みる)|清:せい,きよ(い),きよ(まる),きよ(める)|静:せい,しず(か),しず(まる),しず(める)|席:せき|積:せき,つ(む),つ(もる)|折:せつ,お(る),お(れる),おり|節:せつ,ふし|説:せつ,と(く)|浅:せん,あさ(い)|戦:せん,いくさ,たたか(う)|選:せん,えら(ぶ)|然:ぜん,ねん|争:そう,あらそ(う)|倉:そう,くら|巣:そう,す|束:そく,たば|側:そく,かわ|続:ぞく,つづ(く),つづ(ける)|卒:そつ|孫:そん,まご|帯:たい,おび,お(びる)|隊:たい|達:たつ|単:たん|置:ち,お(く)|仲:ちゅう,なか|兆:ちょう,きざ(し)|低:てい,ひく(い),ひく(める),ひく(まる)|底:てい,そこ|的:てき,まと|典:てん|伝:でん,つた(わる),つた(える),つた(う)|徒:と|努:ど,つと(める)|灯:とう,ひ|徳:とく|栃:とち|特:とく|働:どう,はたら(く)|奈:な|梨:り,なし|熱:ねつ,あつ(い)|念:ねん|敗:はい,やぶ(れる)|梅:ばい,うめ|博:はく|飯:はん,めし|阪:はん|飛:ひ,と(ぶ),と(ばす)|必:ひつ,かなら(ず)|票:ひょう|標:ひょう|不:ふ|夫:ふ,ふう,おっと|付:ふ,つ(く),つ(ける)|府:ふ|阜:ふ|富:ふ,ふう,と(む),とみ|副:ふく|兵:へい,ひょう,つわもの|別:べつ,わか(れる)|変:へん,か(わる),か(える)|辺:へん,あた(り),べ|便:べん,びん,たよ(り)|包:ほう,つつ(む)|法:ほう|望:ぼう,のぞ(む)|牧:ぼく,まき|末:まつ,すえ|満:まん,み(ちる),み(たす)|未:み|民:みん,たみ|無:む,ぶ,な(い)|約:やく|勇:ゆう,いさ(む)|要:よう,い(る),かなめ|養:よう,やしな(う)|浴:よく,あ(びる),あ(びせる)|利:り,き(く)|陸:りく|良:りょう,よ(い)|料:りょう|量:りょう,はか(る)|輪:りん,わ|類:るい|令:れい|冷:れい,つめ(たい),ひ(える),ひ(や),ひ(やす),さ(める),さ(ます)|例:れい,たと(える)|連:れん,つら(なる),つら(ねる),つ(れる)|老:ろう,お(いる)|労:ろう",
+         5:"圧:あつ|囲:い,かこ(む),かこ(う)|移:い,うつ(る),うつ(す)|因:いん,よ(る)|永:えい,なが(い)|営:えい,いとな(む)|衛:えい|易:えき,い,やさ(しい)|益:えき,やく|液:えき|演:えん|応:おう,こた(える)|往:おう|桜:おう,さくら|可:か,べ(き)|仮:か,け,かり|価:か,あたい|河:か,かわ|過:か,す(ぎる),す(ごす),あやま(つ)|快:かい,こころよ(い)|解:かい,げ,と(く),と(かす),と(ける)|格:かく,こう|確:かく,たし(か),たし(かめる)|額:がく,ひたい|刊:かん|幹:かん,みき|慣:かん,な(れる),な(らす)|眼:がん,げん,まなこ|基:き,もと,もとい|紀:き|寄:き,よ(る),よ(せる)|規:き|喜:き,よろこ(ぶ)|技:ぎ,わざ|義:ぎ|逆:ぎゃく,さか,さか(らう)|久:きゅう,ひさ(しい)|旧:きゅう,ふる(い)|救:きゅう,すく(う)|居:きょ,い(る)|許:きょ,ゆる(す)|境:きょう,けい,さかい|均:きん|禁:きん|句:く|型:けい,かた|経:けい,きょう,へ(る)|潔:けつ,いさぎよ(い)|件:けん|険:けん,けわ(しい)|検:けん|限:げん,かぎ(る)|現:げん,あらわ(れる),あらわ(す)|減:げん,へ(る),へ(らす)|故:こ,ゆえ|個:こ|護:ご|効:こう,き(く)|厚:こう,あつ(い)|耕:こう,たがや(す)|航:こう|鉱:こう|構:こう,かま(える),かま(う)|興:こう,きょう,おこ(る),おこ(す)|講:こう|告:こく,つ(げる)|混:こん,ま(じる),ま(ざる),ま(ぜる),こ(む)|査:さ|再:さい,さ|災:さい,わざわ(い)|妻:さい,つま|採:さい,と(る)|際:さい,きわ|在:ざい,あ(る)|財:ざい,さい|罪:ざい,つみ|殺:さつ,ころ(す)|雑:ざつ,ぞう|酸:さん,す(い)|賛:さん|士:し|支:し,ささ(える)|志:し,こころざし,こころざ(す)|枝:し,えだ|師:し|資:し|飼:し,か(う)|史:し|示:じ,し,しめ(す)|似:じ,に(る)|識:しき|質:しつ,しち,たち|舎:しゃ|謝:しゃ,あやま(る)|授:じゅ,さず(ける),さず(かる)|修:しゅう,しゅ,おさ(める),おさ(まる)|述:じゅつ,の(べる)|術:じゅつ,すべ|準:じゅん|序:じょ|招:しょう,まね(く)|証:しょう|象:しょう,ぞう|賞:しょう|条:じょう|状:じょう|常:じょう,つね,とこ|情:じょう,せい,なさ(け)|織:しょく,しき,お(る)|職:しょく|制:せい|性:せい,しょう|政:せい,まつりごと|勢:せい,いきお(い)|精:せい,しょう|製:せい|税:ぜい|責:せき,せ(める)|績:せき|接:せつ,つ(ぐ)|設:せつ,もう(ける)|絶:ぜつ,た(える),た(やす),た(つ)|祖:そ|素:そ,す|総:そう|造:ぞう,つく(る)|像:ぞう|増:ぞう,ま(す),ふ(える),ふ(やす)|則:そく|測:そく,はか(る)|属:ぞく|率:りつ,そつ,ひき(いる)|損:そん,そこ(なう),そこ(ねる)|貸:たい,か(す)|態:たい|団:だん,とん|断:だん,ことわ(る),た(つ)|築:ちく,きず(く)|貯:ちょ|張:ちょう,は(る)|提:てい,さ(げる)|程:てい,ほど|停:てい|適:てき|統:とう,す(べる)|堂:どう|導:どう,みちび(く)|銅:どう|得:とく,え(る),う(る)|毒:どく|独:どく,ひと(り)|任:にん,まか(せる),まか(す)|燃:ねん,も(える),も(やす)|能:のう|破:は,やぶ(る),やぶ(れる)|犯:はん,おか(す)|判:はん,ばん|版:はん|比:ひ,くら(べる)|肥:ひ,こ(える),こ(やす),こえ|費:ひ,つい(やす)|非:ひ|備:び,そな(える),そな(わる)|貧:ひん,びん,まず(しい)|布:ふ,ぬの|婦:ふ|武:ぶ,む|復:ふく|複:ふく|仏:ぶつ,ほとけ|粉:ふん,こ,こな|編:へん,あ(む)|弁:べん|保:ほ,たも(つ)|墓:ぼ,はか|報:ほう,むく(いる)|豊:ほう,ゆた(か)|防:ぼう,ふせ(ぐ)|貿:ぼう|暴:ぼう,あば(れる)|務:む,つと(める)|夢:む,ゆめ|迷:めい,まよ(う)|綿:めん,わた|脈:みゃく|輸:ゆ|余:よ,あま(る),あま(す)|容:よう|略:りゃく|留:りゅう,る,と(める),と(まる)|領:りょう|歴:れき",
+         6:"異:い,こと(なる)|遺:い,ゆい|胃:い|域:いき|宇:う|映:えい,うつ(る),うつ(す),は(える)|延:えん,の(びる),の(べる),の(ばす)|沿:えん,そ(う)|恩:おん|我:が,われ,わ|灰:かい,はい|拡:かく|革:かく,かわ|閣:かく|割:かつ,わ(る),わ(り),わ(れる),さ(く)|株:かぶ|干:かん,ほ(す),ひ(る)|巻:かん,ま(く),まき|看:かん|簡:かん|危:き,あぶ(ない),あや(うい)|机:き,つくえ|揮:き|貴:き,とうと(い),たっと(い)|疑:ぎ,うたが(う)|吸:きゅう,す(う)|供:きょう,く,とも,そな(える)|胸:きょう,むね,むな|郷:きょう,ごう|勤:きん,ごん,つと(める),つと(まる)|筋:きん,すじ|系:けい|敬:けい,うやま(う)|警:けい|劇:げき|激:げき,はげ(しい)|穴:けつ,あな|絹:けん,きぬ|権:けん,ごん|憲:けん|券:けん|源:げん,みなもと|厳:げん,おごそ(か),きび(しい)|己:こ,き,おのれ|呼:こ,よ(ぶ)|誤:ご,あやま(る)|后:こう,きさき|孝:こう|皇:こう,おう|紅:こう,べに,くれない|降:こう,お(りる),お(ろす),ふ(る)|鋼:こう,はがね|刻:こく,きざ(む)|穀:こく|骨:こつ,ほね|困:こん,こま(る)|砂:さ,しゃ,すな|座:ざ,すわ(る)|済:さい,す(む),す(ます)|裁:さい,さば(く),た(つ)|策:さく|冊:さつ,さく|蚕:さん,かいこ|至:し,いた(る)|私:し,わたし,わたくし|姿:し,すがた|視:し|詞:し|誌:し|磁:じ|射:しゃ,い(る)|捨:しゃ,す(てる)|尺:しゃく|若:じゃく,にゃく,わか(い),も(しくは)|樹:じゅ,き|収:しゅう,おさ(める),おさ(まる)|宗:しゅう,そう|就:しゅう,じゅ,つ(く),つ(ける)|衆:しゅう,しゅ|従:じゅう,しょう,ジュ,したが(う),したが(える)|縦:じゅう,たて|縮:しゅく,ちぢ(む),ちぢ(まる),ちぢ(める),ちぢ(れる),ちぢ(らす)|熟:じゅく,う(れる)|純:じゅん|処:しょ|署:しょ|諸:しょ,もろ|除:じょ,じ,のぞ(く)|承:しょう,うけたまわ(る)|将:しょう|傷:しょう,きず,いた(む),いた(める)|障:しょう,さわ(る)|蒸:じょう,む(す),む(れる),む(らす)|針:しん,はり|仁:じん|垂:すい,た(れる),た(らす)|推:すい,お(す)|寸:すん|盛:せい,じょう,も(る),さか(る),さか(ん)|聖:せい|誠:せい,まこと|舌:ぜつ,した|宣:せん,のたま(う)|専:せん,もっぱ(ら)|泉:せん,いずみ|洗:せん,あら(う)|染:せん,そ(める),そ(まる),し(みる),し(み)|善:ぜん,よ(い)|銭:せん,ぜに|奏:そう,かな(でる)|窓:そう,まど|創:そう,つく(る)|装:そう,しょう,よそお(う)|層:そう|操:そう,みさお,あやつ(る)|蔵:ぞう,くら|臓:ぞう|存:そん,ぞん|尊:そん,とうと(い),たっと(い),とうと(ぶ),たっと(ぶ)|退:たい,しりぞ(く),しりぞ(ける)|宅:たく|担:たん,かつ(ぐ),にな(う)|探:たん,さが(す),さぐ(る)|誕:たん|段:だん|暖:だん,あたた(か),あたた(かい),あたた(まる),あたた(める)|値:ち,ね,あたい|宙:ちゅう|忠:ちゅう|著:ちょ,いちじる(しい),あらわ(す)|庁:ちょう|腸:ちょう,はらわた|頂:ちょう,いただ(く),いただき|潮:ちょう,しお|賃:ちん|痛:つう,いた(い),いた(む),いた(める)|敵:てき,かたき|展:てん|討:とう,う(つ)|党:とう|糖:とう|届:とど(く),とど(ける)|難:なん,かた(い),むずか(しい)|乳:にゅう,ちち,ち|認:にん,みと(める)|納:のう,なっ,とう,おさ(める),おさ(まる)|脳:のう|派:は|拝:はい,おが(む)|背:はい,せ,せい,そむ(く),そむ(ける)|肺:はい|俳:はい|班:はん|晩:ばん|否:ひ,いな|批:ひ|秘:ひ,ひ(める)|俵:ひょう,たわら|腹:ふく,はら|奮:ふん,ふる(う)|並:へい,なみ,なら(ぶ),なら(べる),なら(びに)|陛:へい|閉:へい,と(じる),と(ざす),し(める),し(まる)|片:へん,かた|補:ほ,おぎな(う)|暮:ぼ,く(れる),く(らす)|宝:ほう,たから|訪:ほう,おとず(れる),たず(ねる)|亡:ぼう,もう,な(く),な(くなる)|忘:ぼう,わす(れる)|棒:ぼう|枚:まい|幕:まく,ばく|密:みつ|盟:めい|模:も,ぼ|訳:やく,わけ|郵:ゆう|優:ゆう,やさ(しい),すぐ(れる)|預:よ,あず(ける),あず(かる)|幼:よう,おさな(い)|欲:よく,ほっ(する),ほ(しい)|翌:よく|乱:らん,みだ(れる),みだ(す)|卵:らん,たまご|覧:らん|裏:り,うら|律:りつ,りち|臨:りん,のぞ(む)|朗:ろう,ほが(らか)|論:ろん",
+ };
 
         // --- データ展開 ---
         function parseCompressedData(grade, compressedString) {
@@ -696,6 +651,11 @@ Legal Terms
         let currentChar = null;
         let currentMode = 'practice';
         let currentGrade = 1;
+
+        // 追加：ランダムテスト用の変数
+        let isRandomTest = false;
+        let randomTestQueue = [];
+        let randomTestIndex = 0;
         
         // レベル計算定数
         const XP_PER_LEVEL = 5;
@@ -714,32 +674,49 @@ Legal Terms
             return { level, totalXP, currentLevelXP, nextLevelXP };
         }
 
+        // 修正：レイアウトを崩さないよう [アイコン, 称号名] のセットで返すようにしました
         function getMascot(level) {
-            // 5レベルごとに進化
-            if (level < 5) return "🥚";   // 卵
-            if (level < 10) return "🐣";  // ヒヨコ
-            if (level < 15) return "🐥";  // ヒヨコ（成長）
-            if (level < 20) return "🐓";  // ニワトリ
-            if (level < 25) return "🦉";  // フクロウ（博士）
-            if (level < 30) return "🦅";  // ワシ
-            if (level < 35) return "🦁";  // ライオン
-            if (level < 40) return "🦄";  // ユニコーン
-            if (level < 50) return "🐉";  // ドラゴン
-            return "🤴";                  // かんじマスター（神）
+            if (level < 5) return ["🥚", "たまご"];
+            if (level < 10) return ["🐣", "ヒヨコ"];
+            if (level < 15) return ["🐥", "こどもトリ"];
+            if (level < 20) return ["🐓", "ニワトリ"];
+            if (level < 25) return ["🦉", "フクロウ博士"];
+            if (level < 30) return ["🦅", "ワシ"];
+            if (level < 35) return ["🦁", "ライオン"];
+            if (level < 40) return ["🦄", "ユニコーン"];
+            if (level < 50) return ["🐉", "ドラゴン"];
+            if (level < 60) return ["🦸", "ヒーロー"];
+            if (level < 70) return ["🧙", "大魔法使い"];
+            if (level < 80) return ["🧚", "妖精王"];
+            if (level < 90) return ["👼", "天使"];
+            if (level < 100) return ["🌟", "星の精"];
+            if (level < 150) return ["👑", "王様"];
+            if (level < 200) return ["帝", "皇帝"];
+            if (level < 210) return ["🐉", "神竜マスター"];
+            if (level < 220) return ["🌌", "宇宙マスター"];
+            if (level < 230) return ["🌠", "流星マスター"];
+            if (level < 240) return ["🌞", "太陽マスター"];
+            if (level < 250) return ["🌈", "虹のマスター"];
+            if (level < 260) return ["⚡", "雷神マスター"];
+            if (level < 270) return ["🌪️", "風神マスター"];
+            if (level < 280) return ["🌊", "海神マスター"];
+            if (level < 290) return ["🌋", "炎神マスター"];
+            if (level < 300) return ["✨", "創造神"];
+            return ["♾️", "漢字神"];
         }
 
         // 画面更新
         function updateUI() {
             const stats = getStats();
-            const mascot = getMascot(stats.level);
+            const [mascotIcon, mascotName] = getMascot(stats.level); // 修正部分
             
             // タイトル画面
-            document.getElementById('title-mascot').innerText = mascot;
-            document.getElementById('title-level').innerText = `Lv.${stats.level}`;
+            document.getElementById('title-mascot').innerText = mascotIcon;
+            document.getElementById('title-level').innerText = `${stats.level} (${mascotName})`;
 
             // リスト画面
-            document.getElementById('list-mascot').innerText = mascot;
-            document.getElementById('list-level').innerText = `Lv.${stats.level}`;
+            document.getElementById('list-mascot').innerText = mascotIcon;
+            document.getElementById('list-level').innerText = `${stats.level} (${mascotName})`;
             document.getElementById('next-xp').innerText = stats.nextLevelXP;
             
             // ゲージ更新
@@ -769,13 +746,18 @@ Legal Terms
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
             document.getElementById(screenId).classList.add('active');
             
+            // 途中で戻ったらランダムテスト状態をリセット
+            if (screenId !== 'practice-screen') {
+                isRandomTest = false; 
+            }
+
             // 画面ごとの初期処理
             if (screenId === 'list-screen') {
                 renderList();
             } else if (screenId === 'title-screen') {
                 // タイトルに戻ったら検索窓をクリアしておく
                 document.getElementById('home-search-input').value = '';
-                document.getElementById('search-box').value = '';
+                if(document.getElementById('search-box')) document.getElementById('search-box').value = '';
                 
                 // 検索で学年が変わっている場合があるのでボタンを更新
                 updateTitleGradeButtons();
@@ -808,6 +790,27 @@ Legal Terms
             document.getElementById('search-box').value = '';
             showScreen('list-screen');
         }
+
+        // --- 追加：ランダムテスト開始機能 ---
+        function startRandomTest() {
+            playSound('click');
+            const list = allKanjiData[currentGrade];
+            if (!list || list.length === 0) {
+                alert("漢字データがありません。");
+                return;
+            }
+
+            // 選択中の学年の漢字をシャッフル
+            let shuffled = [...list].sort(() => 0.5 - Math.random());
+            randomTestQueue = shuffled.slice(0, Math.min(10, shuffled.length));
+            
+            isRandomTest = true;
+            randomTestIndex = 0;
+            currentMode = 'test'; // テストモードで開始
+            
+            startApp(randomTestQueue[0]);
+        }
+        // ------------------------------------
 
         // 検索・リスト描画
         function filterList() {
@@ -995,7 +998,10 @@ Legal Terms
                     document.getElementById('result-overlay').classList.remove('active'); // 結果画面消す
                     document.getElementById('levelup-overlay').classList.add('active'); // レベルアップ画面出す
                     document.getElementById('new-level-num').innerText = stats.level;
-                    document.getElementById('levelup-mascot').innerText = getMascot(stats.level);
+                    
+                    const [mascotIcon, mascotName] = getMascot(stats.level); // 追加した称号呼び出し
+                    document.getElementById('levelup-mascot').innerText = mascotIcon;
+                    document.getElementById('levelup-text').innerText = `「${mascotName}」に しんか したよ！`;
                 }, 1000);
             }
         }
@@ -1005,11 +1011,30 @@ Legal Terms
             goNext();
         }
 
+        // 修正：ランダムテスト用の次へ進む処理
         function goNext() {
+            // ランダムテスト中の場合
+            if (isRandomTest) {
+                randomTestIndex++;
+                if (randomTestIndex < randomTestQueue.length) {
+                    startApp(randomTestQueue[randomTestIndex]);
+                } else {
+                    isRandomTest = false;
+                    alert("🎉 ランダム10問テスト クリア！よくがんばったね！");
+                    showScreen('title-screen');
+                }
+                return;
+            }
+
+            // 通常モードの場合
             const list = allKanjiData[currentGrade];
-            const idx = list.findIndex(k => k.char === currentChar.char);
-            if (idx >= 0 && idx < list.length - 1) {
-                startApp(list[idx + 1]);
+            const targetList = currentChar._foundGrade ? allKanjiData[currentChar._foundGrade] : list;
+            
+            if (!targetList) { showScreen('list-screen'); return; }
+
+            const idx = targetList.findIndex(k => k.char === currentChar.char);
+            if (idx >= 0 && idx < targetList.length - 1) {
+                startApp(targetList[idx + 1]);
             } else {
                 showScreen('list-screen');
             }
