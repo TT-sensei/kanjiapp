@@ -188,7 +188,7 @@
             border-color: var(--primary);
         }
 
-        /* 検索ボックス（はみ出し修正版） */
+        /* 検索ボックス */
         .home-search-box {
             margin: 20px auto;
             width: 90%;
@@ -200,7 +200,7 @@
 
         .home-search-box input {
             flex: 1;
-            min-width: 0; /* これがはみ出し防止の魔法 */
+            min-width: 0;
             box-sizing: border-box; 
             padding: 12px;
             border-radius: 25px;
@@ -389,6 +389,59 @@
         #current-reading { font-size: 1.2rem; font-weight: 700; min-height: 40px;}
         .reset-link { margin-top: 20px; font-size: 0.85rem; }
         .reset-link span { color: var(--primary); text-decoration: underline; cursor: pointer; font-weight: 700; }
+
+        /* フッター・クレジット用デザイン */
+        .footer-note, .app-credits-container {
+            text-align: left;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 20px;
+            margin: 30px auto 10px;
+            width: 90%;
+            max-width: 400px;
+            border-radius: 20px;
+            box-shadow: var(--shadow-soft);
+            font-size: 0.9rem;
+            line-height: 1.5;
+            box-sizing: border-box;
+            border: 3px solid white;
+        }
+        .credit-warning-box {
+            background: #FFF3E0;
+            padding: 12px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            border-left: 5px solid var(--accent3);
+        }
+        .credit-warning-title {
+            font-weight: bold;
+            color: #D35400;
+            margin-bottom: 5px;
+        }
+        .credit-section-title {
+            font-size: 1rem;
+            border-bottom: 2px solid #EEE;
+            padding-bottom: 5px;
+            margin-top: 20px;
+            color: var(--text);
+        }
+        .credit-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .credit-item {
+            margin-bottom: 15px;
+            margin-top: 10px;
+        }
+        .credit-name {
+            font-weight: bold;
+            color: var(--primary);
+        }
+        .credit-desc {
+            font-size: 0.8rem;
+            color: #666;
+            margin-top: 3px;
+        }
     </style>
 </head>
 <body>
@@ -397,7 +450,7 @@
    <div class="mascot-area" id="title-mascot">🥚</div>
    <div class="level-title-area">
     Lv.<span id="title-level">1</span> 
-    <span class="title-badge" id="title-name">見習いタマゴ</span>
+    <span class="title-badge" id="title-name">漢字タマゴ</span>
    </div>
    <div class="grade-selector">
      <button class="grade-btn selected" onclick="setGrade(1)"><div class="grade-btn-icon">📚</div><div>1年</div></button> 
@@ -418,7 +471,44 @@
    <button aria-label="ランダムテスト" class="menu-btn btn-random" onclick="startRandomTest()">🎲 ランダムテスト(10問)</button>
    
    <div class="reset-link"><span onclick="showResetConfirm()">📋 データリセット</span></div>
-  </div>
+
+   <div class="footer-note"><strong>⚠️ 保護者・先生方へ</strong><br>
+     本アプリは学習支援のために作成されました。漢字のデータは日本の学習指導要領を参照しています。 
+    <div style="margin-top: 10px; padding: 12px; background-color: #f9f9f9; border-left: 5px solid var(--accent3); font-size:0.85rem; border-radius: 8px;"><strong>【判定に関するご注意】</strong><br>
+      ・標準的な字体を使用しているため、教科書の字体と細部が異なる場合があります。<br>
+      ・<strong>学校で習った書き方が最も正しい基準です。</strong>アプリの判定はあくまで目安としてご活用ください。
+    </div>
+   </div>
+
+   <div class="app-credits-container">
+    <div class="credit-warning-box">
+     <div class="credit-warning-title">
+      ⚠️ 筆順（書き順）について
+     </div>
+     <div>
+      データの都合上、一部の漢字で標準と異なる筆順が表示される場合があります。<br><strong>学校の教科書や先生の指導と異なる場合は、教科書を正解としてください。</strong>
+     </div>
+    </div>
+    <h3 class="credit-section-title">使用データ・ライセンス</h3>
+    <ul class="credit-list">
+     <li class="credit-item">
+      <div class="credit-name">
+       1. Hanzi Writer Data JP
+      </div>
+      <div class="credit-desc">
+       GitHub: chanind/hanzi-writer-data-jp<br>
+        Based on AnimCJK (LGPL v3). Hanzi Writer is licensed under the MIT License.
+      </div></li>
+     <li class="credit-item">
+      <div class="credit-name">
+       2. Hanzi Writer
+      </div>
+      <div class="credit-desc">
+       JavaScript Library for Chinese/Japanese character stroke order.
+      </div></li>
+    </ul>
+   </div>
+   </div>
   
   <div id="list-screen" class="screen">
    <div class="header-bar">
