@@ -8,6 +8,8 @@
     <script src="https://cdn.jsdelivr.net/npm/hanzi-writer@3.5/dist/hanzi-writer.min.js"></script>
     
     <script src="kanji-data.js"></script>
+    
+    <script src="title-data.js"></script>
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Kosugi+Maru:wght@400;700&display=swap');
@@ -88,6 +90,27 @@
             50% { transform: translateY(-20px) scale(1.05); }
         }
 
+        /* 称号エリアのデザイン */
+        .level-title-area {
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .title-badge {
+            background: linear-gradient(135deg, var(--accent2), #FF8C00);
+            color: white;
+            padding: 4px 14px;
+            border-radius: 20px;
+            font-size: 1rem;
+            box-shadow: var(--shadow-soft);
+            text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+        }
+
         .menu-btn {
             display: block;
             width: 85%;
@@ -165,18 +188,19 @@
             border-color: var(--primary);
         }
 
-        /* 検索ボックス */
+        /* 検索ボックス（はみ出し修正版） */
         .home-search-box {
             margin: 20px auto;
-            width: 85%;
-            max-width: 340px;
+            width: 90%;
+            max-width: 320px;
             display: flex;
-            gap: 8px;
+            gap: 6px;
             box-sizing: border-box; 
         }
 
         .home-search-box input {
             flex: 1;
+            min-width: 0; /* これがはみ出し防止の魔法 */
             box-sizing: border-box; 
             padding: 12px;
             border-radius: 25px;
@@ -205,7 +229,7 @@
             box-shadow: 0 2px 0 rgba(0,0,0,0.15);
         }
 
-        /* リスト画面など省略せず記載 */
+        /* リスト画面 */
         .header-bar {
             display: flex;
             justify-content: space-between;
@@ -292,12 +316,12 @@
             width: 0%; transition: width 0.5s ease;
         }
 
-        /* 結果オーバーレイ（全体共通） */
+        /* 結果オーバーレイ */
         .overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.85); display: none; z-index: 100;
             flex-direction: column; color: white; backdrop-filter: blur(3px);
-            align-items: center; justify-content: center; /* 画面中央に変更 */
+            align-items: center; justify-content: center;
             box-sizing: border-box;
         }
         .overlay.active { display: flex; animation: popIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); }
@@ -311,12 +335,11 @@
             background: white; color: var(--text); padding: 30px 20px;
             border-radius: 30px; text-align: center; width: 85%; max-width: 320px;
             box-shadow: 0 10px 40px rgba(0,0,0,0.3); border: 4px solid white;
-            max-height: 85vh; /* ★スマホではみ出さないための魔法 */
-            overflow-y: auto; /* ★入りきらない時はスクロール可能に */
+            max-height: 85vh;
+            overflow-y: auto;
         }
         
         .big-icon { font-size: 5rem; margin: 10px 0; }
-        
         .result-content h2 { font-size: 1.8rem; margin: 10px 0; font-weight: 700; }
 
         .next-btn {
@@ -332,7 +355,7 @@
             border-radius: 20px; cursor: pointer; margin-top: 10px; font-family: inherit;
         }
 
-        /* ★レベルアップ特別演出（サイズ調整済み） */
+        /* レベルアップ特別演出 */
         #levelup-overlay { background: rgba(255, 20, 147, 0.95); }
         .levelup-anim { font-size: 3.5rem; animation: spin 1s infinite linear; margin: 10px 0;}
         @keyframes spin { 100% { transform: rotate(360deg); } }
@@ -341,10 +364,10 @@
             background: linear-gradient(90deg, var(--primary), var(--accent3));
             -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-size: 1.6rem; margin-bottom: 5px;
         }
-        #levelup-mascot { font-size: 4rem; margin: 10px 0; }
+        #levelup-mascot { font-size: 4rem; margin: 10px 0; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.1)); }
         .new-level-text { font-size: 1.3rem; margin: 10px 0; font-weight:700; }
 
-        /* リセット確認モーダル等 */
+        /* リセット確認モーダル */
         .confirm-modal {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.85); z-index: 200; align-items: center; justify-content: center;
@@ -372,8 +395,9 @@
   <div id="title-screen" class="screen active">
    <h1>🌟 かんじマスター</h1>
    <div class="mascot-area" id="title-mascot">🥚</div>
-   <div style="font-size:1.3rem; margin-bottom:15px; font-weight:700;">
-    Lv.<span id="title-level">1</span>
+   <div class="level-title-area">
+    Lv.<span id="title-level">1</span> 
+    <span class="title-badge" id="title-name">見習いタマゴ</span>
    </div>
    <div class="grade-selector">
      <button class="grade-btn selected" onclick="setGrade(1)"><div class="grade-btn-icon">📚</div><div>1年</div></button> 
@@ -516,19 +540,17 @@
         // --- 状態管理 ---
         let progressPractice = JSON.parse(localStorage.getItem('kanjiMasterPractice')) || {};
         let progressTest = JSON.parse(localStorage.getItem('kanjiMasterTest')) || {};
-        let bonusXP = parseInt(localStorage.getItem('kanjiMasterBonusXP')) || 0; // ★ランダムテスト用ボーナスXP
+        let bonusXP = parseInt(localStorage.getItem('kanjiMasterBonusXP')) || 0;
         let writer;
         let currentChar = null;
         let currentMode = 'practice';
         let currentGrade = 1;
         
-        // ランダムテスト用状態
         let isRandomTest = false;
         let randomQueue = [];
         let randomIndex = 0;
         let levelBeforeRandomTest = 1;
 
-        // レベルアップのフロー制御用フラグ
         let pendingLevelUp = false;
         let pendingGoHome = false;
         
@@ -538,7 +560,7 @@
         function getStats() {
             const practiceCount = Object.keys(progressPractice).length;
             const testCount = Object.keys(progressTest).length;
-            const totalXP = practiceCount + (testCount*2) + bonusXP; // ボーナスXPを加算
+            const totalXP = practiceCount + (testCount*2) + bonusXP;
             
             const level = Math.floor(totalXP / XP_PER_LEVEL) + 1;
             const currentLevelXP = totalXP % XP_PER_LEVEL;
@@ -547,29 +569,34 @@
             return { level, totalXP, currentLevelXP, nextLevelXP };
         }
 
-        function getMascot(level) {
-            const milestones = [
-                { limit: 5,   text: "🥚 タマゴ" }, { limit: 10,  text: "🐤 ヒヨコ" }, { limit: 15,  text: "🐥 アヒル" },
-                { limit: 20,  text: "🐢 カメ" }, { limit: 25,  text: "🐰 ウサギ" }, { limit: 30,  text: "🐱 ネコ" },
-                { limit: 35,  text: "🐶 イヌ" }, { limit: 40,  text: "🐻 クマ" }, { limit: 45,  text: "🦊 キツネ" },
-                { limit: 50,  text: "🐼 パンダ" }, { limit: 60,  text: "🦁 ライオン" }, { limit: 100, text: "🐉 ドラゴン" }
-            ];
-            for (let i = 0; i < milestones.length; i++) {
-                if (level < milestones[i].limit) return milestones[i].text;
+        // 称号データからレベルに応じた情報を取得
+        function getTitleData(level) {
+            let current = TITLE_DATA[0];
+            for (let i = 0; i < TITLE_DATA.length; i++) {
+                if (level >= TITLE_DATA[i].level) {
+                    current = TITLE_DATA[i];
+                } else {
+                    break;
+                }
             }
-            return "∞ 漢字神";
+            return current;
         }
 
         function updateUI() {
             const stats = getStats();
-            const mascot = getMascot(stats.level);
+            const mascotData = getTitleData(stats.level);
             
-            document.getElementById('title-mascot').innerText = mascot.split(' ')[0];
+            // ホーム画面の更新
+            document.getElementById('title-mascot').innerText = mascotData.mascot;
             document.getElementById('title-level').innerText = `${stats.level}`;
-            document.getElementById('list-mascot').innerText = mascot.split(' ')[0];
+            document.getElementById('title-name').innerText = mascotData.title;
+            
+            // リスト画面の更新
+            document.getElementById('list-mascot').innerText = mascotData.mascot;
             document.getElementById('list-level').innerText = `${stats.level}`;
             document.getElementById('next-xp').innerText = stats.nextLevelXP;
             
+            // 経験値バーの更新
             const percent = (stats.currentLevelXP / XP_PER_LEVEL) * 100;
             document.getElementById('xp-bar').style.width = `${percent}%`;
         }
@@ -584,7 +611,7 @@
 
         function showScreen(screenId) {
             window.scrollTo(0, 0);
-            isRandomTest = false; // 画面遷移したらランダムテストは解除
+            isRandomTest = false;
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
             document.getElementById(screenId).classList.add('active');
             
@@ -654,26 +681,25 @@
             });
         }
 
-        // --- ★ランダムテスト機能 ---
+        // --- ランダムテスト機能 ---
         function startRandomTest() {
             playSound('click');
             const list = allKanjiData[currentGrade];
             if (!list || list.length === 0) return;
 
-            // リストをシャッフルして最大10問抽出
             const shuffled = [...list].sort(() => 0.5 - Math.random());
             randomQueue = shuffled.slice(0, 10);
             randomIndex = 0;
             isRandomTest = true;
-            currentMode = 'test'; // テストモードの見た目にする
-            levelBeforeRandomTest = getStats().level; // 始まる前のレベルを記録
+            currentMode = 'test';
+            levelBeforeRandomTest = getStats().level;
 
             startApp(randomQueue[randomIndex]);
         }
 
         function handleBackFromPractice() {
             if (isRandomTest) {
-                showScreen('title-screen'); // ランダムテスト中はホームへ戻る
+                showScreen('title-screen');
             } else {
                 showScreen('list-screen');
             }
@@ -725,7 +751,7 @@
             });
         }
 
-        // --- 結果の処理（画面フロー統合） ---
+        // --- 結果の処理 ---
         function handleComplete() {
             playSound('complete');
             const msg = document.getElementById('result-msg');
@@ -737,13 +763,11 @@
 
             const oldLevel = getStats().level;
             
-            // 進捗を保存
             targetStorage[currentChar.char] = true;
             localStorage.setItem(storageKey, JSON.stringify(targetStorage));
 
             const newLevel = getStats().level;
             
-            // 通常モード時のみ、裏でレベルアップ判定をしておく
             if (!isRandomTest && newLevel > oldLevel) {
                 pendingLevelUp = true;
             }
@@ -759,11 +783,9 @@
             }, 800);
         }
 
-        // 「できた！」画面の「次へ」を押した時
         function handleNextClick() {
             document.getElementById('result-overlay').classList.remove('active');
             
-            // レベルアップフラグが立っていたらレベルアップ画面を割り込ませる
             if (pendingLevelUp) {
                 pendingLevelUp = false;
                 showLevelUpDisplay(getStats().level);
@@ -773,14 +795,12 @@
             moveToNextKanji();
         }
 
-        // 実際の次の問題への移動処理
         function moveToNextKanji() {
             if (isRandomTest) {
                 randomIndex++;
                 if (randomIndex < randomQueue.length) {
-                    startApp(randomQueue[randomIndex]); // 次のランダム問題へ
+                    startApp(randomQueue[randomIndex]);
                 } else {
-                    // ★ランダムテスト10問クリア！
                     isRandomTest = false;
                     bonusXP += 10;
                     localStorage.setItem('kanjiMasterBonusXP', bonusXP);
@@ -789,7 +809,6 @@
                     updateUI();
                 }
             } else {
-                // 通常モードの次の問題へ
                 let list = allKanjiData[currentGrade];
                 if (currentChar._foundGrade) list = allKanjiData[currentChar._foundGrade];
                 if (!list) { showScreen('list-screen'); return; }
@@ -803,15 +822,15 @@
             }
         }
 
-        // レベルアップ画面の表示
         function showLevelUpDisplay(level) {
             playSound('levelup');
             document.getElementById('levelup-overlay').classList.add('active');
             document.getElementById('new-level-num').innerText = level;
-            document.getElementById('levelup-mascot').innerText = getMascot(level).split(' ')[0];
+            
+            const newTitleData = getTitleData(level);
+            document.getElementById('levelup-mascot').innerText = newTitleData.mascot;
         }
 
-        // レベルアップ画面の「やったー！」を押した時
         function closeLevelUp() {
             document.getElementById('levelup-overlay').classList.remove('active');
             
@@ -819,18 +838,16 @@
                 pendingGoHome = false;
                 showScreen('title-screen');
             } else {
-                moveToNextKanji(); // 止まっていた次の問題へ
+                moveToNextKanji();
             }
         }
 
-        // ランダムテストクリア画面の「ホームへ」を押した時
         function handleRandomClearClick() {
             document.getElementById('random-clear-overlay').classList.remove('active');
             
-            // テスト前後でレベルが上がっていればレベルアップ画面へ！
             const currentLevel = getStats().level;
             if (currentLevel > levelBeforeRandomTest) {
-                pendingGoHome = true; // レベルアップ画面を閉じたらホームに戻るフラグ
+                pendingGoHome = true;
                 showLevelUpDisplay(currentLevel);
             } else {
                 showScreen('title-screen');
