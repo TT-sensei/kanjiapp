@@ -109,22 +109,26 @@
             text-shadow: 0 1px 2px rgba(0,0,0,0.2);
         }
 
+        /* メニューボタンの2列グリッド化 */
         .menu-grid {
             display: grid;
-            grid-template-columns: 1fr;
+            grid-template-columns: 1fr 1fr; /* 2列にする */
             gap: 12px;
-            width: 85%;
-            max-width: 320px;
+            width: 95%;
+            max-width: 400px;
             margin: 15px auto;
         }
 
         .menu-btn {
-            display: block;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
             width: 100%;
-            padding: 18px;
-            font-size: 1.2rem;
+            padding: 15px 5px;
+            font-size: 1rem;
             border: none;
-            border-radius: 25px;
+            border-radius: 20px;
             cursor: pointer;
             box-shadow: var(--shadow-pop);
             transition: all 0.1s;
@@ -133,6 +137,7 @@
             position: relative;
             overflow: hidden;
             box-sizing: border-box;
+            line-height: 1.4;
         }
 
         .menu-btn::before {
@@ -151,9 +156,19 @@
 
         .btn-practice { background: linear-gradient(135deg, #00D084, #00E5A0); color: white; }
         .btn-test { background: linear-gradient(135deg, #FF1493, #FF69B4); color: white; }
-        .btn-random { background: linear-gradient(135deg, #9B59B6, #D291BC); color: white; }
         .btn-mykanji { background: linear-gradient(135deg, #FF9800, #FFB74D); color: white; }
         .btn-mykanji-test { background: linear-gradient(135deg, #FF5722, #FF8A65); color: white; }
+        
+        /* ランダムテストは2列ぶち抜き（1段フルサイズ）にする */
+        .btn-random { 
+            grid-column: span 2; 
+            background: linear-gradient(135deg, #9B59B6, #D291BC); 
+            color: white; 
+            flex-direction: row; /* アイコンと文字を横並びに */
+            gap: 8px;
+            padding: 18px 10px;
+            font-size: 1.1rem;
+        }
         
         /* 学年選択ボタン */
         .grade-selector {
@@ -194,7 +209,7 @@
         .home-search-box {
             margin: 20px auto;
             width: 90%;
-            max-width: 320px;
+            max-width: 400px;
             display: flex;
             gap: 6px;
             box-sizing: border-box; 
@@ -446,11 +461,11 @@
    </div>
    
    <div class="menu-grid">
-       <button aria-label="練習モード" class="menu-btn btn-practice" onclick="selectMode('practice')">✏️ れんしゅう</button> 
-       <button aria-label="テストモード" class="menu-btn btn-test" onclick="selectMode('test')">🏅 テスト</button>
-       <button aria-label="ランダムテスト" class="menu-btn btn-random" onclick="startRandomTest()">🎲 ランダムテスト(10問)</button>
-       <button aria-label="マイ漢字" class="menu-btn btn-mykanji" onclick="selectMode('mykanji')">⭐ マイ漢字をみる</button>
-       <button aria-label="マイ漢字テスト" class="menu-btn btn-mykanji-test" onclick="startMyKanjiRandomTest()">🎯 マイ漢字テスト</button>
+       <button aria-label="練習モード" class="menu-btn btn-practice" onclick="selectMode('practice')">✏️<br>れんしゅう</button> 
+       <button aria-label="テストモード" class="menu-btn btn-test" onclick="selectMode('test')">🏅<br>テスト</button>
+       <button aria-label="マイ漢字" class="menu-btn btn-mykanji" onclick="selectMode('mykanji')">⭐<br>マイ漢字をみる</button>
+       <button aria-label="マイ漢字テスト" class="menu-btn btn-mykanji-test" onclick="startMyKanjiRandomTest()">🎯<br>マイ漢字テスト</button>
+       <button aria-label="ランダムテスト" class="menu-btn btn-random" onclick="startRandomTest()">🎲 ランダムテスト (10問)</button>
    </div>
    
    <div class="reset-link"><span onclick="showResetConfirm()">📋 データリセット</span></div>
@@ -800,7 +815,7 @@
             startApp(randomQueue[randomIndex]);
         }
         
-        // 追加: マイ漢字からのランダムテスト機能
+        // マイ漢字からのランダムテスト機能（10個以上で開放）
         function startMyKanjiRandomTest() {
             playSound('click');
             let list = [];
@@ -809,10 +824,13 @@
                     list = list.concat(allKanjiData[g].filter(item => myKanji[item.char]));
                 }
             }
-            if (list.length === 0) {
-                alert('マイ漢字が １つも 登録されていません！\n練習画面から「☆ マイ漢字」ボタンをおして 登録してね。');
+            
+            // マイ漢字が10個未満の場合はアラートを出して中断
+            if (list.length < 10) {
+                alert(`マイ漢字を 10こ以上 登録すると テストできるよ！\n（いま: ${list.length}こ）\nれんしゅう画面の「☆ マイ漢字」ボタンで 登録してね。`);
                 return;
             }
+            
             const shuffled = [...list].sort(() => 0.5 - Math.random());
             randomQueue = shuffled.slice(0, 10);
             randomIndex = 0;
