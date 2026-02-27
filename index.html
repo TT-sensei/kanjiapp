@@ -233,7 +233,7 @@
     </div>
     
     <div class="controls">
-      <button aria-label="書き順再生" class="control-btn" onclick="playAnimationStub()">▶</button> 
+      <button aria-label="書き順再生" class="control-btn" onclick="playAnimation()">▶</button> 
       <button aria-label="リトライ" class="control-btn" onclick="retry()">↺</button>
     </div>
   </div>
@@ -291,6 +291,7 @@
         let currentStrokeIndex = 0; 
         let isDrawing = false;      
         let userPoints = [];        
+        let isAnimating = false;    // アニメーション制御用
 
         let bgCanvasCtx, fixedCanvasCtx, drawCanvasCtx;
 
@@ -298,7 +299,6 @@
         const KVG_SIZE = 109;    
         const PADDING = 15;      
         const SCALE = (CANVAS_SIZE - PADDING * 2) / KVG_SIZE;
-        // ▲▲▲ 判定エンジン用 変数 ▲▲▲
 
         let isRandomTest = false;
         let randomQueue = [];
@@ -396,7 +396,6 @@
             document.getElementById('xp-bar').style.width = `${percent}%`;
         }
 
-        // --- マイ漢字機能 ---
         function toggleMyKanji() {
             playSound('click');
             if (!currentChar) return;
@@ -421,7 +420,6 @@
             }
         }
 
-        // --- 画面遷移と初期化 ---
         function setGrade(grade) { playSound('click'); currentGrade = grade; updateTitleGradeButtons(); }
         function updateTitleGradeButtons() {
             document.querySelectorAll('.grade-btn').forEach(btn => {
@@ -452,7 +450,6 @@
         function selectMode(mode) { playSound('click'); currentMode = mode; document.getElementById('search-box').value = ''; showScreen('list-screen'); }
         function filterList() { renderList(); }
 
-        // リスト描画
         function renderList() {
             updateUI();
             const searchText = document.getElementById('search-box').value.trim();
@@ -520,19 +517,16 @@
             });
         }
 
-        // --- ランダムテスト機能 ---
         function startRandomTest() {
             playSound('click');
             const list = allKanjiData[currentGrade];
             if (!list || list.length === 0) return;
-
             const shuffled = [...list].sort(() => 0.5 - Math.random());
             randomQueue = shuffled.slice(0, 10);
             randomIndex = 0;
             isRandomTest = true;
             currentMode = 'test';
             levelBeforeRandomTest = getStats().level;
-
             startApp(randomQueue[randomIndex]);
         }
         
@@ -544,23 +538,21 @@
                     list = list.concat(allKanjiData[g].filter(item => myKanji[item.char]));
                 }
             }
-            
             if (list.length < 10) {
                 alert(`マイ漢字を 10こ以上 登録すると テストできるよ！\n（いま: ${list.length}こ）\nれんしゅう画面の「☆ マイ漢字」ボタンで 登録してね。`);
                 return;
             }
-            
             const shuffled = [...list].sort(() => 0.5 - Math.random());
             randomQueue = shuffled.slice(0, 10);
             randomIndex = 0;
             isRandomTest = true;
             currentMode = 'test';
             levelBeforeRandomTest = getStats().level;
-
             startApp(randomQueue[randomIndex]);
         }
 
         function handleBackFromPractice() {
+            isAnimating = false;
             if (isRandomTest) {
                 showScreen('title-screen');
             } else {
@@ -568,9 +560,7 @@
             }
         }
 
-        // ▼▼▼ 新しい判定エンジンのコア関数群 ▼▼▼
-        
-        // ① KanjiVGからデータ取得
+        // ▼▼▼ キャンバス判定エンジン ▼▼▼
         async function fetchKanjiVG(char) {
             const hex = char.charCodeAt(0).toString(16).padStart(5, '0');
             const url = `https://cdn.jsdelivr.net/gh/KanjiVG/kanjivg@master/kanji/${hex}.svg`;
@@ -583,7 +573,6 @@
             return paths.map(p => p.getAttribute('d')); 
         }
 
-        // ② キャンバス初期設定
         function initCanvasEngine() {
             const drawCanvas = document.getElementById('draw-canvas');
             bgCanvasCtx = document.getElementById('bg-canvas').getContext('2d');
@@ -596,9 +585,9 @@
                 ctx.strokeStyle = color;
                 ctx.lineWidth = width;
             };
-            setupCtx(bgCanvasCtx, '#E0E0E0', 8);   
-            setupCtx(fixedCanvasCtx, '#333333', 8); 
-            setupCtx(drawCanvasCtx, '#FF6B35', 8);  
+            setupCtx(bgCanvasCtx, '#E0E0E0', 5);   
+            setupCtx(fixedCanvasCtx, '#333333', 5); 
+            setupCtx(drawCanvasCtx, '#FF6B35', 5);  
 
             const getPos = (e) => {
                 const rect = drawCanvas.getBoundingClientRect();
@@ -608,7 +597,7 @@
             };
 
             const startDraw = (e) => {
-                if (currentStrokeIndex >= currentKanjiPaths.length) return;
+                if (isAnimating || currentStrokeIndex >= currentKanjiPaths.length) return;
                 isDrawing = true; 
                 userPoints = [getPos(e)];
                 drawCanvasCtx.beginPath(); 
@@ -616,7 +605,7 @@
             };
 
             const draw = (e) => {
-                if (!isDrawing) return;
+                if (!isDrawing || isAnimating) return;
                 const pos = getPos(e); 
                 userPoints.push(pos);
                 drawCanvasCtx.lineTo(pos.x, pos.y); 
@@ -624,7 +613,7 @@
             };
 
             const endDraw = () => { 
-                if (!isDrawing) return; 
+                if (!isDrawing || isAnimating) return; 
                 isDrawing = false; 
                 evaluateStroke(); 
             };
@@ -638,7 +627,6 @@
             drawCanvas.addEventListener('touchend', (e) => { e.preventDefault(); endDraw(); }, { passive: false });
         }
 
-        // ③ 判定処理
         function evaluateStroke() {
             if (userPoints.length < 2) { 
                 drawCanvasCtx.clearRect(0, 0, CANVAS_SIZE, CANVAS_SIZE); 
@@ -651,28 +639,50 @@
             
             const totalLen = pathEl.getTotalLength();
             const tStart = pathEl.getPointAtLength(0);
+            const tMid1 = pathEl.getPointAtLength(totalLen * 0.33);
+            const tMid2 = pathEl.getPointAtLength(totalLen * 0.66);
             const tEnd = pathEl.getPointAtLength(totalLen);
             
-            const targetStartX = tStart.x * SCALE + PADDING;
-            const targetStartY = tStart.y * SCALE + PADDING;
-            const targetEndX = tEnd.x * SCALE + PADDING;
-            const targetEndY = tEnd.y * SCALE + PADDING;
+            const scalePoint = (p) => ({ x: p.x * SCALE + PADDING, y: p.y * SCALE + PADDING });
+            const targetStart = scalePoint(tStart);
+            const targetMid1 = scalePoint(tMid1);
+            const targetMid2 = scalePoint(tMid2);
+            const targetEnd = scalePoint(tEnd);
 
-            const uStart = userPoints[0];
-            const uEnd = userPoints[userPoints.length - 1];
-
-            const distStart = Math.hypot(uStart.x - targetStartX, uStart.y - targetStartY);
-            const distEnd = Math.hypot(uEnd.x - targetEndX, uEnd.y - targetEndY);
-            
             let userLen = 0;
+            let userDistances = [0];
             for (let i = 1; i < userPoints.length; i++) {
                 userLen += Math.hypot(userPoints[i].x - userPoints[i-1].x, userPoints[i].y - userPoints[i-1].y);
+                userDistances.push(userLen);
             }
+
+            const getUserPointAtLen = (targetD) => {
+                if (targetD <= 0) return userPoints[0];
+                if (targetD >= userLen) return userPoints[userPoints.length - 1];
+                for (let i = 1; i < userPoints.length; i++) {
+                    if (userDistances[i] >= targetD) {
+                        let segment = userDistances[i] - userDistances[i-1];
+                        let ratio = segment === 0 ? 0 : (targetD - userDistances[i-1]) / segment;
+                        let p1 = userPoints[i-1], p2 = userPoints[i];
+                        return { x: p1.x + (p2.x - p1.x) * ratio, y: p1.y + (p2.y - p1.y) * ratio };
+                    }
+                }
+                return userPoints[userPoints.length - 1];
+            };
+
+            const uStart = userPoints[0];
+            const uMid1 = getUserPointAtLen(userLen * 0.33);
+            const uMid2 = getUserPointAtLen(userLen * 0.66);
+            const uEnd = userPoints[userPoints.length - 1];
+
+            const distStart = Math.hypot(uStart.x - targetStart.x, uStart.y - targetStart.y);
+            const distMid1 = Math.hypot(uMid1.x - targetMid1.x, uMid1.y - targetMid1.y);
+            const distMid2 = Math.hypot(uMid2.x - targetMid2.x, uMid2.y - targetMid2.y);
+            const distEnd = Math.hypot(uEnd.x - targetEnd.x, uEnd.y - targetEnd.y);
 
             const THRESHOLD = 50; 
             
-            if (distStart < THRESHOLD && distEnd < THRESHOLD && userLen > (totalLen * SCALE) * 0.4) {
-                // --- 正解した時の処理 ---
+            if (distStart < THRESHOLD && distMid1 < THRESHOLD && distMid2 < THRESHOLD && distEnd < THRESHOLD && userLen > (totalLen * SCALE) * 0.4) {
                 playSound('success'); 
                 document.getElementById('message-area').innerText = "いいぞ！ もっとやろう！";
                 
@@ -685,27 +695,86 @@
                 currentStrokeIndex++; 
                 drawCanvasCtx.clearRect(0, 0, CANVAS_SIZE, CANVAS_SIZE); 
 
-                // 最後の画まで書き終わったかチェック
                 if (currentStrokeIndex >= currentKanjiPaths.length) {
                     handleComplete(); 
                 }
             } else {
-                // --- 不正解の時の処理 ---
                 playSound('error'); 
-                document.getElementById('message-area').innerText = "おしい！ ここだよ";
+                document.getElementById('message-area').innerText = "おしい！ よくみて！";
                 drawCanvasCtx.clearRect(0, 0, CANVAS_SIZE, CANVAS_SIZE); 
             }
         }
-        
-        // 仮のアニメーション呼び出しボタン用
-        function playAnimationStub() {
-            alert('▶アニメーション機能は、新しいシステムに合わせて準備中だよ！');
+
+        async function playAnimation() {
+            if (isAnimating || currentKanjiPaths.length === 0) return;
+            isAnimating = true;
+
+            currentStrokeIndex = 0;
+            drawCanvasCtx.clearRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
+            fixedCanvasCtx.clearRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
+
+            fixedCanvasCtx.save();
+            fixedCanvasCtx.translate(PADDING, PADDING);
+            fixedCanvasCtx.scale(SCALE, SCALE);
+            fixedCanvasCtx.strokeStyle = '#00BFFF'; 
+
+            for (let i = 0; i < currentKanjiPaths.length; i++) {
+                if (!isAnimating) break; 
+                
+                const pathData = currentKanjiPaths[i];
+                const p = new Path2D(pathData);
+                const pathEl = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                pathEl.setAttribute('d', pathData);
+                const len = pathEl.getTotalLength();
+
+                await new Promise(resolve => {
+                    let start = null;
+                    const duration = 500; 
+
+                    const step = (timestamp) => {
+                        if (!isAnimating) { resolve(); return; }
+                        if (!start) start = timestamp;
+                        const progress = Math.min((timestamp - start) / duration, 1);
+
+                        fixedCanvasCtx.clearRect(-100, -100, (CANVAS_SIZE * 2) / SCALE, (CANVAS_SIZE * 2) / SCALE);
+                        
+                        for(let j=0; j<i; j++) {
+                            fixedCanvasCtx.setLineDash([]);
+                            fixedCanvasCtx.stroke(new Path2D(currentKanjiPaths[j]));
+                        }
+
+                        fixedCanvasCtx.setLineDash([len, len]);
+                        fixedCanvasCtx.lineDashOffset = len * (1 - progress);
+                        fixedCanvasCtx.stroke(p);
+
+                        if (progress < 1) {
+                            requestAnimationFrame(step);
+                        } else {
+                            fixedCanvasCtx.setLineDash([]); 
+                            resolve();
+                        }
+                    };
+                    requestAnimationFrame(step);
+                });
+                
+                if (!isAnimating) break;
+                await new Promise(r => setTimeout(r, 150)); 
+            }
+            fixedCanvasCtx.restore();
+
+            if (isAnimating) {
+                setTimeout(() => {
+                    if (!isAnimating) return;
+                    fixedCanvasCtx.clearRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
+                    fixedCanvasCtx.strokeStyle = '#333333'; 
+                    isAnimating = false;
+                }, 1000);
+            }
         }
 
-        // ▲▲▲ 新しい判定エンジンのコア関数群 ▲▲▲
-
-        // --- 漢字書き取りアプリ本体（書き換え版） ---
+        // --- アプリ制御 ---
         async function startApp(item) {
+            isAnimating = false;
             currentChar = item;
             window.scrollTo(0, 0);
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
@@ -730,7 +799,6 @@
                 readingDisplay.innerText = `${item.char} (${item.reading || ''})`;
             }
 
-            // ★ キャンバスHTMLのセットアップ
             const targetDiv = document.getElementById('character-target');
             targetDiv.innerHTML = `
                 <div style="position: relative; width: ${CANVAS_SIZE}px; height: ${CANVAS_SIZE}px; margin: 0 auto; background-color: white;">
@@ -740,15 +808,12 @@
                 </div>
             `;
 
-            // キャンバスの初期化
             initCanvasEngine();
             currentStrokeIndex = 0;
 
             try {
-                // KanjiVGからパスデータを取得
                 currentKanjiPaths = await fetchKanjiVG(item.char);
 
-                // れんしゅうモードなら、うすいガイド線を描画する
                 if (currentMode === 'practice' || currentMode === 'mykanji') {
                     bgCanvasCtx.save();
                     bgCanvasCtx.translate(PADDING, PADDING);
@@ -759,12 +824,11 @@
                     bgCanvasCtx.restore();
                 }
             } catch (error) {
-                msgArea.innerText = "エラー: 漢字データが読み込めませんでした";
+                msgArea.innerText = "エラー: データがよみこめません";
                 console.error(error);
             }
         }
 
-        // --- 結果の処理 ---
         function handleComplete() {
             playSound('complete');
             const msg = document.getElementById('result-msg');
@@ -775,15 +839,11 @@
             const storageKey = isPractice ? 'kanjiMasterPractice' : 'kanjiMasterTest';
 
             const oldLevel = getStats().level;
-            
             targetStorage[currentChar.char] = true;
             localStorage.setItem(storageKey, JSON.stringify(targetStorage));
-
             const newLevel = getStats().level;
             
-            if (!isRandomTest && newLevel > oldLevel) {
-                pendingLevelUp = true;
-            }
+            if (!isRandomTest && newLevel > oldLevel) pendingLevelUp = true;
 
             if (isPractice) {
                 msg.innerText = "できたー！"; msg.style.color = "#00D084"; icon.innerText = "⭐";
@@ -798,13 +858,11 @@
 
         function handleNextClick() {
             document.getElementById('result-overlay').classList.remove('active');
-            
             if (pendingLevelUp) {
                 pendingLevelUp = false;
                 showLevelUpDisplay(getStats().level);
                 return;
             }
-            
             moveToNextKanji();
         }
 
@@ -849,14 +907,12 @@
             playSound('levelup');
             document.getElementById('levelup-overlay').classList.add('active');
             document.getElementById('new-level-num').innerText = level;
-            
             const newTitleData = getTitleData(level);
             document.getElementById('levelup-mascot').innerText = newTitleData.mascot;
         }
 
         function closeLevelUp() {
             document.getElementById('levelup-overlay').classList.remove('active');
-            
             if (pendingGoHome) {
                 pendingGoHome = false;
                 showScreen('title-screen');
@@ -867,7 +923,6 @@
 
         function handleRandomClearClick() {
             document.getElementById('random-clear-overlay').classList.remove('active');
-            
             const currentLevel = getStats().level;
             if (currentLevel > levelBeforeRandomTest) {
                 pendingGoHome = true;
@@ -877,7 +932,10 @@
             }
         }
 
-        function retry() { startApp(currentChar); }
+        function retry() { 
+            isAnimating = false; 
+            startApp(currentChar); 
+        }
 
         function showResetConfirm() { playSound('click'); document.getElementById('reset-confirm').classList.add('active'); }
         function closeResetConfirm() { playSound('click'); document.getElementById('reset-confirm').classList.remove('active'); }
