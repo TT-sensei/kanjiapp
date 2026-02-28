@@ -292,6 +292,7 @@
         let isDrawing = false;      
         let userPoints = [];        
         let isAnimating = false;    // アニメーション制御用
+        let hintTimeout = null;     // ★追加：ヒント表示のタイマー管理用
 
         let bgCanvasCtx, fixedCanvasCtx, drawCanvasCtx;
 
@@ -331,25 +332,47 @@
             if (!audioContext) audioContext = new (window.AudioContext || window.webkitAudioContext)();
             if (audioContext.state === 'suspended') audioContext.resume();
             const now = audioContext.currentTime;
+            
             const createOsc = (freq, type, dur, vol = 0.1) => {
                 const osc = audioContext.createOscillator();
                 const gain = audioContext.createGain();
-                osc.type = type; osc.frequency.setValueAtTime(freq, now);
-                gain.gain.setValueAtTime(vol, now); gain.gain.exponentialRampToValueAtTime(0.01, now + dur);
-                osc.connect(gain); gain.connect(audioContext.destination); osc.start(now); osc.stop(now + dur);
+                osc.type = type; 
+                osc.frequency.setValueAtTime(freq, now);
+                gain.gain.setValueAtTime(vol, now); 
+                gain.gain.exponentialRampToValueAtTime(0.01, now + dur);
+                osc.connect(gain); 
+                gain.connect(audioContext.destination); 
+                osc.start(now); 
+                osc.stop(now + dur);
             };
+
             switch(type) {
-                case 'success': createOsc(800, 'sine', 0.2); break;
-                case 'click': createOsc(500, 'triangle', 0.1, 0.08); break;
-                case 'error': createOsc(250, 'sawtooth', 0.3, 0.1); break;
-                case 'complete': createOsc(600, 'sine', 0.15); setTimeout(() => createOsc(900, 'sine', 0.25), 120); break;
+                case 'success': 
+                    // ★ 気持ちいい高音（和音でピロン♪）
+                    createOsc(880, 'sine', 0.15, 0.1); 
+                    setTimeout(() => createOsc(1108, 'sine', 0.2, 0.1), 50);
+                    break;
+                case 'click': 
+                    createOsc(500, 'triangle', 0.1, 0.08); 
+                    break;
+                case 'error': 
+                    // ★ ぶっという低い音
+                    createOsc(150, 'sawtooth', 0.3, 0.1); 
+                    break;
+                case 'complete': 
+                    createOsc(600, 'sine', 0.15); 
+                    setTimeout(() => createOsc(900, 'sine', 0.25), 120); 
+                    break;
                 case 'levelup': 
                     const melody = [523, 659, 783, 1046, 783, 1046];
                     melody.forEach((f, i) => {
-                        const o = audioContext.createOscillator(); const g = audioContext.createGain();
+                        const o = audioContext.createOscillator(); 
+                        const g = audioContext.createGain();
                         o.type = 'square'; o.frequency.value = f;
-                        g.gain.setValueAtTime(0.12, now + i*0.1); g.gain.exponentialRampToValueAtTime(0.01, now + i*0.1 + 0.35);
-                        o.connect(g); g.connect(audioContext.destination); o.start(now + i*0.1); o.stop(now + i*0.1 + 0.35);
+                        g.gain.setValueAtTime(0.12, now + i*0.1); 
+                        g.gain.exponentialRampToValueAtTime(0.01, now + i*0.1 + 0.35);
+                        o.connect(g); g.connect(audioContext.destination); 
+                        o.start(now + i*0.1); o.stop(now + i*0.1 + 0.35);
                     });
                     break;
             }
@@ -552,6 +575,7 @@
         }
 
         function handleBackFromPractice() {
+            if (hintTimeout) { clearTimeout(hintTimeout); hintTimeout = null; }
             isAnimating = false;
             if (isRandomTest) {
                 showScreen('title-screen');
@@ -627,6 +651,43 @@
             drawCanvas.addEventListener('touchend', (e) => { e.preventDefault(); endDraw(); }, { passive: false });
         }
 
+        // ★新規追加：1秒間だけヒントを表示する関数
+        function showStrokeHint(index) {
+            if (index >= currentKanjiPaths.length) return;
+            const pathData = currentKanjiPaths[index];
+            
+            // すでにヒント表示中ならタイマーをリセット
+            if (hintTimeout) clearTimeout(hintTimeout);
+
+            // 一時的に赤い薄い線でヒントを描画
+            fixedCanvasCtx.save();
+            fixedCanvasCtx.translate(PADDING, PADDING);
+            fixedCanvasCtx.scale(SCALE, SCALE);
+            fixedCanvasCtx.strokeStyle = 'rgba(255, 60, 60, 0.6)'; // 薄い赤
+            fixedCanvasCtx.lineWidth = 5;
+            fixedCanvasCtx.lineCap = 'round';
+            fixedCanvasCtx.lineJoin = 'round';
+            fixedCanvasCtx.stroke(new Path2D(pathData));
+            fixedCanvasCtx.restore();
+
+            // 1秒後にヒントを消して、正解済みの画を再描画する
+            hintTimeout = setTimeout(() => {
+                fixedCanvasCtx.clearRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
+                fixedCanvasCtx.save();
+                fixedCanvasCtx.translate(PADDING, PADDING);
+                fixedCanvasCtx.scale(SCALE, SCALE);
+                fixedCanvasCtx.strokeStyle = '#333333';
+                fixedCanvasCtx.lineWidth = 5;
+                fixedCanvasCtx.lineCap = 'round';
+                fixedCanvasCtx.lineJoin = 'round';
+                for (let i = 0; i < currentStrokeIndex; i++) {
+                    fixedCanvasCtx.stroke(new Path2D(currentKanjiPaths[i]));
+                }
+                fixedCanvasCtx.restore();
+                hintTimeout = null;
+            }, 1000);
+        }
+
         function evaluateStroke() {
             if (userPoints.length < 2) { 
                 drawCanvasCtx.clearRect(0, 0, CANVAS_SIZE, CANVAS_SIZE); 
@@ -682,31 +743,52 @@
 
             const THRESHOLD = 50; 
             
+            // ★判定ロジック
             if (distStart < THRESHOLD && distMid1 < THRESHOLD && distMid2 < THRESHOLD && distEnd < THRESHOLD && userLen > (totalLen * SCALE) * 0.4) {
+                // 正解のとき
                 playSound('success'); 
-                document.getElementById('message-area').innerText = "いいぞ！ もっとやろう！";
+                document.getElementById('message-area').innerText = "いいぞ！ その調子！";
                 
+                // ヒントがまだ表示中ならタイマーを止める
+                if (hintTimeout) {
+                    clearTimeout(hintTimeout);
+                    hintTimeout = null;
+                }
+
+                currentStrokeIndex++; 
+                drawCanvasCtx.clearRect(0, 0, CANVAS_SIZE, CANVAS_SIZE); 
+
+                // 確定した線をすべて描き直す（ヒントの赤い線を確実に消すため）
+                fixedCanvasCtx.clearRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
                 fixedCanvasCtx.save();
                 fixedCanvasCtx.translate(PADDING, PADDING);
                 fixedCanvasCtx.scale(SCALE, SCALE);
-                fixedCanvasCtx.stroke(new Path2D(pathData));
+                fixedCanvasCtx.strokeStyle = '#333333';
+                fixedCanvasCtx.lineWidth = 5;
+                fixedCanvasCtx.lineCap = 'round';
+                fixedCanvasCtx.lineJoin = 'round';
+                for (let i = 0; i < currentStrokeIndex; i++) {
+                    fixedCanvasCtx.stroke(new Path2D(currentKanjiPaths[i]));
+                }
                 fixedCanvasCtx.restore();
-                
-                currentStrokeIndex++; 
-                drawCanvasCtx.clearRect(0, 0, CANVAS_SIZE, CANVAS_SIZE); 
 
                 if (currentStrokeIndex >= currentKanjiPaths.length) {
                     handleComplete(); 
                 }
             } else {
+                // 不正解のとき
                 playSound('error'); 
-                document.getElementById('message-area').innerText = "おしい！ よくみて！";
+                document.getElementById('message-area').innerText = "おしい！ ここを見て！";
                 drawCanvasCtx.clearRect(0, 0, CANVAS_SIZE, CANVAS_SIZE); 
+                
+                // 1秒間のヒントを表示
+                showStrokeHint(currentStrokeIndex);
             }
         }
 
         async function playAnimation() {
             if (isAnimating || currentKanjiPaths.length === 0) return;
+            if (hintTimeout) { clearTimeout(hintTimeout); hintTimeout = null; } // アニメ開始前にヒントを消す
             isAnimating = true;
 
             currentStrokeIndex = 0;
@@ -774,6 +856,7 @@
 
         // --- アプリ制御 ---
         async function startApp(item) {
+            if (hintTimeout) { clearTimeout(hintTimeout); hintTimeout = null; }
             isAnimating = false;
             currentChar = item;
             window.scrollTo(0, 0);
@@ -933,6 +1016,7 @@
         }
 
         function retry() { 
+            if (hintTimeout) { clearTimeout(hintTimeout); hintTimeout = null; }
             isAnimating = false; 
             startApp(currentChar); 
         }
