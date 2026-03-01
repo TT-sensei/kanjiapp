@@ -516,6 +516,7 @@ function evaluateStroke() {
     }
 }
 
+// ★ 書き順アニメーションを2倍速に変更
 async function playAnimation() {
     if (isAnimating || currentKanjiPaths.length === 0) return;
     if (hintTimeout) { clearTimeout(hintTimeout); hintTimeout = null; } 
@@ -541,7 +542,7 @@ async function playAnimation() {
 
         await new Promise(resolve => {
             let start = null;
-            const duration = 500; 
+            const duration = 250; 
 
             const step = (timestamp) => {
                 if (!isAnimating) { resolve(); return; }
@@ -570,7 +571,7 @@ async function playAnimation() {
         });
         
         if (!isAnimating) break;
-        await new Promise(r => setTimeout(r, 150)); 
+        await new Promise(r => setTimeout(r, 60)); 
     }
     fixedCanvasCtx.restore();
 
@@ -580,7 +581,7 @@ async function playAnimation() {
             fixedCanvasCtx.clearRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
             fixedCanvasCtx.strokeStyle = '#333333'; 
             isAnimating = false;
-        }, 1000);
+        }, 600); 
     }
 }
 
@@ -623,6 +624,22 @@ async function startApp(item) {
 
     initCanvasEngine();
     currentStrokeIndex = 0;
+
+    // ★ ここから追加：薄い緑色の十字点線（ガイド）を描画
+    bgCanvasCtx.save();
+    bgCanvasCtx.strokeStyle = '#A5D6A7'; // 薄い緑色
+    bgCanvasCtx.lineWidth = 2;           // 太さ
+    bgCanvasCtx.setLineDash([6, 6]);     // 点線の間隔
+    bgCanvasCtx.beginPath();
+    // 縦線
+    bgCanvasCtx.moveTo(CANVAS_SIZE / 2, 0);
+    bgCanvasCtx.lineTo(CANVAS_SIZE / 2, CANVAS_SIZE);
+    // 横線
+    bgCanvasCtx.moveTo(0, CANVAS_SIZE / 2);
+    bgCanvasCtx.lineTo(CANVAS_SIZE, CANVAS_SIZE / 2);
+    bgCanvasCtx.stroke();
+    bgCanvasCtx.restore();
+    // ★ ここまで
 
     try {
         currentKanjiPaths = await fetchKanjiVG(item.char);
@@ -759,7 +776,7 @@ function executeReset() {
     playSound('click');
     localStorage.clear();
     progressPractice = {}; progressTest = {}; 
-    tokkunKanji = {}; nigateKanji = {}; // ★ 変更箇所
+    tokkunKanji = {}; nigateKanji = {}; 
     bonusXP = 0;
     document.getElementById('reset-confirm').classList.remove('active');
     location.reload();
