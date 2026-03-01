@@ -597,49 +597,126 @@ async function startApp(item) {
     updateFolderBtns();
 
     const msgArea = document.getElementById('message-area');
+    
+    // ★ 元々あった横書きの読み仮名を隠す
     const readingDisplay = document.getElementById('current-reading');
+    if (readingDisplay) readingDisplay.style.display = 'none';
     
     if (isRandomTest) {
         msgArea.innerText = `🎲 テスト: ${randomIndex + 1} / ${randomQueue.length}問目`;
         msgArea.style.color = "#9B59B6";
-        readingDisplay.innerText = item.reading ? item.reading.split('/')[0] : "（よめない）";
     } else if (currentMode === 'test') {
         msgArea.innerText = "この かんじ を かこう！";
         msgArea.style.color = "#FF1493";
-        readingDisplay.innerText = item.reading ? item.reading.split('/')[0] : "（よめない）";
     } else {
         msgArea.innerText = "うすいせんを なぞろう！";
         msgArea.style.color = "#00D084";
-        readingDisplay.innerText = `${item.char} (${item.reading || ''})`;
     }
 
+    // ★ 読み仮名を「音読み（カタカナ）」と「訓読み（ひらがな）」に分ける
+    let onyomi = [];
+    let kunyomi = [];
+    if (item.reading) {
+        const cleanReading = item.reading.replace(/\./g, '');
+        const parts = cleanReading.split(/[、,／\/ \u3000]+/);
+        parts.forEach(p => {
+            if (!p) return;
+            if (/[\u30A0-\u30FF]/.test(p)) {
+                onyomi.push(p);
+            } else {
+                kunyomi.push(p);
+            }
+        });
+    }
+
+    const displayOn = onyomi.length > 0 ? onyomi.join("・") : "";
+    const displayKun = kunyomi.length > 0 ? kunyomi.join("・") : "";
+
+    const displayOnMobile = onyomi.length > 0 ? `<span style="font-size: 0.8rem; color:#999; margin-right:4px;">音</span>${onyomi.join("・")}` : "";
+    const displayKunMobile = kunyomi.length > 0 ? `<span style="font-size: 0.8rem; color:#999; margin-right:4px;">訓</span>${kunyomi.join("・")}` : "";
+
     const targetDiv = document.getElementById('character-target');
+    
+    // ★ PCは左右縦書き、スマホは上下横並びのレスポンシブレイアウト
     targetDiv.innerHTML = `
-        <div style="position: relative; width: ${CANVAS_SIZE}px; height: ${CANVAS_SIZE}px; margin: 0 auto; background-color: white;">
-            <canvas id="bg-canvas" width="${CANVAS_SIZE}" height="${CANVAS_SIZE}" style="position: absolute; top: 0; left: 0; z-index: 1;"></canvas>
-            <canvas id="fixed-canvas" width="${CANVAS_SIZE}" height="${CANVAS_SIZE}" style="position: absolute; top: 0; left: 0; z-index: 2;"></canvas>
-            <canvas id="draw-canvas" width="${CANVAS_SIZE}" height="${CANVAS_SIZE}" style="position: absolute; top: 0; left: 0; z-index: 3; touch-action: none; cursor: crosshair;"></canvas>
+        <style>
+            .kanji-layout {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                gap: 15px;
+                width: 100%;
+            }
+            .yomi-pc {
+                writing-mode: vertical-rl;
+                text-orientation: upright;
+                font-size: 1.4rem;
+                font-weight: bold;
+                letter-spacing: 0.2rem;
+                height: ${CANVAS_SIZE}px;
+                text-align: start;
+            }
+            .yomi-mobile {
+                display: none;
+            }
+            
+            @media (max-width: 500px) {
+                .kanji-layout {
+                    flex-direction: column;
+                    gap: 10px;
+                }
+                .yomi-pc {
+                    display: none;
+                }
+                .yomi-mobile {
+                    display: flex;
+                    justify-content: center;
+                    gap: 20px;
+                    width: 100%;
+                    font-size: 1.2rem;
+                    font-weight: bold;
+                    letter-spacing: 0.1rem;
+                }
+            }
+        </style>
+        
+        <div class="kanji-layout">
+            <div class="yomi-pc" style="color: #E65100;">
+                ${displayOn}
+            </div>
+
+            <div class="yomi-mobile">
+                <div style="color: #E65100;">${displayOnMobile}</div>
+                <div style="color: #0277BD;">${displayKunMobile}</div>
+            </div>
+
+            <div style="position: relative; width: ${CANVAS_SIZE}px; height: ${CANVAS_SIZE}px; margin: 0; background-color: white; flex-shrink: 0; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.1);">
+                <canvas id="bg-canvas" width="${CANVAS_SIZE}" height="${CANVAS_SIZE}" style="position: absolute; top: 0; left: 0; z-index: 1;"></canvas>
+                <canvas id="fixed-canvas" width="${CANVAS_SIZE}" height="${CANVAS_SIZE}" style="position: absolute; top: 0; left: 0; z-index: 2;"></canvas>
+                <canvas id="draw-canvas" width="${CANVAS_SIZE}" height="${CANVAS_SIZE}" style="position: absolute; top: 0; left: 0; z-index: 3; touch-action: none; cursor: crosshair;"></canvas>
+            </div>
+
+            <div class="yomi-pc" style="color: #0277BD;">
+                ${displayKun}
+            </div>
         </div>
     `;
 
     initCanvasEngine();
     currentStrokeIndex = 0;
 
-    // ★ ここから追加：薄い緑色の十字点線（ガイド）を描画
+    // 薄い緑色の十字点線（ガイド）を描画
     bgCanvasCtx.save();
-    bgCanvasCtx.strokeStyle = '#A5D6A7'; // 薄い緑色
-    bgCanvasCtx.lineWidth = 2;           // 太さ
-    bgCanvasCtx.setLineDash([6, 6]);     // 点線の間隔
+    bgCanvasCtx.strokeStyle = '#A5D6A7'; 
+    bgCanvasCtx.lineWidth = 2;           
+    bgCanvasCtx.setLineDash([6, 6]);     
     bgCanvasCtx.beginPath();
-    // 縦線
     bgCanvasCtx.moveTo(CANVAS_SIZE / 2, 0);
     bgCanvasCtx.lineTo(CANVAS_SIZE / 2, CANVAS_SIZE);
-    // 横線
     bgCanvasCtx.moveTo(0, CANVAS_SIZE / 2);
     bgCanvasCtx.lineTo(CANVAS_SIZE, CANVAS_SIZE / 2);
     bgCanvasCtx.stroke();
     bgCanvasCtx.restore();
-    // ★ ここまで
 
     try {
         currentKanjiPaths = await fetchKanjiVG(item.char);
