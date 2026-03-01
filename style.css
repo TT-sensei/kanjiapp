@@ -1,0 +1,137 @@
+@import url('https://fonts.googleapis.com/css2?family=Kosugi+Maru:wght@400;700&display=swap');
+
+:root {
+    --primary: #FF1493;
+    --secondary: #00D084;
+    --accent: #00BFFF;
+    --accent2: #FFD700;
+    --accent3: #FF6B35;
+    --accent4: #9B59B6;
+    --bg-light: #FFF8F0;
+    --text: #2D1B3D;
+    --shadow-pop: 0 8px 0 rgba(0,0,0,0.15);
+    --shadow-soft: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+html, body {
+    font-family: 'Kosugi Maru', sans-serif;
+    background: linear-gradient(135deg, #FFE5EC 0%, #E0F7FF 50%, #E5FFE5 100%);
+    color: var(--text);
+    margin: 0;
+    padding: 0;
+    text-align: center;
+    user-select: none;
+    overflow-x: hidden;
+    touch-action: manipulation;
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
+}
+
+/* 画面共通設定 */
+.screen { display: none; padding: 20px; min-height: 100vh; box-sizing: border-box; animation: fadeIn 0.3s; }
+.screen.active { display: block; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+/* タイトル画面 */
+#title-screen { background: linear-gradient(180deg, #FFE5EC 0%, #E0F7FF 50%, #E5FFE5 100%); padding-top: 40px; padding-bottom: 50px; }
+h1 { font-size: 3rem; margin: 0; background: linear-gradient(90deg, var(--primary), var(--accent3), var(--secondary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; font-weight: 700; letter-spacing: 2px; }
+.mascot-area { font-size: 6rem; margin: 20px 0; animation: bounce 2s infinite; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.1)); }
+@keyframes bounce { 0%, 100% { transform: translateY(0) scale(1); } 50% { transform: translateY(-20px) scale(1.05); } }
+
+.level-title-area { font-size: 1.4rem; font-weight: 700; margin-bottom: 20px; display: flex; justify-content: center; align-items: center; gap: 10px; }
+.title-badge { background: linear-gradient(135deg, var(--accent2), #FF8C00); color: white; padding: 4px 14px; border-radius: 20px; font-size: 1rem; box-shadow: var(--shadow-soft); text-shadow: 0 1px 2px rgba(0,0,0,0.2); }
+
+.menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; width: 95%; max-width: 400px; margin: 15px auto; }
+.menu-btn { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; padding: 15px 5px; font-size: 1rem; border: none; border-radius: 20px; cursor: pointer; box-shadow: var(--shadow-pop); transition: all 0.1s; font-family: inherit; font-weight: 700; position: relative; overflow: hidden; box-sizing: border-box; line-height: 1.4; }
+.menu-btn::before { content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%; background: rgba(255,255,255,0.3); transition: left 0.3s; }
+.menu-btn:hover::before { left: 100%; }
+.menu-btn:active { transform: translateY(7px); box-shadow: 0 2px 0 rgba(0,0,0,0.15); }
+.btn-practice { background: linear-gradient(135deg, #00D084, #00E5A0); color: white; }
+.btn-test { background: linear-gradient(135deg, #FF1493, #FF69B4); color: white; }
+.btn-mykanji { background: linear-gradient(135deg, #FF9800, #FFB74D); color: white; }
+.btn-mykanji-test { background: linear-gradient(135deg, #FF5722, #FF8A65); color: white; }
+.btn-random { grid-column: span 2; background: linear-gradient(135deg, #9B59B6, #D291BC); color: white; flex-direction: row; gap: 8px; padding: 18px 10px; font-size: 1.1rem; }
+
+.grade-selector { display: flex; justify-content: center; gap: 8px; margin: 25px 0; flex-wrap: wrap; }
+.grade-btn { width: 75px; height: 75px; border-radius: 20px; border: 4px solid white; background: rgba(255,255,255,0.5); color: var(--text); font-size: 0.8rem; font-weight: 700; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; transition: all 0.2s; font-family: inherit; box-shadow: var(--shadow-soft); }
+.grade-btn-icon { font-size: 2rem; }
+.grade-btn.selected { background: white; transform: scale(1.15) rotateZ(-3deg); box-shadow: 0 0 20px rgba(255, 20, 147, 0.4); border-color: var(--primary); }
+
+.home-search-box { margin: 20px auto; width: 90%; max-width: 400px; display: flex; gap: 6px; box-sizing: border-box; }
+.home-search-box input { flex: 1; min-width: 0; box-sizing: border-box; padding: 12px; border-radius: 25px; border: 3px solid white; font-size: 1rem; text-align: center; background: white; box-shadow: var(--shadow-soft); color: var(--text); font-family: inherit; }
+.home-search-box button { box-sizing: border-box; background: linear-gradient(135deg, var(--accent), #00E5FF); color: white; border: 3px solid transparent; border-radius: 25px; padding: 12px 20px; cursor: pointer; font-weight: 700; box-shadow: var(--shadow-pop); font-family: inherit; }
+.home-search-box button:active { transform: translateY(4px); box-shadow: 0 2px 0 rgba(0,0,0,0.15); }
+
+/* リスト画面 */
+.header-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; background: white; padding: 15px 20px; border-radius: 20px; box-shadow: var(--shadow-soft); border: 3px solid white; }
+.back-btn { background: linear-gradient(135deg, #9E9E9E, #B0BEC5); color: white; border: none; padding: 8px 18px; border-radius: 25px; cursor: pointer; font-size: 1rem; font-weight: 700; box-shadow: 0 3px 0 rgba(0,0,0,0.1); font-family: inherit; }
+.back-btn:active { transform: translateY(3px); box-shadow: 0 1px 0 rgba(0,0,0,0.1); }
+.search-area { margin-bottom: 20px; }
+#search-box { width: 75%; max-width: 240px; padding: 10px; font-size: 0.95rem; border: 3px solid var(--primary); border-radius: 20px; text-align: center; background: white; box-shadow: var(--shadow-soft); font-family: inherit; }
+.kanji-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(85px, 1fr)); gap: 12px; padding-bottom: 50px; }
+.kanji-card { background: white; aspect-ratio: 1; display: flex; align-items: center; justify-content: center; font-size: 2.8rem; border-radius: 18px; box-shadow: var(--shadow-pop); cursor: pointer; position: relative; border: 3px solid transparent; font-weight: 700; }
+.kanji-card:active { transform: scale(0.92); box-shadow: 0 2px 0 rgba(0,0,0,0.1); }
+.kanji-card.cleared-practice { border-color: var(--secondary); background: linear-gradient(135deg, #E5FFF5, #F0FFFA); }
+.kanji-card.cleared-test { border-color: var(--primary); background: linear-gradient(135deg, #FFE5F5, #FFF0F7); }
+.mark-badge { position: absolute; top: -8px; right: -8px; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; border: 3px solid white; box-shadow: 0 3px 8px rgba(0,0,0,0.2); }
+.cleared-practice .star-mark { background: linear-gradient(135deg, var(--accent2), #FFE700); border-radius: 50%; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;}
+.cleared-test .crown-mark { background: linear-gradient(135deg, var(--primary), #FF69B4); border-radius: 50%; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;}
+.mykanji-mark { background: linear-gradient(135deg, #FF9800, #FFB74D); border-radius: 50%; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; position: absolute; bottom: -6px; left: -6px; font-size: 12px; border: 2px solid white; color: white; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+.mykanji-btn { background: #EEE; color: #666; border: 2px solid #CCC; padding: 8px 14px; border-radius: 20px; cursor: pointer; font-weight: 700; font-family: inherit; transition: all 0.2s; font-size: 0.9rem; }
+.mykanji-btn.active { background: linear-gradient(135deg, #FF9800, #FFB74D); color: white; border-color: white; box-shadow: 0 3px 0 rgba(0,0,0,0.1); }
+
+/* 練習画面 */
+#practice-area { background: white; border-radius: 25px; padding: 25px; box-shadow: var(--shadow-soft); display: inline-block; margin-top: 20px; border: 4px solid white; touch-action: none; }
+.controls { margin-top: 25px; display: flex; justify-content: center; gap: 20px; }
+.control-btn { background: linear-gradient(135deg, var(--accent), #00E5FF); color: white; border: none; width: 70px; height: 70px; border-radius: 50%; font-size: 1.8rem; cursor: pointer; box-shadow: var(--shadow-pop); font-weight: 700; display: flex; align-items: center; justify-content: center; }
+.control-btn:active { transform: translateY(7px); box-shadow: 0 2px 0 #1976D2; }
+.control-btn:nth-child(2) { background: linear-gradient(135deg, var(--accent3), #FF8555); }
+
+/* 経験値バー */
+.xp-container { width: 90%; max-width: 420px; height: 24px; background: white; border-radius: 15px; margin: 15px auto; overflow: hidden; position: relative; box-shadow: inset 0 2px 4px rgba(0,0,0,0.1); border: 3px solid #E0E0E0; }
+.xp-bar { height: 100%; background: linear-gradient(90deg, var(--secondary), #00E5A0); width: 0%; transition: width 0.5s ease; }
+
+/* 結果オーバーレイ */
+.overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); display: none; z-index: 100; flex-direction: column; color: white; backdrop-filter: blur(3px); align-items: center; justify-content: center; box-sizing: border-box; }
+.overlay.active { display: flex; animation: popIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); }
+@keyframes popIn { from { transform: scale(0.5); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+.result-content { background: white; color: var(--text); padding: 30px 20px; border-radius: 30px; text-align: center; width: 85%; max-width: 320px; box-shadow: 0 10px 40px rgba(0,0,0,0.3); border: 4px solid white; max-height: 85vh; overflow-y: auto; }
+.big-icon { font-size: 5rem; margin: 10px 0; }
+.result-content h2 { font-size: 1.8rem; margin: 10px 0; font-weight: 700; }
+.next-btn { background: linear-gradient(135deg, var(--primary), #FF69B4); color: white; border: none; padding: 14px 30px; font-size: 1.1rem; border-radius: 30px; cursor: pointer; margin-top: 15px; box-shadow: var(--shadow-pop); font-weight: 700; font-family: inherit; transition: all 0.1s; }
+.next-btn:active { transform: translateY(6px); box-shadow: 0 2px 0 rgba(0,0,0,0.15); }
+.retry-btn { background: none; border: 2px solid #DDD; color: #999; padding: 8px 20px; border-radius: 20px; cursor: pointer; margin-top: 10px; font-family: inherit; }
+
+/* レベルアップ特別演出 */
+#levelup-overlay { background: rgba(255, 20, 147, 0.95); }
+.levelup-anim { font-size: 3.5rem; animation: spin 1s infinite linear; margin: 10px 0;}
+@keyframes spin { 100% { transform: rotate(360deg); } }
+#levelup-overlay .result-content { background: linear-gradient(135deg, #FFE5EC, #E0F7FF); border-color: var(--primary); }
+#levelup-overlay h2 { background: linear-gradient(90deg, var(--primary), var(--accent3)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-size: 1.6rem; margin-bottom: 5px; }
+#levelup-mascot { font-size: 4rem; margin: 10px 0; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.1)); }
+.new-level-text { font-size: 1.3rem; margin: 10px 0; font-weight:700; }
+
+/* リセット確認モーダル */
+.confirm-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 200; align-items: center; justify-content: center; }
+.confirm-modal.active { display: flex; }
+.confirm-content { background: white; padding: 30px; border-radius: 25px; width: 85%; max-width: 300px; border: 4px solid white; text-align: center; }
+.confirm-btn { width: 100%; padding: 14px; margin-top: 12px; border: none; border-radius: 18px; font-size: 1rem; cursor: pointer; font-weight: 700; box-shadow: var(--shadow-pop); }
+.confirm-btn-yes { background: linear-gradient(135deg, #FF6B6B, #FF5252); color: white; }
+.confirm-btn-no { background: linear-gradient(135deg, #B0BEC5, #90A4AE); color: white; }
+
+#mode-display { padding: 8px 20px; border-radius: 20px; color: white; font-size: 0.95rem; font-weight: 700; display: inline-block; }
+#message-area { margin: 15px 0; font-size: 1.3rem; font-weight: 700; min-height: 30px; }
+#current-reading { font-size: 1.2rem; font-weight: 700; min-height: 40px;}
+.reset-link { margin-top: 20px; font-size: 0.85rem; }
+.reset-link span { color: var(--primary); text-decoration: underline; cursor: pointer; font-weight: 700; }
+
+/* フッター・クレジット用デザイン */
+.footer-note, .app-credits-container { text-align: left; background: rgba(255, 255, 255, 0.9); padding: 20px; margin: 30px auto 10px; width: 90%; max-width: 400px; border-radius: 20px; box-shadow: var(--shadow-soft); font-size: 0.9rem; line-height: 1.5; box-sizing: border-box; border: 3px solid white; }
+.credit-warning-box { background: #FFF3E0; padding: 12px; border-radius: 10px; margin-bottom: 15px; border-left: 5px solid var(--accent3); }
+.credit-warning-title { font-weight: bold; color: #D35400; margin-bottom: 5px; }
+.credit-section-title { font-size: 1rem; border-bottom: 2px solid #EEE; padding-bottom: 5px; margin-top: 20px; color: var(--text); }
+.credit-list { list-style: none; padding: 0; margin: 0; }
+.credit-item { margin-bottom: 15px; margin-top: 10px; }
+.credit-name { font-weight: bold; color: var(--primary); }
+.credit-desc { font-size: 0.8rem; color: #666; margin-top: 3px; }
