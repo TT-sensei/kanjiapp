@@ -1,7 +1,6 @@
 // --- 状態管理 ---
 let progressPractice = JSON.parse(localStorage.getItem('kanjiMasterPractice')) || {};
 let progressTest = JSON.parse(localStorage.getItem('kanjiMasterTest')) || {};
-// ★ マイ漢字を廃止し、2つのフォルダを追加
 let tokkunKanji = JSON.parse(localStorage.getItem('kanjiMasterTokkun')) || {}; 
 let nigateKanji = JSON.parse(localStorage.getItem('kanjiMasterNigate')) || {}; 
 let bonusXP = parseInt(localStorage.getItem('kanjiMasterBonusXP')) || 0;
@@ -14,8 +13,8 @@ let currentKanjiPaths = [];
 let currentStrokeIndex = 0; 
 let isDrawing = false;      
 let userPoints = [];        
-let isAnimating = false;    // アニメーション制御用
-let hintTimeout = null;     // ヒント表示のタイマー管理用
+let isAnimating = false;    
+let hintTimeout = null;     
 
 let bgCanvasCtx, fixedCanvasCtx, drawCanvasCtx;
 
@@ -140,7 +139,7 @@ function updateUI() {
     document.getElementById('xp-bar').style.width = `${percent}%`;
 }
 
-// ★ フォルダごとの切り替え処理
+// フォルダごとの切り替え処理
 function toggleFolder(type) {
     playSound('click');
     if (!currentChar) return;
@@ -202,9 +201,18 @@ function handleHomeSearch() {
 function selectMode(mode) { playSound('click'); currentMode = mode; document.getElementById('search-box').value = ''; showScreen('list-screen'); }
 function filterList() { renderList(); }
 
+// ★ カタカナをひらがなに変換する関数（検索用）
+function toHiragana(str) {
+    if (!str) return '';
+    return str.replace(/[\u30a1-\u30f6]/g, match => String.fromCharCode(match.charCodeAt(0) - 0x60));
+}
+
 function renderList() {
     updateUI();
     const searchText = document.getElementById('search-box').value.trim();
+    // 検索ワードをひらがなに統一
+    const searchKana = toHiragana(searchText);
+    
     const grid = document.getElementById('kanji-grid');
     const badge = document.getElementById('mode-display');
     
@@ -236,13 +244,23 @@ function renderList() {
             }
         }
         if (searchText) {
-            filtered = filtered.filter(item => item.char.includes(searchText) || (item.reading && item.reading.includes(searchText)));
+            // ★ とっくん・にがてフォルダ内での検索時もひらがな・カタカナ区別なく検索
+            filtered = filtered.filter(item => {
+                const matchChar = item.char.includes(searchText);
+                const matchReading = item.reading && toHiragana(item.reading).includes(searchKana);
+                return matchChar || matchReading;
+            });
         }
     } else {
         if (searchText) {
+            // ★ 通常モードでの検索時もひらがな・カタカナ区別なく検索
             for (let g = 1; g <= 6; g++) {
                 if (allKanjiData[g]) {
-                    const matches = allKanjiData[g].filter(item => item.char.includes(searchText) || (item.reading && item.reading.includes(searchText)));
+                    const matches = allKanjiData[g].filter(item => {
+                        const matchChar = item.char.includes(searchText);
+                        const matchReading = item.reading && toHiragana(item.reading).includes(searchKana);
+                        return matchChar || matchReading;
+                    });
                     matches.forEach(m => m._foundGrade = g);
                     filtered = filtered.concat(matches);
                 }
@@ -289,7 +307,6 @@ function startRandomTest() {
     startApp(randomQueue[randomIndex]);
 }
 
-// ★ フォルダ別のテスト開始処理
 function startFolderRandomTest(folderType) {
     playSound('click');
     let list = [];
@@ -597,7 +614,7 @@ async function startApp(item) {
 
     const msgArea = document.getElementById('message-area');
     const readingDisplay = document.getElementById('current-reading');
-    if (readingDisplay) readingDisplay.style.display = 'none'; // 元の読み表示を隠す
+    if (readingDisplay) readingDisplay.style.display = 'none'; 
     
     if (isRandomTest) {
         msgArea.innerText = `🎲 テスト: ${randomIndex + 1} / ${randomQueue.length}問目`;
@@ -610,13 +627,10 @@ async function startApp(item) {
         msgArea.style.color = "#00D084";
     }
 
-    // ★ 読み仮名の自動振り分け ＆ カッコの全角変換
     let onyomi = [];
     let kunyomi = [];
     if (item.reading) {
-        // 半角()を全角（）に変換し、不要なピリオドを削除
         let cleanReading = item.reading.replace(/\(/g, '（').replace(/\)/g, '）').replace(/\./g, '');
-        // カンマなどで区切って配列にする
         const parts = cleanReading.split(/[、,／\/ \u3000]+/);
         
         parts.forEach(p => {
@@ -629,23 +643,20 @@ async function startApp(item) {
         });
     }
 
-    // ★ PC用：<br>で区切って列を分ける（縦書きなので左に列が増えます）
     const displayOnPC = onyomi.join("<br>");
     const displayKunPC = kunyomi.join("<br>");
 
-    // ★ スマホ用：横並び用にスペース区切り
     const displayOnMobile = onyomi.length > 0 ? `<span style="font-size: 0.8rem; color:#C62828; border: 1px solid #FFCDD2; background: #FFEBEE; border-radius: 12px; padding: 2px 8px; margin-right:6px;">おんよみ</span>${onyomi.join("　")}` : "";
     const displayKunMobile = kunyomi.length > 0 ? `<span style="font-size: 0.8rem; color:#1565C0; border: 1px solid #BBDEFB; background: #E3F2FD; border-radius: 12px; padding: 2px 8px; margin-right:6px;">くんよみ</span>${kunyomi.join("　")}` : "";
 
     const targetDiv = document.getElementById('character-target');
     
-    // 画像のデザインに合わせてスタイルを大幅アップデート
     targetDiv.innerHTML = `
         <style>
             .kanji-layout {
                 display: flex;
                 justify-content: center;
-                align-items: stretch; /* 高さを揃える */
+                align-items: stretch;
                 gap: 25px;
                 width: 100%;
                 margin-top: 10px;
@@ -654,9 +665,8 @@ async function startApp(item) {
                 display: flex;
                 flex-direction: column;
                 align-items: center;
-                width: 80px; /* カラムの幅を固定 */
+                width: 80px; 
             }
-            /* 上部の丸いバッジ */
             .yomi-badge {
                 writing-mode: horizontal-tb;
                 padding: 6px 14px;
@@ -676,21 +686,19 @@ async function startApp(item) {
                 color: #B03A2E;
                 background: #FDEDEC;
             }
-            /* 縦書きテキスト */
             .yomi-pc {
                 writing-mode: vertical-rl;
                 text-orientation: upright;
                 font-size: 1.5rem;
                 font-weight: bold;
                 letter-spacing: 0.2rem;
-                line-height: 2.2; /* 複数列になった時の隙間 */
+                line-height: 2.2; 
                 text-align: start;
             }
             .yomi-mobile {
                 display: none;
             }
             
-            /* スマホ用レスポンシブ */
             @media (max-width: 500px) {
                 .kanji-layout {
                     flex-direction: column;
@@ -698,7 +706,7 @@ async function startApp(item) {
                     gap: 15px;
                 }
                 .side-col {
-                    display: none; /* スマホ時は左右のカラムを隠す */
+                    display: none; 
                 }
                 .yomi-mobile {
                     display: flex;
@@ -743,7 +751,6 @@ async function startApp(item) {
     initCanvasEngine();
     currentStrokeIndex = 0;
 
-    // 薄い青色の十字点線（ガイド）を描画（画像に合わせて色と太さを調整）
     bgCanvasCtx.save();
     bgCanvasCtx.strokeStyle = '#D6EAF8'; 
     bgCanvasCtx.lineWidth = 3;           
