@@ -1,7 +1,9 @@
 // --- 状態管理 ---
 let progressPractice = JSON.parse(localStorage.getItem('kanjiMasterPractice')) || {};
 let progressTest = JSON.parse(localStorage.getItem('kanjiMasterTest')) || {};
-let myKanji = JSON.parse(localStorage.getItem('kanjiMasterMyKanji')) || {}; 
+// ★ マイ漢字を廃止し、2つのフォルダを追加
+let tokkunKanji = JSON.parse(localStorage.getItem('kanjiMasterTokkun')) || {}; 
+let nigateKanji = JSON.parse(localStorage.getItem('kanjiMasterNigate')) || {}; 
 let bonusXP = parseInt(localStorage.getItem('kanjiMasterBonusXP')) || 0;
 let currentChar = null;
 let currentMode = 'practice';
@@ -138,27 +140,35 @@ function updateUI() {
     document.getElementById('xp-bar').style.width = `${percent}%`;
 }
 
-function toggleMyKanji() {
+// ★ フォルダごとの切り替え処理
+function toggleFolder(type) {
     playSound('click');
     if (!currentChar) return;
-    if (myKanji[currentChar.char]) {
-        delete myKanji[currentChar.char];
-    } else {
-        myKanji[currentChar.char] = true;
+    if (type === 'tokkun') {
+        if (tokkunKanji[currentChar.char]) delete tokkunKanji[currentChar.char];
+        else tokkunKanji[currentChar.char] = true;
+        localStorage.setItem('kanjiMasterTokkun', JSON.stringify(tokkunKanji));
+    } else if (type === 'nigate') {
+        if (nigateKanji[currentChar.char]) delete nigateKanji[currentChar.char];
+        else nigateKanji[currentChar.char] = true;
+        localStorage.setItem('kanjiMasterNigate', JSON.stringify(nigateKanji));
     }
-    localStorage.setItem('kanjiMasterMyKanji', JSON.stringify(myKanji));
-    updateMyKanjiBtn();
+    updateFolderBtns();
 }
 
-function updateMyKanjiBtn() {
-    const btn = document.getElementById('mykanji-toggle');
+function updateFolderBtns() {
     if (!currentChar) return;
-    if (myKanji[currentChar.char]) {
-        btn.classList.add('active');
-        btn.innerText = '★ マイ漢字';
+    const tBtn = document.getElementById('tokkun-toggle');
+    const nBtn = document.getElementById('nigate-toggle');
+    if (tokkunKanji[currentChar.char]) {
+        tBtn.classList.add('active'); tBtn.innerText = '★ とっくん';
     } else {
-        btn.classList.remove('active');
-        btn.innerText = '☆ マイ漢字';
+        tBtn.classList.remove('active'); tBtn.innerText = '☆ とっくん';
+    }
+    if (nigateKanji[currentChar.char]) {
+        nBtn.classList.add('active'); nBtn.innerText = '★ にがて';
+    } else {
+        nBtn.classList.remove('active'); nBtn.innerText = '☆ にがて';
     }
 }
 
@@ -204,18 +214,23 @@ function renderList() {
     } else if (currentMode === 'test') {
         badge.innerText = searchText ? `🌍 ぜんがくねん・テスト` : `${currentGrade}ねんせい・🏅 テスト`;
         badge.style.background = 'linear-gradient(135deg, var(--primary), #FF69B4)';
-    } else if (currentMode === 'mykanji') {
-        const count = Object.keys(myKanji).length;
-        badge.innerText = `⭐ マイ漢字（${count}コ）`;
-        badge.style.background = 'linear-gradient(135deg, #FF9800, #FFB74D)';
+    } else if (currentMode === 'tokkun') {
+        const count = Object.keys(tokkunKanji).length;
+        badge.innerText = `💪 とっくん漢字（${count}コ）`;
+        badge.style.background = 'linear-gradient(135deg, #4CAF50, #81C784)';
+    } else if (currentMode === 'nigate') {
+        const count = Object.keys(nigateKanji).length;
+        badge.innerText = `💦 にがてな漢字（${count}コ）`;
+        badge.style.background = 'linear-gradient(135deg, #9C27B0, #BA68C8)';
     }
 
     let filtered = [];
     
-    if (currentMode === 'mykanji') {
+    if (currentMode === 'tokkun' || currentMode === 'nigate') {
+        const targetFolder = currentMode === 'tokkun' ? tokkunKanji : nigateKanji;
         for (let g = 1; g <= 6; g++) {
             if (allKanjiData[g]) {
-                const matches = allKanjiData[g].filter(item => myKanji[item.char]);
+                const matches = allKanjiData[g].filter(item => targetFolder[item.char]);
                 matches.forEach(m => m._foundGrade = g);
                 filtered = filtered.concat(matches);
             }
@@ -240,19 +255,21 @@ function renderList() {
     grid.innerHTML = '';
     if (filtered.length === 0) { grid.innerHTML = '<div style="grid-column:1/-1;padding:20px;">みつかりません...</div>'; return; }
 
-    const targetProgress = (currentMode === 'practice' || currentMode === 'mykanji') ? progressPractice : progressTest;
+    const targetProgress = (currentMode === 'practice' || currentMode === 'tokkun' || currentMode === 'nigate') ? progressPractice : progressTest;
 
     filtered.forEach(item => {
         const card = document.createElement('div');
         card.className = 'kanji-card';
-        if (targetProgress[item.char]) card.classList.add((currentMode === 'practice' || currentMode === 'mykanji') ? 'cleared-practice' : 'cleared-test');
+        if (targetProgress[item.char]) card.classList.add((currentMode === 'practice' || currentMode === 'tokkun' || currentMode === 'nigate') ? 'cleared-practice' : 'cleared-test');
         
         let badgeHtml = '';
         if (progressPractice[item.char]) badgeHtml += `<div class="mark-badge cleared-practice" style="display:flex;right:auto;left:-8px;"><span class="star-mark">⭐</span></div>`;
         if (progressTest[item.char]) badgeHtml += `<div class="mark-badge cleared-test" style="display:flex;"><span class="crown-mark">👑</span></div>`;
-        if (myKanji[item.char]) badgeHtml += `<div class="mykanji-mark">★</div>`;
+        if (tokkunKanji[item.char]) badgeHtml += `<div class="tokkun-mark">💪</div>`;
+        if (nigateKanji[item.char]) badgeHtml += `<div class="nigate-mark">💦</div>`;
         
-        const gradeLabel = searchText || currentMode === 'mykanji' ? `<span style="position:absolute; bottom:3px; right:6px; font-size:0.65rem; color:#999; font-weight:600;">${item._foundGrade}年</span>` : '';
+        const isFolderMode = (currentMode === 'tokkun' || currentMode === 'nigate');
+        const gradeLabel = searchText || isFolderMode ? `<span style="position:absolute; bottom:3px; right:6px; font-size:0.65rem; color:#999; font-weight:600;">${item._foundGrade}年</span>` : '';
         card.innerHTML = `${item.char}${badgeHtml}${gradeLabel}`;
         card.onclick = () => { playSound('click'); if (item._foundGrade) currentGrade = item._foundGrade; startApp(item); };
         grid.appendChild(card);
@@ -272,16 +289,20 @@ function startRandomTest() {
     startApp(randomQueue[randomIndex]);
 }
 
-function startMyKanjiRandomTest() {
+// ★ フォルダ別のテスト開始処理
+function startFolderRandomTest(folderType) {
     playSound('click');
     let list = [];
+    const targetFolder = folderType === 'tokkun' ? tokkunKanji : nigateKanji;
+    const folderName = folderType === 'tokkun' ? 'とっくん' : 'にがて';
+
     for (let g = 1; g <= 6; g++) {
         if (allKanjiData[g]) {
-            list = list.concat(allKanjiData[g].filter(item => myKanji[item.char]));
+            list = list.concat(allKanjiData[g].filter(item => targetFolder[item.char]));
         }
     }
     if (list.length < 10) {
-        alert(`マイ漢字を 10こ以上 登録すると テストできるよ！\n（いま: ${list.length}こ）\nれんしゅう画面の「☆ マイ漢字」ボタンで 登録してね。`);
+        alert(`${folderName} に 10こ以上 登録すると テストできるよ！\n（いま: ${list.length}こ）\nれんしゅう画面で 登録してね。`);
         return;
     }
     const shuffled = [...list].sort(() => 0.5 - Math.random());
@@ -572,7 +593,7 @@ async function startApp(item) {
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
     document.getElementById('practice-screen').classList.add('active');
     
-    updateMyKanjiBtn();
+    updateFolderBtns();
 
     const msgArea = document.getElementById('message-area');
     const readingDisplay = document.getElementById('current-reading');
@@ -606,7 +627,7 @@ async function startApp(item) {
     try {
         currentKanjiPaths = await fetchKanjiVG(item.char);
 
-        if (currentMode === 'practice' || currentMode === 'mykanji') {
+        if (currentMode === 'practice' || currentMode === 'tokkun' || currentMode === 'nigate') {
             bgCanvasCtx.save();
             bgCanvasCtx.translate(PADDING, PADDING);
             bgCanvasCtx.scale(SCALE, SCALE);
@@ -626,7 +647,7 @@ function handleComplete() {
     const msg = document.getElementById('result-msg');
     const icon = document.getElementById('result-icon');
     
-    const isPractice = (currentMode === 'practice' || currentMode === 'mykanji');
+    const isPractice = (currentMode === 'practice' || currentMode === 'tokkun' || currentMode === 'nigate');
     const targetStorage = isPractice ? progressPractice : progressTest;
     const storageKey = isPractice ? 'kanjiMasterPractice' : 'kanjiMasterTest';
 
@@ -673,10 +694,11 @@ function moveToNextKanji() {
         }
     } else {
         let list = [];
-        if (currentMode === 'mykanji') {
+        if (currentMode === 'tokkun' || currentMode === 'nigate') {
+             const targetFolder = currentMode === 'tokkun' ? tokkunKanji : nigateKanji;
              for (let g = 1; g <= 6; g++) {
                 if (allKanjiData[g]) {
-                    list = list.concat(allKanjiData[g].filter(item => myKanji[item.char]));
+                    list = list.concat(allKanjiData[g].filter(item => targetFolder[item.char]));
                 }
             }
         } else {
@@ -736,7 +758,9 @@ function closeResetConfirm() { playSound('click'); document.getElementById('rese
 function executeReset() {
     playSound('click');
     localStorage.clear();
-    progressPractice = {}; progressTest = {}; myKanji = {}; bonusXP = 0;
+    progressPractice = {}; progressTest = {}; 
+    tokkunKanji = {}; nigateKanji = {}; // ★ 変更箇所
+    bonusXP = 0;
     document.getElementById('reset-confirm').classList.remove('active');
     location.reload();
 }
