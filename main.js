@@ -516,7 +516,6 @@ function evaluateStroke() {
     }
 }
 
-// ★ 書き順アニメーションを2倍速に変更
 async function playAnimation() {
     if (isAnimating || currentKanjiPaths.length === 0) return;
     if (hintTimeout) { clearTimeout(hintTimeout); hintTimeout = null; } 
@@ -597,10 +596,8 @@ async function startApp(item) {
     updateFolderBtns();
 
     const msgArea = document.getElementById('message-area');
-    
-    // ★ 元々あった横書きの読み仮名を隠す
     const readingDisplay = document.getElementById('current-reading');
-    if (readingDisplay) readingDisplay.style.display = 'none';
+    if (readingDisplay) readingDisplay.style.display = 'none'; // 元の読み表示を隠す
     
     if (isRandomTest) {
         msgArea.innerText = `🎲 テスト: ${randomIndex + 1} / ${randomQueue.length}問目`;
@@ -613,12 +610,15 @@ async function startApp(item) {
         msgArea.style.color = "#00D084";
     }
 
-    // ★ 読み仮名を「音読み（カタカナ）」と「訓読み（ひらがな）」に分ける
+    // ★ 読み仮名の自動振り分け ＆ カッコの全角変換
     let onyomi = [];
     let kunyomi = [];
     if (item.reading) {
-        const cleanReading = item.reading.replace(/\./g, '');
+        // 半角()を全角（）に変換し、不要なピリオドを削除
+        let cleanReading = item.reading.replace(/\(/g, '（').replace(/\)/g, '）').replace(/\./g, '');
+        // カンマなどで区切って配列にする
         const parts = cleanReading.split(/[、,／\/ \u3000]+/);
+        
         parts.forEach(p => {
             if (!p) return;
             if (/[\u30A0-\u30FF]/.test(p)) {
@@ -629,75 +629,113 @@ async function startApp(item) {
         });
     }
 
-    const displayOn = onyomi.length > 0 ? onyomi.join("・") : "";
-    const displayKun = kunyomi.length > 0 ? kunyomi.join("・") : "";
+    // ★ PC用：<br>で区切って列を分ける（縦書きなので左に列が増えます）
+    const displayOnPC = onyomi.join("<br>");
+    const displayKunPC = kunyomi.join("<br>");
 
-    const displayOnMobile = onyomi.length > 0 ? `<span style="font-size: 0.8rem; color:#999; margin-right:4px;">音</span>${onyomi.join("・")}` : "";
-    const displayKunMobile = kunyomi.length > 0 ? `<span style="font-size: 0.8rem; color:#999; margin-right:4px;">訓</span>${kunyomi.join("・")}` : "";
+    // ★ スマホ用：横並び用にスペース区切り
+    const displayOnMobile = onyomi.length > 0 ? `<span style="font-size: 0.8rem; color:#C62828; border: 1px solid #FFCDD2; background: #FFEBEE; border-radius: 12px; padding: 2px 8px; margin-right:6px;">おんよみ</span>${onyomi.join("　")}` : "";
+    const displayKunMobile = kunyomi.length > 0 ? `<span style="font-size: 0.8rem; color:#1565C0; border: 1px solid #BBDEFB; background: #E3F2FD; border-radius: 12px; padding: 2px 8px; margin-right:6px;">くんよみ</span>${kunyomi.join("　")}` : "";
 
     const targetDiv = document.getElementById('character-target');
     
-    // ★ PCは左右縦書き、スマホは上下横並びのレスポンシブレイアウト
+    // 画像のデザインに合わせてスタイルを大幅アップデート
     targetDiv.innerHTML = `
         <style>
             .kanji-layout {
                 display: flex;
                 justify-content: center;
-                align-items: center;
-                gap: 15px;
+                align-items: stretch; /* 高さを揃える */
+                gap: 25px;
                 width: 100%;
+                margin-top: 10px;
             }
+            .side-col {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                width: 80px; /* カラムの幅を固定 */
+            }
+            /* 上部の丸いバッジ */
+            .yomi-badge {
+                writing-mode: horizontal-tb;
+                padding: 6px 14px;
+                border-radius: 20px;
+                font-size: 0.9rem;
+                font-weight: bold;
+                margin-bottom: 20px;
+                white-space: nowrap;
+            }
+            .yomi-badge.kun {
+                border: 2px solid #D6EAF8;
+                color: #2874A6;
+                background: #EBF5FB;
+            }
+            .yomi-badge.on {
+                border: 2px solid #FADBD8;
+                color: #B03A2E;
+                background: #FDEDEC;
+            }
+            /* 縦書きテキスト */
             .yomi-pc {
                 writing-mode: vertical-rl;
                 text-orientation: upright;
-                font-size: 1.4rem;
+                font-size: 1.5rem;
                 font-weight: bold;
                 letter-spacing: 0.2rem;
-                height: ${CANVAS_SIZE}px;
+                line-height: 2.2; /* 複数列になった時の隙間 */
                 text-align: start;
             }
             .yomi-mobile {
                 display: none;
             }
             
+            /* スマホ用レスポンシブ */
             @media (max-width: 500px) {
                 .kanji-layout {
                     flex-direction: column;
-                    gap: 10px;
+                    align-items: center;
+                    gap: 15px;
                 }
-                .yomi-pc {
-                    display: none;
+                .side-col {
+                    display: none; /* スマホ時は左右のカラムを隠す */
                 }
                 .yomi-mobile {
                     display: flex;
-                    justify-content: center;
-                    gap: 20px;
+                    flex-direction: column;
+                    align-items: center;
+                    gap: 10px;
                     width: 100%;
                     font-size: 1.2rem;
                     font-weight: bold;
-                    letter-spacing: 0.1rem;
                 }
             }
         </style>
         
         <div class="kanji-layout">
-            <div class="yomi-pc" style="color: #E65100;">
-                ${displayOn}
+            <div class="side-col">
+                ${kunyomi.length > 0 ? `
+                <div class="yomi-badge kun">くんよみ</div>
+                <div class="yomi-pc" style="color: #2874A6;">${displayKunPC}</div>
+                ` : ''}
             </div>
 
             <div class="yomi-mobile">
-                <div style="color: #E65100;">${displayOnMobile}</div>
-                <div style="color: #0277BD;">${displayKunMobile}</div>
+                ${kunyomi.length > 0 ? `<div style="color: #2874A6;">${displayKunMobile}</div>` : ''}
+                ${onyomi.length > 0 ? `<div style="color: #B03A2E;">${displayOnMobile}</div>` : ''}
             </div>
 
-            <div style="position: relative; width: ${CANVAS_SIZE}px; height: ${CANVAS_SIZE}px; margin: 0; background-color: white; flex-shrink: 0; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.1);">
+            <div style="position: relative; width: ${CANVAS_SIZE}px; height: ${CANVAS_SIZE}px; margin: 0; background-color: white; flex-shrink: 0; border-radius: 24px; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
                 <canvas id="bg-canvas" width="${CANVAS_SIZE}" height="${CANVAS_SIZE}" style="position: absolute; top: 0; left: 0; z-index: 1;"></canvas>
                 <canvas id="fixed-canvas" width="${CANVAS_SIZE}" height="${CANVAS_SIZE}" style="position: absolute; top: 0; left: 0; z-index: 2;"></canvas>
                 <canvas id="draw-canvas" width="${CANVAS_SIZE}" height="${CANVAS_SIZE}" style="position: absolute; top: 0; left: 0; z-index: 3; touch-action: none; cursor: crosshair;"></canvas>
             </div>
 
-            <div class="yomi-pc" style="color: #0277BD;">
-                ${displayKun}
+            <div class="side-col">
+                ${onyomi.length > 0 ? `
+                <div class="yomi-badge on">おんよみ</div>
+                <div class="yomi-pc" style="color: #B03A2E;">${displayOnPC}</div>
+                ` : ''}
             </div>
         </div>
     `;
@@ -705,11 +743,11 @@ async function startApp(item) {
     initCanvasEngine();
     currentStrokeIndex = 0;
 
-    // 薄い緑色の十字点線（ガイド）を描画
+    // 薄い青色の十字点線（ガイド）を描画（画像に合わせて色と太さを調整）
     bgCanvasCtx.save();
-    bgCanvasCtx.strokeStyle = '#A5D6A7'; 
-    bgCanvasCtx.lineWidth = 2;           
-    bgCanvasCtx.setLineDash([6, 6]);     
+    bgCanvasCtx.strokeStyle = '#D6EAF8'; 
+    bgCanvasCtx.lineWidth = 3;           
+    bgCanvasCtx.setLineDash([8, 8]);     
     bgCanvasCtx.beginPath();
     bgCanvasCtx.moveTo(CANVAS_SIZE / 2, 0);
     bgCanvasCtx.lineTo(CANVAS_SIZE / 2, CANVAS_SIZE);
