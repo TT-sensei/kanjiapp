@@ -7,7 +7,6 @@
     
     <script src="kanji-data.js"></script>
     <script src="title-data.js"></script>
-
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -35,8 +34,13 @@
    <div class="menu-grid">
        <button aria-label="練習モード" class="menu-btn btn-practice" onclick="selectMode('practice')">✏️<br>れんしゅう</button> 
        <button aria-label="テストモード" class="menu-btn btn-test" onclick="selectMode('test')">🏅<br>テスト</button>
-       <button aria-label="マイ漢字" class="menu-btn btn-mykanji" onclick="selectMode('mykanji')">⭐<br>マイ漢字をみる</button>
-       <button aria-label="マイ漢字テスト" class="menu-btn btn-mykanji-test" onclick="startMyKanjiRandomTest()">🎯<br>マイ漢字テスト</button>
+       
+       <button aria-label="とっくん漢字" class="menu-btn btn-tokkun" onclick="selectMode('tokkun')">💪<br>とっくんをみる</button>
+       <button aria-label="にがてな漢字" class="menu-btn btn-nigate" onclick="selectMode('nigate')">💦<br>にがてをみる</button>
+       
+       <button aria-label="とっくんテスト" class="menu-btn btn-tokkun-test" onclick="startFolderRandomTest('tokkun')">🎯<br>とっくんテスト</button>
+       <button aria-label="にがてテスト" class="menu-btn btn-nigate-test" onclick="startFolderRandomTest('nigate')">🎯<br>にがてテスト</button>
+       
        <button aria-label="ランダムテスト" class="menu-btn btn-random" onclick="startRandomTest()">🎲 ランダムテスト (10問)</button>
    </div>
    
@@ -85,7 +89,10 @@
   <div id="practice-screen" class="screen">
     <div class="header-bar">
       <button class="back-btn" onclick="handleBackFromPractice()">↩ もどる</button>
-      <button id="mykanji-toggle" class="mykanji-btn" onclick="toggleMyKanji()">☆ マイ漢字</button>
+      <div style="display:flex; gap:8px;">
+        <button id="tokkun-toggle" class="folder-btn tokkun-btn" onclick="toggleFolder('tokkun')">☆ とっくん</button>
+        <button id="nigate-toggle" class="folder-btn nigate-btn" onclick="toggleFolder('nigate')">☆ にがて</button>
+      </div>
     </div>
     <h2 id="message-area"></h2>
     <div id="current-reading" style="font-size:3rem; font-weight:bold; text-align:center; margin:5px 0; color:#333;"></div>
@@ -132,7 +139,7 @@
   <div id="reset-confirm" class="confirm-modal">
    <div class="confirm-content">
     <h3 style="font-size:1.2rem;">ほんとうに データを けしますか？</h3>
-    <p style="color:#666;">レベルも マイ漢字も １からに なります。</p>
+    <p style="color:#666;">レベルも 登録した漢字も １からに なります。</p>
     <button class="confirm-btn confirm-btn-yes" onclick="executeReset()">はい、けします</button> 
     <button class="confirm-btn confirm-btn-no" onclick="closeResetConfirm()">キャンセル</button>
    </div>
