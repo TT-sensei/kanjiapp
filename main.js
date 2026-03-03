@@ -1,35 +1,50 @@
-// --- 状態管理 ---
+// ============================================================
+//  かんじマスター main.js  ── 周回システム・進捗ゲージ完全版
+// ============================================================
+
+const LAP_THEMES = [
+    { lap:0, name:'はじめて',  primary:'#00D084', secondary:'#00E5A0', cardBg:'#F0FFF8', cardBorder:'#00D084', emoji:'🌱' },
+    { lap:1, name:'1しゅう目', primary:'#3B82F6', secondary:'#60A5FA', cardBg:'#EFF6FF', cardBorder:'#3B82F6', emoji:'⭐' },
+    { lap:2, name:'2しゅう目', primary:'#F59E0B', secondary:'#FCD34D', cardBg:'#FFFBEB', cardBorder:'#F59E0B', emoji:'🌟' },
+    { lap:3, name:'3しゅう目', primary:'#EF4444', secondary:'#F87171', cardBg:'#FFF1F1', cardBorder:'#EF4444', emoji:'🔥' },
+    { lap:4, name:'4しゅう目', primary:'#8B5CF6', secondary:'#A78BFA', cardBg:'#F5F3FF', cardBorder:'#8B5CF6', emoji:'💎' },
+    { lap:5, name:'5しゅう目', primary:'#EC4899', secondary:'#F472B6', cardBg:'#FDF2F8', cardBorder:'#EC4899', emoji:'👑' },
+];
+function getLapTheme(lap) { return LAP_THEMES[Math.min(lap, LAP_THEMES.length - 1)]; }
+
 let progressPractice = JSON.parse(localStorage.getItem('kanjiMasterPractice')) || {};
-let progressTest = JSON.parse(localStorage.getItem('kanjiMasterTest')) || {};
-let tokkunKanji = JSON.parse(localStorage.getItem('kanjiMasterTokkun')) || {}; 
-let nigateKanji = JSON.parse(localStorage.getItem('kanjiMasterNigate')) || {}; 
-let bonusXP = parseInt(localStorage.getItem('kanjiMasterBonusXP')) || 0;
-let currentChar = null;
-let currentMode = 'practice';
-let currentGrade = 1;
+let progressTest     = JSON.parse(localStorage.getItem('kanjiMasterTest'))     || {};
+let tokkunKanji      = JSON.parse(localStorage.getItem('kanjiMasterTokkun'))   || {};
+let nigateKanji      = JSON.parse(localStorage.getItem('kanjiMasterNigate'))   || {};
+let bonusXP          = parseInt(localStorage.getItem('kanjiMasterBonusXP'))    || 0;
+let lapCount         = JSON.parse(localStorage.getItem('kanjiMasterLap'))      || {};
 
-// ▼▼▼ 判定エンジン用 変数 ▼▼▼
-let currentKanjiPaths = []; 
-let currentStrokeIndex = 0; 
-let isDrawing = false;      
-let userPoints = [];        
-let isAnimating = false;    
-let hintTimeout = null;     
+let currentChar   = null;
+let currentMode   = 'practice';
+let currentGrade  = 1;
 
+let currentKanjiPaths  = [];
+let currentStrokeIndex = 0;
+let isDrawing   = false;
+let userPoints  = [];
+let isAnimating = false;
+let hintTimeout = null;
 let bgCanvasCtx, fixedCanvasCtx, drawCanvasCtx;
 
-const CANVAS_SIZE = 250; 
-const KVG_SIZE = 109;    
-const PADDING = 15;      
-const SCALE = (CANVAS_SIZE - PADDING * 2) / KVG_SIZE;
+const CANVAS_SIZE = 250;
+const KVG_SIZE    = 109;
+const PADDING     = 15;
+const SCALE       = (CANVAS_SIZE - PADDING * 2) / KVG_SIZE;
 
-let isRandomTest = false;
-let randomQueue = [];
-let randomIndex = 0;
+let isRandomTest          = false;
+let randomQueue           = [];
+let randomIndex           = 0;
 let levelBeforeRandomTest = 1;
 
-let pendingLevelUp = false;
-let pendingGoHome = false;
+let pendingLevelUp  = false;
+let pendingGoHome   = false;
+let pendingLapUp    = false;
+let pendingLapGrade = null;
 
 const XP_PER_LEVEL = 5;
 
@@ -40,7 +55,6 @@ function parseCompressedData(grade, compressedString) {
         return { char, reading };
     });
 }
-
 const allKanjiData = {};
 for (let g = 1; g <= 6; g++) {
     if (typeof compressedKanjiData !== 'undefined' && compressedKanjiData[g]) {
@@ -48,858 +62,595 @@ for (let g = 1; g <= 6; g++) {
     }
 }
 
-// --- 効果音システム ---
+// ============================================================
+// 周回システム
+// ============================================================
+function getGradeProgress(grade) {
+    const list = allKanjiData[grade];
+    if (!list || list.length === 0) return { cleared: 0, total: 0 };
+    const cleared = list.filter(item =>
+        progressPractice[item.char] || progressTest[item.char]
+    ).length;
+    return { cleared, total: list.length };
+}
+function getGradeLap(grade) { return lapCount[grade] || 0; }
+
+function checkAndIncrementLap(grade) {
+    const { cleared, total } = getGradeProgress(grade);
+    if (total > 0 && cleared >= total) {
+        lapCount[grade] = (lapCount[grade] || 0) + 1;
+        localStorage.setItem('kanjiMasterLap', JSON.stringify(lapCount));
+        allKanjiData[grade].forEach(item => {
+            delete progressPractice[item.char];
+            delete progressTest[item.char];
+        });
+        localStorage.setItem('kanjiMasterPractice', JSON.stringify(progressPractice));
+        localStorage.setItem('kanjiMasterTest',     JSON.stringify(progressTest));
+        return true;
+    }
+    return false;
+}
+
+// ============================================================
+// 効果音
+// ============================================================
 let audioContext;
 function playSound(type) {
     if (!audioContext) audioContext = new (window.AudioContext || window.webkitAudioContext)();
     if (audioContext.state === 'suspended') audioContext.resume();
     const now = audioContext.currentTime;
-    
-    const createOsc = (freq, type, dur, vol = 0.1) => {
-        const osc = audioContext.createOscillator();
-        const gain = audioContext.createGain();
-        osc.type = type; 
-        osc.frequency.setValueAtTime(freq, now);
-        gain.gain.setValueAtTime(vol, now); 
-        gain.gain.exponentialRampToValueAtTime(0.01, now + dur);
-        osc.connect(gain); 
-        gain.connect(audioContext.destination); 
-        osc.start(now); 
-        osc.stop(now + dur);
+    const osc = (freq, wv, dur, vol=0.1) => {
+        const o = audioContext.createOscillator(), g = audioContext.createGain();
+        o.type = wv; o.frequency.setValueAtTime(freq, now);
+        g.gain.setValueAtTime(vol, now);
+        g.gain.exponentialRampToValueAtTime(0.01, now + dur);
+        o.connect(g); g.connect(audioContext.destination);
+        o.start(now); o.stop(now + dur);
     };
-
     switch(type) {
-        case 'success': 
-            createOsc(880, 'sine', 0.15, 0.1); 
-            setTimeout(() => createOsc(1108, 'sine', 0.2, 0.1), 50);
-            break;
-        case 'click': 
-            createOsc(500, 'triangle', 0.1, 0.08); 
-            break;
-        case 'error': 
-            createOsc(150, 'sawtooth', 0.3, 0.1); 
-            break;
-        case 'complete': 
-            createOsc(600, 'sine', 0.15); 
-            setTimeout(() => createOsc(900, 'sine', 0.25), 120); 
-            break;
-        case 'levelup': 
-            const melody = [523, 659, 783, 1046, 783, 1046];
-            melody.forEach((f, i) => {
-                const o = audioContext.createOscillator(); 
-                const g = audioContext.createGain();
-                o.type = 'square'; o.frequency.value = f;
-                g.gain.setValueAtTime(0.12, now + i*0.1); 
-                g.gain.exponentialRampToValueAtTime(0.01, now + i*0.1 + 0.35);
-                o.connect(g); g.connect(audioContext.destination); 
-                o.start(now + i*0.1); o.stop(now + i*0.1 + 0.35);
-            });
-            break;
+        case 'success':  osc(880,'sine',0.15,0.1); setTimeout(()=>osc(1108,'sine',0.2,0.1),50); break;
+        case 'click':    osc(500,'triangle',0.1,0.08); break;
+        case 'error':    osc(150,'sawtooth',0.3,0.1); break;
+        case 'complete': osc(600,'sine',0.15); setTimeout(()=>osc(900,'sine',0.25),120); break;
+        case 'levelup':
+            [523,659,783,1046,783,1046].forEach((f,i)=>{
+                const o=audioContext.createOscillator(),g=audioContext.createGain();
+                o.type='square'; o.frequency.value=f;
+                g.gain.setValueAtTime(0.12,now+i*0.1);
+                g.gain.exponentialRampToValueAtTime(0.01,now+i*0.1+0.35);
+                o.connect(g); g.connect(audioContext.destination);
+                o.start(now+i*0.1); o.stop(now+i*0.1+0.35);
+            }); break;
+        case 'lapup':
+            [523,659,783,659,783,1046,1046,1318].forEach((f,i)=>{
+                const o=audioContext.createOscillator(),g=audioContext.createGain();
+                o.type='square'; o.frequency.value=f;
+                g.gain.setValueAtTime(0.15,now+i*0.12);
+                g.gain.exponentialRampToValueAtTime(0.01,now+i*0.12+0.4);
+                o.connect(g); g.connect(audioContext.destination);
+                o.start(now+i*0.12); o.stop(now+i*0.12+0.4);
+            }); break;
     }
 }
 
-// --- 経験値・レベルシステム ---
+// ============================================================
+// 経験値・レベル
+// ============================================================
 function getStats() {
-    const practiceCount = Object.keys(progressPractice).length;
-    const testCount = Object.keys(progressTest).length;
-    const totalXP = practiceCount + (testCount*2) + bonusXP;
-    
-    const level = Math.floor(totalXP / XP_PER_LEVEL) + 1;
-    const currentLevelXP = totalXP % XP_PER_LEVEL;
-    const nextLevelXP = XP_PER_LEVEL - currentLevelXP;
-    
-    return { level, totalXP, currentLevelXP, nextLevelXP };
+    const lapBonus = Object.values(lapCount).reduce((s,v)=>s+v*10,0);
+    const totalXP  = Object.keys(progressPractice).length
+                   + Object.keys(progressTest).length * 2
+                   + bonusXP + lapBonus;
+    return {
+        level:          Math.floor(totalXP / XP_PER_LEVEL) + 1,
+        totalXP,
+        currentLevelXP: totalXP % XP_PER_LEVEL,
+        nextLevelXP:    XP_PER_LEVEL - (totalXP % XP_PER_LEVEL),
+    };
 }
-
 function getTitleData(level) {
-    let current = TITLE_DATA[0];
-    for (let i = 0; i < TITLE_DATA.length; i++) {
-        if (level >= TITLE_DATA[i].level) {
-            current = TITLE_DATA[i];
-        } else {
-            break;
-        }
+    let c = TITLE_DATA[0];
+    for (let i=0; i<TITLE_DATA.length; i++) {
+        if (level >= TITLE_DATA[i].level) c = TITLE_DATA[i]; else break;
     }
-    return current;
+    return c;
 }
 
+// ============================================================
+// UI 更新
+// ============================================================
 function updateUI() {
-    const stats = getStats();
-    const mascotData = getTitleData(stats.level);
-    
-    document.getElementById('title-mascot').innerText = mascotData.mascot;
-    document.getElementById('title-level').innerText = `${stats.level}`;
-    document.getElementById('title-name').innerText = mascotData.title;
-    
-    document.getElementById('list-mascot').innerText = mascotData.mascot;
-    document.getElementById('list-level').innerText = `${stats.level}`;
-    document.getElementById('next-xp').innerText = stats.nextLevelXP;
-    
-    const percent = (stats.currentLevelXP / XP_PER_LEVEL) * 100;
-    document.getElementById('xp-bar').style.width = `${percent}%`;
+    const s = getStats(), m = getTitleData(s.level);
+    document.getElementById('title-mascot').innerText = m.mascot;
+    document.getElementById('title-level').innerText  = s.level;
+    document.getElementById('title-name').innerText   = m.title;
+    document.getElementById('list-mascot').innerText  = m.mascot;
+    document.getElementById('list-level').innerText   = s.level;
+    document.getElementById('next-xp').innerText      = s.nextLevelXP;
+    document.getElementById('xp-bar').style.width     = `${(s.currentLevelXP/XP_PER_LEVEL)*100}%`;
+    updateGradeProgressBars();
 }
 
-// フォルダごとの切り替え処理
+function updateGradeProgressBars() {
+    for (let g=1; g<=6; g++) {
+        const { cleared, total } = getGradeProgress(g);
+        const lap=getGradeLap(g), theme=getLapTheme(lap);
+        const pct = total>0 ? Math.round((cleared/total)*100) : 0;
+        const barEl=document.getElementById(`grade-progress-${g}`);
+        if(barEl){ barEl.style.width=`${pct}%`; barEl.style.background=theme.primary; }
+        const lapEl=document.getElementById(`grade-lap-${g}`);
+        if(lapEl){ lapEl.innerText=lap>0?`${theme.emoji}×${lap}`:''; lapEl.style.display=lap>0?'block':'none'; }
+        const txtEl=document.getElementById(`grade-progress-text-${g}`);
+        if(txtEl) txtEl.innerText=`${cleared}/${total}`;
+    }
+}
+
+// ============================================================
+// フォルダ管理
+// ============================================================
 function toggleFolder(type) {
     playSound('click');
     if (!currentChar) return;
-    if (type === 'tokkun') {
-        if (tokkunKanji[currentChar.char]) delete tokkunKanji[currentChar.char];
-        else tokkunKanji[currentChar.char] = true;
-        localStorage.setItem('kanjiMasterTokkun', JSON.stringify(tokkunKanji));
-    } else if (type === 'nigate') {
-        if (nigateKanji[currentChar.char]) delete nigateKanji[currentChar.char];
-        else nigateKanji[currentChar.char] = true;
-        localStorage.setItem('kanjiMasterNigate', JSON.stringify(nigateKanji));
-    }
+    const key=type==='tokkun'?tokkunKanji:nigateKanji;
+    const sk =type==='tokkun'?'kanjiMasterTokkun':'kanjiMasterNigate';
+    if(key[currentChar.char]) delete key[currentChar.char]; else key[currentChar.char]=true;
+    localStorage.setItem(sk,JSON.stringify(key));
     updateFolderBtns();
 }
-
 function updateFolderBtns() {
-    if (!currentChar) return;
-    const tBtn = document.getElementById('tokkun-toggle');
-    const nBtn = document.getElementById('nigate-toggle');
-    if (tokkunKanji[currentChar.char]) {
-        tBtn.classList.add('active'); tBtn.innerText = '★ とっくん';
-    } else {
-        tBtn.classList.remove('active'); tBtn.innerText = '☆ とっくん';
-    }
-    if (nigateKanji[currentChar.char]) {
-        nBtn.classList.add('active'); nBtn.innerText = '★ にがて';
-    } else {
-        nBtn.classList.remove('active'); nBtn.innerText = '☆ にがて';
-    }
+    if(!currentChar) return;
+    const tBtn=document.getElementById('tokkun-toggle');
+    const nBtn=document.getElementById('nigate-toggle');
+    tBtn.classList.toggle('active',!!tokkunKanji[currentChar.char]);
+    tBtn.innerText=tokkunKanji[currentChar.char]?'★ とっくん':'☆ とっくん';
+    nBtn.classList.toggle('active',!!nigateKanji[currentChar.char]);
+    nBtn.innerText=nigateKanji[currentChar.char]?'★ にがて':'☆ にがて';
 }
 
-function setGrade(grade) { playSound('click'); currentGrade = grade; updateTitleGradeButtons(); }
+// ============================================================
+// 学年・画面切替
+// ============================================================
+function setGrade(grade) { playSound('click'); currentGrade=grade; updateTitleGradeButtons(); }
 function updateTitleGradeButtons() {
-    document.querySelectorAll('.grade-btn').forEach(btn => {
-        btn.classList.toggle('selected', parseInt(btn.querySelector('div:last-child').innerText) === currentGrade);
+    document.querySelectorAll('.grade-btn').forEach(btn=>{
+        const g=parseInt(btn.dataset.grade), lap=getGradeLap(g), theme=getLapTheme(lap);
+        btn.classList.toggle('selected',g===currentGrade);
+        if(g===currentGrade){
+            btn.style.borderColor=theme.primary;
+            btn.style.background=`linear-gradient(135deg,${theme.primary},${theme.secondary})`;
+        } else {
+            btn.style.borderColor=theme.primary+'66';
+            btn.style.background=theme.cardBg;
+        }
     });
 }
 
 function showScreen(screenId) {
-    window.scrollTo(0, 0);
-    isRandomTest = false;
-    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    window.scrollTo(0,0); isRandomTest=false;
+    document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
     document.getElementById(screenId).classList.add('active');
-    
-    if (screenId === 'list-screen') renderList();
-    else if (screenId === 'title-screen') {
-        document.getElementById('home-search-input').value = ''; document.getElementById('search-box').value = '';
+    if(screenId==='list-screen') renderList();
+    else if(screenId==='title-screen'){
+        document.getElementById('home-search-input').value='';
+        document.getElementById('search-box').value='';
         updateTitleGradeButtons(); updateUI();
     }
 }
-
 function handleHomeSearch() {
-    const query = document.getElementById('home-search-input').value;
-    if (!query) return;
-    document.getElementById('search-box').value = query;
-    currentMode = 'practice'; playSound('click'); showScreen('list-screen'); filterList();
+    const q=document.getElementById('home-search-input').value;
+    if(!q) return;
+    document.getElementById('search-box').value=q;
+    currentMode='practice'; playSound('click'); showScreen('list-screen'); filterList();
 }
+function selectMode(mode){ playSound('click'); currentMode=mode; document.getElementById('search-box').value=''; showScreen('list-screen'); }
+function filterList(){ renderList(); }
+function toHiragana(str){ if(!str) return ''; return str.replace(/[\u30a1-\u30f6]/g,c=>String.fromCharCode(c.charCodeAt(0)-0x60)); }
 
-function selectMode(mode) { playSound('click'); currentMode = mode; document.getElementById('search-box').value = ''; showScreen('list-screen'); }
-function filterList() { renderList(); }
-
-// ★ カタカナをひらがなに変換する関数（検索用）
-function toHiragana(str) {
-    if (!str) return '';
-    return str.replace(/[\u30a1-\u30f6]/g, match => String.fromCharCode(match.charCodeAt(0) - 0x60));
-}
-
+// ============================================================
+// リスト描画
+// ============================================================
 function renderList() {
     updateUI();
-    const searchText = document.getElementById('search-box').value.trim();
-    // 検索ワードをひらがなに統一
-    const searchKana = toHiragana(searchText);
-    
-    const grid = document.getElementById('kanji-grid');
-    const badge = document.getElementById('mode-display');
-    
-    if (currentMode === 'practice') {
-        badge.innerText = searchText ? `🌍 ぜんがくねん・れんしゅう` : `${currentGrade}ねんせい・✏️ れんしゅう`;
-        badge.style.background = 'linear-gradient(135deg, var(--secondary), #00E5A0)';
-    } else if (currentMode === 'test') {
-        badge.innerText = searchText ? `🌍 ぜんがくねん・テスト` : `${currentGrade}ねんせい・🏅 テスト`;
-        badge.style.background = 'linear-gradient(135deg, var(--primary), #FF69B4)';
-    } else if (currentMode === 'tokkun') {
-        const count = Object.keys(tokkunKanji).length;
-        badge.innerText = `💪 とっくん漢字（${count}コ）`;
-        badge.style.background = 'linear-gradient(135deg, #4CAF50, #81C784)';
-    } else if (currentMode === 'nigate') {
-        const count = Object.keys(nigateKanji).length;
-        badge.innerText = `💦 にがてな漢字（${count}コ）`;
-        badge.style.background = 'linear-gradient(135deg, #9C27B0, #BA68C8)';
+    const searchText=document.getElementById('search-box').value.trim();
+    const searchKana=toHiragana(searchText);
+    const grid=document.getElementById('kanji-grid');
+    const badge=document.getElementById('mode-display');
+    const lap=getGradeLap(currentGrade), theme=getLapTheme(lap);
+
+    if(currentMode==='practice'){
+        badge.innerText=searchText?`🌍 ぜんがくねん・れんしゅう`:`${currentGrade}ねんせい・✏️ れんしゅう`;
+        badge.style.background=`linear-gradient(135deg,${theme.primary},${theme.secondary})`;
+    } else if(currentMode==='test'){
+        badge.innerText=searchText?`🌍 ぜんがくねん・テスト`:`${currentGrade}ねんせい・🏅 テスト`;
+        badge.style.background=`linear-gradient(135deg,${theme.primary},${theme.secondary})`;
+    } else if(currentMode==='tokkun'){
+        badge.innerText=`💪 とっくん漢字（${Object.keys(tokkunKanji).length}コ）`;
+        badge.style.background='linear-gradient(135deg,#4CAF50,#81C784)';
+    } else if(currentMode==='nigate'){
+        badge.innerText=`💦 にがてな漢字（${Object.keys(nigateKanji).length}コ）`;
+        badge.style.background='linear-gradient(135deg,#9C27B0,#BA68C8)';
     }
 
-    let filtered = [];
-    
-    if (currentMode === 'tokkun' || currentMode === 'nigate') {
-        const targetFolder = currentMode === 'tokkun' ? tokkunKanji : nigateKanji;
-        for (let g = 1; g <= 6; g++) {
-            if (allKanjiData[g]) {
-                const matches = allKanjiData[g].filter(item => targetFolder[item.char]);
-                matches.forEach(m => m._foundGrade = g);
-                filtered = filtered.concat(matches);
-            }
-        }
-        if (searchText) {
-            // ★ とっくん・にがてフォルダ内での検索時もひらがな・カタカナ区別なく検索
-            filtered = filtered.filter(item => {
-                const matchChar = item.char.includes(searchText);
-                const matchReading = item.reading && toHiragana(item.reading).includes(searchKana);
-                return matchChar || matchReading;
-            });
-        }
+    renderListProgressBar();
+
+    let filtered=[];
+    const isFolderMode=(currentMode==='tokkun'||currentMode==='nigate');
+    if(isFolderMode){
+        const folder=currentMode==='tokkun'?tokkunKanji:nigateKanji;
+        for(let g=1;g<=6;g++) if(allKanjiData[g])
+            allKanjiData[g].filter(i=>folder[i.char]).forEach(m=>{m._foundGrade=g;filtered.push(m);});
+        if(searchText) filtered=filtered.filter(i=>i.char.includes(searchText)||(i.reading&&toHiragana(i.reading).includes(searchKana)));
+    } else if(searchText){
+        for(let g=1;g<=6;g++) if(allKanjiData[g])
+            allKanjiData[g].filter(i=>i.char.includes(searchText)||(i.reading&&toHiragana(i.reading).includes(searchKana)))
+                .forEach(m=>{m._foundGrade=g;filtered.push(m);});
     } else {
-        if (searchText) {
-            // ★ 通常モードでの検索時もひらがな・カタカナ区別なく検索
-            for (let g = 1; g <= 6; g++) {
-                if (allKanjiData[g]) {
-                    const matches = allKanjiData[g].filter(item => {
-                        const matchChar = item.char.includes(searchText);
-                        const matchReading = item.reading && toHiragana(item.reading).includes(searchKana);
-                        return matchChar || matchReading;
-                    });
-                    matches.forEach(m => m._foundGrade = g);
-                    filtered = filtered.concat(matches);
-                }
-            }
-        } else {
-            if (allKanjiData[currentGrade]) { filtered = allKanjiData[currentGrade]; filtered.forEach(m => m._foundGrade = currentGrade); }
-        }
+        if(allKanjiData[currentGrade]){ filtered=allKanjiData[currentGrade]; filtered.forEach(m=>m._foundGrade=currentGrade); }
     }
 
-    grid.innerHTML = '';
-    if (filtered.length === 0) { grid.innerHTML = '<div style="grid-column:1/-1;padding:20px;">みつかりません...</div>'; return; }
+    grid.innerHTML='';
+    if(!filtered.length){ grid.innerHTML='<div style="grid-column:1/-1;padding:20px;">みつかりません...</div>'; return; }
 
-    const targetProgress = (currentMode === 'practice' || currentMode === 'tokkun' || currentMode === 'nigate') ? progressPractice : progressTest;
-
-    filtered.forEach(item => {
-        const card = document.createElement('div');
-        card.className = 'kanji-card';
-        if (targetProgress[item.char]) card.classList.add((currentMode === 'practice' || currentMode === 'tokkun' || currentMode === 'nigate') ? 'cleared-practice' : 'cleared-test');
-        
-        let badgeHtml = '';
-        if (progressPractice[item.char]) badgeHtml += `<div class="mark-badge cleared-practice" style="display:flex;right:auto;left:-8px;"><span class="star-mark">⭐</span></div>`;
-        if (progressTest[item.char]) badgeHtml += `<div class="mark-badge cleared-test" style="display:flex;"><span class="crown-mark">👑</span></div>`;
-        if (tokkunKanji[item.char]) badgeHtml += `<div class="tokkun-mark">💪</div>`;
-        if (nigateKanji[item.char]) badgeHtml += `<div class="nigate-mark">💦</div>`;
-        
-        const isFolderMode = (currentMode === 'tokkun' || currentMode === 'nigate');
-        const gradeLabel = searchText || isFolderMode ? `<span style="position:absolute; bottom:3px; right:6px; font-size:0.65rem; color:#999; font-weight:600;">${item._foundGrade}年</span>` : '';
-        card.innerHTML = `${item.char}${badgeHtml}${gradeLabel}`;
-        card.onclick = () => { playSound('click'); if (item._foundGrade) currentGrade = item._foundGrade; startApp(item); };
+    filtered.forEach(item=>{
+        const card=document.createElement('div');
+        const ig=item._foundGrade||currentGrade, iLap=getGradeLap(ig), iTheme=getLapTheme(iLap);
+        const isCleared=progressPractice[item.char]||progressTest[item.char];
+        card.className='kanji-card';
+        if(isCleared){
+            card.style.background=iTheme.cardBg; card.style.borderColor=iTheme.cardBorder;
+            card.style.borderWidth='2px'; card.style.borderStyle='solid';
+            card.classList.add(isFolderMode||currentMode==='practice'?'cleared-practice':'cleared-test');
+        }
+        let badges='';
+        if(progressPractice[item.char]) badges+=`<div class="mark-badge cleared-practice" style="display:flex;right:auto;left:-8px;"><span class="star-mark">⭐</span></div>`;
+        if(progressTest[item.char])     badges+=`<div class="mark-badge cleared-test" style="display:flex;"><span class="crown-mark">👑</span></div>`;
+        if(tokkunKanji[item.char])      badges+=`<div class="tokkun-mark">💪</div>`;
+        if(nigateKanji[item.char])      badges+=`<div class="nigate-mark">💦</div>`;
+        const gradeLabel=searchText||isFolderMode?`<span style="position:absolute;bottom:3px;right:6px;font-size:0.65rem;color:#999;font-weight:600;">${ig}年</span>`:'';
+        const lapBadge=iLap>=2?`<span style="position:absolute;top:2px;left:2px;font-size:0.6rem;background:${iTheme.primary};color:white;border-radius:999px;padding:0 4px;font-weight:bold;">${iTheme.emoji}</span>`:'';
+        card.innerHTML=`${item.char}${badges}${gradeLabel}${lapBadge}`;
+        card.onclick=()=>{ playSound('click'); if(item._foundGrade) currentGrade=item._foundGrade; startApp(item); };
         grid.appendChild(card);
     });
 }
 
+function renderListProgressBar() {
+    const container=document.getElementById('list-progress-bar-container');
+    if(!container) return;
+    const isFolderMode=(currentMode==='tokkun'||currentMode==='nigate');
+    const isSearch=document.getElementById('search-box').value.trim()!=='';
+    if(isFolderMode||isSearch){ container.innerHTML=''; return; }
+    const { cleared, total }=getGradeProgress(currentGrade);
+    const lap=getGradeLap(currentGrade), theme=getLapTheme(lap);
+    const pct=total>0?Math.round((cleared/total)*100):0;
+    container.innerHTML=`
+        <div style="background:white;border-radius:16px;padding:12px 16px;margin-bottom:12px;box-shadow:0 2px 8px rgba(0,0,0,0.06);">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+                <span style="font-size:0.85rem;font-weight:700;color:#555;">${theme.emoji} ${currentGrade}ねんせい${lap>0?' '+lap+'しゅう目':''}</span>
+                <span style="font-size:0.85rem;font-weight:700;color:${theme.primary};">${cleared} / ${total}もじ (${pct}%)</span>
+            </div>
+            <div style="background:#F0F0F0;border-radius:999px;height:10px;overflow:hidden;">
+                <div style="width:${pct}%;height:100%;background:linear-gradient(90deg,${theme.primary},${theme.secondary});border-radius:999px;transition:width 0.6s ease;"></div>
+            </div>
+        </div>`;
+}
+
+// ============================================================
+// ランダムテスト
+// ============================================================
 function startRandomTest() {
     playSound('click');
-    const list = allKanjiData[currentGrade];
-    if (!list || list.length === 0) return;
-    const shuffled = [...list].sort(() => 0.5 - Math.random());
-    randomQueue = shuffled.slice(0, 10);
-    randomIndex = 0;
-    isRandomTest = true;
-    currentMode = 'test';
-    levelBeforeRandomTest = getStats().level;
-    startApp(randomQueue[randomIndex]);
+    const list=allKanjiData[currentGrade]; if(!list||!list.length) return;
+    randomQueue=[...list].sort(()=>0.5-Math.random()).slice(0,10);
+    randomIndex=0; isRandomTest=true; currentMode='test';
+    levelBeforeRandomTest=getStats().level; startApp(randomQueue[0]);
 }
-
 function startFolderRandomTest(folderType) {
     playSound('click');
-    let list = [];
-    const targetFolder = folderType === 'tokkun' ? tokkunKanji : nigateKanji;
-    const folderName = folderType === 'tokkun' ? 'とっくん' : 'にがて';
-
-    for (let g = 1; g <= 6; g++) {
-        if (allKanjiData[g]) {
-            list = list.concat(allKanjiData[g].filter(item => targetFolder[item.char]));
-        }
-    }
-    if (list.length < 10) {
-        alert(`${folderName} に 10こ以上 登録すると テストできるよ！\n（いま: ${list.length}こ）\nれんしゅう画面で 登録してね。`);
-        return;
-    }
-    const shuffled = [...list].sort(() => 0.5 - Math.random());
-    randomQueue = shuffled.slice(0, 10);
-    randomIndex = 0;
-    isRandomTest = true;
-    currentMode = 'test';
-    levelBeforeRandomTest = getStats().level;
-    startApp(randomQueue[randomIndex]);
+    let list=[];
+    const folder=folderType==='tokkun'?tokkunKanji:nigateKanji;
+    const fname=folderType==='tokkun'?'とっくん':'にがて';
+    for(let g=1;g<=6;g++) if(allKanjiData[g]) list=list.concat(allKanjiData[g].filter(i=>folder[i.char]));
+    if(list.length<10){ alert(`${fname} に 10こ以上 登録すると テストできるよ！\n（いま: ${list.length}こ）\nれんしゅう画面で 登録してね。`); return; }
+    randomQueue=[...list].sort(()=>0.5-Math.random()).slice(0,10);
+    randomIndex=0; isRandomTest=true; currentMode='test';
+    levelBeforeRandomTest=getStats().level; startApp(randomQueue[0]);
 }
-
 function handleBackFromPractice() {
-    if (hintTimeout) { clearTimeout(hintTimeout); hintTimeout = null; }
-    isAnimating = false;
-    if (isRandomTest) {
-        showScreen('title-screen');
-    } else {
-        showScreen('list-screen');
-    }
+    if(hintTimeout){clearTimeout(hintTimeout);hintTimeout=null;}
+    isAnimating=false; showScreen(isRandomTest?'title-screen':'list-screen');
 }
 
-// ▼▼▼ キャンバス判定エンジン ▼▼▼
+// ============================================================
+// キャンバス判定エンジン
+// ============================================================
 async function fetchKanjiVG(char) {
-    const hex = char.charCodeAt(0).toString(16).padStart(5, '0');
-    const url = `https://cdn.jsdelivr.net/gh/KanjiVG/kanjivg@master/kanji/${hex}.svg`;
-    const res = await fetch(url);
-    if (!res.ok) throw new Error("漢字データが見つかりません");
-    const text = await res.text();
-    const parser = new DOMParser();
-    const doc = parser.parseFromString(text, "image/svg+xml");
-    const paths = Array.from(doc.querySelectorAll('g[id^="kvg:StrokePaths_"] path'));
-    return paths.map(p => p.getAttribute('d')); 
+    const hex=char.charCodeAt(0).toString(16).padStart(5,'0');
+    const res=await fetch(`https://cdn.jsdelivr.net/gh/KanjiVG/kanjivg@master/kanji/${hex}.svg`);
+    if(!res.ok) throw new Error('漢字データが見つかりません');
+    const doc=new DOMParser().parseFromString(await res.text(),'image/svg+xml');
+    return Array.from(doc.querySelectorAll('g[id^="kvg:StrokePaths_"] path')).map(p=>p.getAttribute('d'));
 }
-
 function initCanvasEngine() {
-    const drawCanvas = document.getElementById('draw-canvas');
-    bgCanvasCtx = document.getElementById('bg-canvas').getContext('2d');
-    fixedCanvasCtx = document.getElementById('fixed-canvas').getContext('2d');
-    drawCanvasCtx = drawCanvas.getContext('2d');
-
-    const setupCtx = (ctx, color, width) => {
-        ctx.lineCap = 'round';
-        ctx.lineJoin = 'round';
-        ctx.strokeStyle = color;
-        ctx.lineWidth = width;
-    };
-    setupCtx(bgCanvasCtx, '#E0E0E0', 5);   
-    setupCtx(fixedCanvasCtx, '#333333', 5); 
-    setupCtx(drawCanvasCtx, '#FF6B35', 5);  
-
-    const getPos = (e) => {
-        const rect = drawCanvas.getBoundingClientRect();
-        const clientX = e.clientX ?? (e.touches ? e.touches[0].clientX : 0);
-        const clientY = e.clientY ?? (e.touches ? e.touches[0].clientY : 0);
-        return { x: clientX - rect.left, y: clientY - rect.top };
-    };
-
-    const startDraw = (e) => {
-        if (isAnimating || currentStrokeIndex >= currentKanjiPaths.length) return;
-        isDrawing = true; 
-        userPoints = [getPos(e)];
-        drawCanvasCtx.beginPath(); 
-        drawCanvasCtx.moveTo(userPoints[0].x, userPoints[0].y);
-    };
-
-    const draw = (e) => {
-        if (!isDrawing || isAnimating) return;
-        const pos = getPos(e); 
-        userPoints.push(pos);
-        drawCanvasCtx.lineTo(pos.x, pos.y); 
-        drawCanvasCtx.stroke();
-    };
-
-    const endDraw = () => { 
-        if (!isDrawing || isAnimating) return; 
-        isDrawing = false; 
-        evaluateStroke(); 
-    };
-
-    drawCanvas.addEventListener('mousedown', startDraw);
-    drawCanvas.addEventListener('mousemove', draw);
-    drawCanvas.addEventListener('mouseup', endDraw);
-    drawCanvas.addEventListener('mouseout', endDraw);
-    drawCanvas.addEventListener('touchstart', (e) => { e.preventDefault(); startDraw(e); }, { passive: false });
-    drawCanvas.addEventListener('touchmove', (e) => { e.preventDefault(); draw(e); }, { passive: false });
-    drawCanvas.addEventListener('touchend', (e) => { e.preventDefault(); endDraw(); }, { passive: false });
+    const dc=document.getElementById('draw-canvas');
+    bgCanvasCtx=document.getElementById('bg-canvas').getContext('2d');
+    fixedCanvasCtx=document.getElementById('fixed-canvas').getContext('2d');
+    drawCanvasCtx=dc.getContext('2d');
+    const setup=(ctx,col,w)=>{ctx.lineCap='round';ctx.lineJoin='round';ctx.strokeStyle=col;ctx.lineWidth=w;};
+    setup(bgCanvasCtx,'#E0E0E0',5); setup(fixedCanvasCtx,'#333333',5); setup(drawCanvasCtx,'#FF6B35',5);
+    const pos=e=>{const r=dc.getBoundingClientRect();return{x:(e.clientX??(e.touches?e.touches[0].clientX:0))-r.left,y:(e.clientY??(e.touches?e.touches[0].clientY:0))-r.top};};
+    const sd=e=>{if(isAnimating||currentStrokeIndex>=currentKanjiPaths.length)return;isDrawing=true;userPoints=[pos(e)];drawCanvasCtx.beginPath();drawCanvasCtx.moveTo(userPoints[0].x,userPoints[0].y);};
+    const dr=e=>{if(!isDrawing||isAnimating)return;const p=pos(e);userPoints.push(p);drawCanvasCtx.lineTo(p.x,p.y);drawCanvasCtx.stroke();};
+    const ed=()=>{if(!isDrawing||isAnimating)return;isDrawing=false;evaluateStroke();};
+    dc.addEventListener('mousedown',sd); dc.addEventListener('mousemove',dr);
+    dc.addEventListener('mouseup',ed);   dc.addEventListener('mouseout',ed);
+    dc.addEventListener('touchstart',e=>{e.preventDefault();sd(e);},{passive:false});
+    dc.addEventListener('touchmove', e=>{e.preventDefault();dr(e);},{passive:false});
+    dc.addEventListener('touchend',  e=>{e.preventDefault();ed();},{passive:false});
 }
-
 function showStrokeHint(index) {
-    if (index >= currentKanjiPaths.length) return;
-    const pathData = currentKanjiPaths[index];
-    
-    if (hintTimeout) clearTimeout(hintTimeout);
-
+    if(index>=currentKanjiPaths.length) return;
+    if(hintTimeout) clearTimeout(hintTimeout);
     fixedCanvasCtx.save();
-    fixedCanvasCtx.translate(PADDING, PADDING);
-    fixedCanvasCtx.scale(SCALE, SCALE);
-    fixedCanvasCtx.strokeStyle = 'rgba(255, 60, 60, 0.6)';
-    fixedCanvasCtx.lineWidth = 5;
-    fixedCanvasCtx.lineCap = 'round';
-    fixedCanvasCtx.lineJoin = 'round';
-    fixedCanvasCtx.stroke(new Path2D(pathData));
+    fixedCanvasCtx.translate(PADDING,PADDING); fixedCanvasCtx.scale(SCALE,SCALE);
+    fixedCanvasCtx.strokeStyle='rgba(255,60,60,0.6)'; fixedCanvasCtx.lineWidth=5;
+    fixedCanvasCtx.lineCap='round'; fixedCanvasCtx.lineJoin='round';
+    fixedCanvasCtx.stroke(new Path2D(currentKanjiPaths[index]));
     fixedCanvasCtx.restore();
-
-    hintTimeout = setTimeout(() => {
-        fixedCanvasCtx.clearRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
+    hintTimeout=setTimeout(()=>{
+        fixedCanvasCtx.clearRect(0,0,CANVAS_SIZE,CANVAS_SIZE);
         fixedCanvasCtx.save();
-        fixedCanvasCtx.translate(PADDING, PADDING);
-        fixedCanvasCtx.scale(SCALE, SCALE);
-        fixedCanvasCtx.strokeStyle = '#333333';
-        fixedCanvasCtx.lineWidth = 5;
-        fixedCanvasCtx.lineCap = 'round';
-        fixedCanvasCtx.lineJoin = 'round';
-        for (let i = 0; i < currentStrokeIndex; i++) {
-            fixedCanvasCtx.stroke(new Path2D(currentKanjiPaths[i]));
-        }
-        fixedCanvasCtx.restore();
-        hintTimeout = null;
-    }, 1000);
+        fixedCanvasCtx.translate(PADDING,PADDING); fixedCanvasCtx.scale(SCALE,SCALE);
+        fixedCanvasCtx.strokeStyle='#333333'; fixedCanvasCtx.lineWidth=5;
+        fixedCanvasCtx.lineCap='round'; fixedCanvasCtx.lineJoin='round';
+        for(let i=0;i<currentStrokeIndex;i++) fixedCanvasCtx.stroke(new Path2D(currentKanjiPaths[i]));
+        fixedCanvasCtx.restore(); hintTimeout=null;
+    },1000);
 }
-
 function evaluateStroke() {
-    if (userPoints.length < 2) { 
-        drawCanvasCtx.clearRect(0, 0, CANVAS_SIZE, CANVAS_SIZE); 
-        return; 
-    }
-    
-    const pathData = currentKanjiPaths[currentStrokeIndex];
-    const pathEl = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-    pathEl.setAttribute('d', pathData);
-    
-    const totalLen = pathEl.getTotalLength();
-    const tStart = pathEl.getPointAtLength(0);
-    const tMid1 = pathEl.getPointAtLength(totalLen * 0.33);
-    const tMid2 = pathEl.getPointAtLength(totalLen * 0.66);
-    const tEnd = pathEl.getPointAtLength(totalLen);
-    
-    const scalePoint = (p) => ({ x: p.x * SCALE + PADDING, y: p.y * SCALE + PADDING });
-    const targetStart = scalePoint(tStart);
-    const targetMid1 = scalePoint(tMid1);
-    const targetMid2 = scalePoint(tMid2);
-    const targetEnd = scalePoint(tEnd);
-
-    let userLen = 0;
-    let userDistances = [0];
-    for (let i = 1; i < userPoints.length; i++) {
-        userLen += Math.hypot(userPoints[i].x - userPoints[i-1].x, userPoints[i].y - userPoints[i-1].y);
-        userDistances.push(userLen);
-    }
-
-    const getUserPointAtLen = (targetD) => {
-        if (targetD <= 0) return userPoints[0];
-        if (targetD >= userLen) return userPoints[userPoints.length - 1];
-        for (let i = 1; i < userPoints.length; i++) {
-            if (userDistances[i] >= targetD) {
-                let segment = userDistances[i] - userDistances[i-1];
-                let ratio = segment === 0 ? 0 : (targetD - userDistances[i-1]) / segment;
-                let p1 = userPoints[i-1], p2 = userPoints[i];
-                return { x: p1.x + (p2.x - p1.x) * ratio, y: p1.y + (p2.y - p1.y) * ratio };
-            }
-        }
-        return userPoints[userPoints.length - 1];
+    if(userPoints.length<2){drawCanvasCtx.clearRect(0,0,CANVAS_SIZE,CANVAS_SIZE);return;}
+    const pd=currentKanjiPaths[currentStrokeIndex];
+    const pe=document.createElementNS('http://www.w3.org/2000/svg','path'); pe.setAttribute('d',pd);
+    const tLen=pe.getTotalLength();
+    const sp=p=>({x:p.x*SCALE+PADDING,y:p.y*SCALE+PADDING});
+    const tS=sp(pe.getPointAtLength(0)),tM1=sp(pe.getPointAtLength(tLen*0.33)),tM2=sp(pe.getPointAtLength(tLen*0.66)),tE=sp(pe.getPointAtLength(tLen));
+    let uLen=0,uD=[0];
+    for(let i=1;i<userPoints.length;i++){uLen+=Math.hypot(userPoints[i].x-userPoints[i-1].x,userPoints[i].y-userPoints[i-1].y);uD.push(uLen);}
+    const uAt=d=>{
+        if(d<=0)return userPoints[0]; if(d>=uLen)return userPoints[userPoints.length-1];
+        for(let i=1;i<userPoints.length;i++){if(uD[i]>=d){const seg=uD[i]-uD[i-1],r=seg===0?0:(d-uD[i-1])/seg,a=userPoints[i-1],b=userPoints[i];return{x:a.x+(b.x-a.x)*r,y:a.y+(b.y-a.y)*r};}}
+        return userPoints[userPoints.length-1];
     };
-
-    const uStart = userPoints[0];
-    const uMid1 = getUserPointAtLen(userLen * 0.33);
-    const uMid2 = getUserPointAtLen(userLen * 0.66);
-    const uEnd = userPoints[userPoints.length - 1];
-
-    const distStart = Math.hypot(uStart.x - targetStart.x, uStart.y - targetStart.y);
-    const distMid1 = Math.hypot(uMid1.x - targetMid1.x, uMid1.y - targetMid1.y);
-    const distMid2 = Math.hypot(uMid2.x - targetMid2.x, uMid2.y - targetMid2.y);
-    const distEnd = Math.hypot(uEnd.x - targetEnd.x, uEnd.y - targetEnd.y);
-
-    const THRESHOLD = 50; 
-    
-    if (distStart < THRESHOLD && distMid1 < THRESHOLD && distMid2 < THRESHOLD && distEnd < THRESHOLD && userLen > (totalLen * SCALE) * 0.4) {
-        playSound('success'); 
-        document.getElementById('message-area').innerText = "いいぞ！ その調子！";
-        
-        if (hintTimeout) {
-            clearTimeout(hintTimeout);
-            hintTimeout = null;
-        }
-
-        currentStrokeIndex++; 
-        drawCanvasCtx.clearRect(0, 0, CANVAS_SIZE, CANVAS_SIZE); 
-
-        fixedCanvasCtx.clearRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
+    const uS=userPoints[0],uM1=uAt(uLen*0.33),uM2=uAt(uLen*0.66),uE=userPoints[userPoints.length-1];
+    const THR=50;
+    const ok=[Math.hypot(uS.x-tS.x,uS.y-tS.y),Math.hypot(uM1.x-tM1.x,uM1.y-tM1.y),Math.hypot(uM2.x-tM2.x,uM2.y-tM2.y),Math.hypot(uE.x-tE.x,uE.y-tE.y)].every(d=>d<THR)&&uLen>(tLen*SCALE)*0.4;
+    if(ok){
+        playSound('success'); document.getElementById('message-area').innerText='いいぞ！ その調子！';
+        if(hintTimeout){clearTimeout(hintTimeout);hintTimeout=null;}
+        currentStrokeIndex++;
+        drawCanvasCtx.clearRect(0,0,CANVAS_SIZE,CANVAS_SIZE);
+        fixedCanvasCtx.clearRect(0,0,CANVAS_SIZE,CANVAS_SIZE);
         fixedCanvasCtx.save();
-        fixedCanvasCtx.translate(PADDING, PADDING);
-        fixedCanvasCtx.scale(SCALE, SCALE);
-        fixedCanvasCtx.strokeStyle = '#333333';
-        fixedCanvasCtx.lineWidth = 5;
-        fixedCanvasCtx.lineCap = 'round';
-        fixedCanvasCtx.lineJoin = 'round';
-        for (let i = 0; i < currentStrokeIndex; i++) {
-            fixedCanvasCtx.stroke(new Path2D(currentKanjiPaths[i]));
-        }
+        fixedCanvasCtx.translate(PADDING,PADDING); fixedCanvasCtx.scale(SCALE,SCALE);
+        fixedCanvasCtx.strokeStyle='#333333'; fixedCanvasCtx.lineWidth=5;
+        fixedCanvasCtx.lineCap='round'; fixedCanvasCtx.lineJoin='round';
+        for(let i=0;i<currentStrokeIndex;i++) fixedCanvasCtx.stroke(new Path2D(currentKanjiPaths[i]));
         fixedCanvasCtx.restore();
-
-        if (currentStrokeIndex >= currentKanjiPaths.length) {
-            handleComplete(); 
-        }
+        if(currentStrokeIndex>=currentKanjiPaths.length) handleComplete();
     } else {
-        playSound('error'); 
-        document.getElementById('message-area').innerText = "おしい！ ここを見て！";
-        drawCanvasCtx.clearRect(0, 0, CANVAS_SIZE, CANVAS_SIZE); 
-        
-        showStrokeHint(currentStrokeIndex);
+        playSound('error'); document.getElementById('message-area').innerText='おしい！ ここを見て！';
+        drawCanvasCtx.clearRect(0,0,CANVAS_SIZE,CANVAS_SIZE); showStrokeHint(currentStrokeIndex);
     }
 }
-
 async function playAnimation() {
-    if (isAnimating || currentKanjiPaths.length === 0) return;
-    if (hintTimeout) { clearTimeout(hintTimeout); hintTimeout = null; } 
-    isAnimating = true;
-
-    currentStrokeIndex = 0;
-    drawCanvasCtx.clearRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
-    fixedCanvasCtx.clearRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
-
+    if(isAnimating||!currentKanjiPaths.length)return;
+    if(hintTimeout){clearTimeout(hintTimeout);hintTimeout=null;}
+    isAnimating=true; currentStrokeIndex=0;
+    drawCanvasCtx.clearRect(0,0,CANVAS_SIZE,CANVAS_SIZE);
+    fixedCanvasCtx.clearRect(0,0,CANVAS_SIZE,CANVAS_SIZE);
     fixedCanvasCtx.save();
-    fixedCanvasCtx.translate(PADDING, PADDING);
-    fixedCanvasCtx.scale(SCALE, SCALE);
-    fixedCanvasCtx.strokeStyle = '#00BFFF'; 
-
-    for (let i = 0; i < currentKanjiPaths.length; i++) {
-        if (!isAnimating) break; 
-        
-        const pathData = currentKanjiPaths[i];
-        const p = new Path2D(pathData);
-        const pathEl = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-        pathEl.setAttribute('d', pathData);
-        const len = pathEl.getTotalLength();
-
-        await new Promise(resolve => {
-            let start = null;
-            const duration = 250; 
-
-            const step = (timestamp) => {
-                if (!isAnimating) { resolve(); return; }
-                if (!start) start = timestamp;
-                const progress = Math.min((timestamp - start) / duration, 1);
-
-                fixedCanvasCtx.clearRect(-100, -100, (CANVAS_SIZE * 2) / SCALE, (CANVAS_SIZE * 2) / SCALE);
-                
-                for(let j=0; j<i; j++) {
-                    fixedCanvasCtx.setLineDash([]);
-                    fixedCanvasCtx.stroke(new Path2D(currentKanjiPaths[j]));
-                }
-
-                fixedCanvasCtx.setLineDash([len, len]);
-                fixedCanvasCtx.lineDashOffset = len * (1 - progress);
+    fixedCanvasCtx.translate(PADDING,PADDING); fixedCanvasCtx.scale(SCALE,SCALE);
+    fixedCanvasCtx.strokeStyle='#00BFFF';
+    for(let i=0;i<currentKanjiPaths.length;i++){
+        if(!isAnimating)break;
+        const pd=currentKanjiPaths[i],p=new Path2D(pd);
+        const pe=document.createElementNS('http://www.w3.org/2000/svg','path'); pe.setAttribute('d',pd);
+        const len=pe.getTotalLength();
+        await new Promise(res=>{
+            let t=null;
+            const step=ts=>{
+                if(!isAnimating){res();return;} if(!t)t=ts;
+                const prog=Math.min((ts-t)/250,1);
+                fixedCanvasCtx.clearRect(-100,-100,(CANVAS_SIZE*2)/SCALE,(CANVAS_SIZE*2)/SCALE);
+                for(let j=0;j<i;j++){fixedCanvasCtx.setLineDash([]);fixedCanvasCtx.stroke(new Path2D(currentKanjiPaths[j]));}
+                fixedCanvasCtx.setLineDash([len,len]); fixedCanvasCtx.lineDashOffset=len*(1-prog);
                 fixedCanvasCtx.stroke(p);
-
-                if (progress < 1) {
-                    requestAnimationFrame(step);
-                } else {
-                    fixedCanvasCtx.setLineDash([]); 
-                    resolve();
-                }
+                if(prog<1)requestAnimationFrame(step); else{fixedCanvasCtx.setLineDash([]);res();}
             };
             requestAnimationFrame(step);
         });
-        
-        if (!isAnimating) break;
-        await new Promise(r => setTimeout(r, 60)); 
+        if(!isAnimating)break;
+        await new Promise(r=>setTimeout(r,60));
     }
     fixedCanvasCtx.restore();
-
-    if (isAnimating) {
-        setTimeout(() => {
-            if (!isAnimating) return;
-            fixedCanvasCtx.clearRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
-            fixedCanvasCtx.strokeStyle = '#333333'; 
-            isAnimating = false;
-        }, 600); 
-    }
+    if(isAnimating) setTimeout(()=>{if(!isAnimating)return;fixedCanvasCtx.clearRect(0,0,CANVAS_SIZE,CANVAS_SIZE);fixedCanvasCtx.strokeStyle='#333333';isAnimating=false;},600);
 }
 
-// --- アプリ制御 ---
+// ============================================================
+// アプリ制御
+// ============================================================
 async function startApp(item) {
-    if (hintTimeout) { clearTimeout(hintTimeout); hintTimeout = null; }
-    isAnimating = false;
-    currentChar = item;
-    window.scrollTo(0, 0);
-    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    if(hintTimeout){clearTimeout(hintTimeout);hintTimeout=null;}
+    isAnimating=false; currentChar=item; window.scrollTo(0,0);
+    document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
     document.getElementById('practice-screen').classList.add('active');
-    
     updateFolderBtns();
+    const msg=document.getElementById('message-area');
+    const rd=document.getElementById('current-reading'); if(rd)rd.style.display='none';
+    if(isRandomTest){msg.innerText=`🎲 テスト: ${randomIndex+1}/${randomQueue.length}問目`;msg.style.color="#9B59B6";}
+    else if(currentMode==='test'){msg.innerText="この かんじ を かこう！";msg.style.color="#FF1493";}
+    else{msg.innerText="うすいせんを なぞろう！";msg.style.color="#00D084";}
 
-    const msgArea = document.getElementById('message-area');
-    const readingDisplay = document.getElementById('current-reading');
-    if (readingDisplay) readingDisplay.style.display = 'none'; 
-    
-    if (isRandomTest) {
-        msgArea.innerText = `🎲 テスト: ${randomIndex + 1} / ${randomQueue.length}問目`;
-        msgArea.style.color = "#9B59B6";
-    } else if (currentMode === 'test') {
-        msgArea.innerText = "この かんじ を かこう！";
-        msgArea.style.color = "#FF1493";
-    } else {
-        msgArea.innerText = "うすいせんを なぞろう！";
-        msgArea.style.color = "#00D084";
+    let onyomi=[],kunyomi=[];
+    if(item.reading){
+        item.reading.replace(/\(/g,'（').replace(/\)/g,'）').replace(/\./g,'')
+            .split(/[、,／\/ \u3000]+/).forEach(p=>{if(!p)return;(/[\u30A0-\u30FF]/.test(p)?onyomi:kunyomi).push(p);});
     }
-
-    let onyomi = [];
-    let kunyomi = [];
-    if (item.reading) {
-        let cleanReading = item.reading.replace(/\(/g, '（').replace(/\)/g, '）').replace(/\./g, '');
-        const parts = cleanReading.split(/[、,／\/ \u3000]+/);
-        
-        parts.forEach(p => {
-            if (!p) return;
-            if (/[\u30A0-\u30FF]/.test(p)) {
-                onyomi.push(p);
-            } else {
-                kunyomi.push(p);
-            }
-        });
-    }
-
-    const displayOnPC = onyomi.join("<br>");
-    const displayKunPC = kunyomi.join("<br>");
-
-    const displayOnMobile = onyomi.length > 0 ? `<span style="font-size: 0.8rem; color:#C62828; border: 1px solid #FFCDD2; background: #FFEBEE; border-radius: 12px; padding: 2px 8px; margin-right:6px;">おんよみ</span>${onyomi.join("　")}` : "";
-    const displayKunMobile = kunyomi.length > 0 ? `<span style="font-size: 0.8rem; color:#1565C0; border: 1px solid #BBDEFB; background: #E3F2FD; border-radius: 12px; padding: 2px 8px; margin-right:6px;">くんよみ</span>${kunyomi.join("　")}` : "";
-
-    const targetDiv = document.getElementById('character-target');
-    
-    targetDiv.innerHTML = `
+    const dOP=onyomi.join('<br>'),dKP=kunyomi.join('<br>');
+    const dOM=onyomi.length>0?`<span style="font-size:0.8rem;color:#C62828;border:1px solid #FFCDD2;background:#FFEBEE;border-radius:12px;padding:2px 8px;margin-right:6px;">おんよみ</span>${onyomi.join('　')}`:'';
+    const dKM=kunyomi.length>0?`<span style="font-size:0.8rem;color:#1565C0;border:1px solid #BBDEFB;background:#E3F2FD;border-radius:12px;padding:2px 8px;margin-right:6px;">くんよみ</span>${kunyomi.join('　')}`:'';
+    document.getElementById('character-target').innerHTML=`
         <style>
-            .kanji-layout {
-                display: flex;
-                justify-content: center;
-                align-items: stretch;
-                gap: 25px;
-                width: 100%;
-                margin-top: 10px;
-            }
-            .side-col {
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                width: 80px; 
-            }
-            .yomi-badge {
-                writing-mode: horizontal-tb;
-                padding: 6px 14px;
-                border-radius: 20px;
-                font-size: 0.9rem;
-                font-weight: bold;
-                margin-bottom: 20px;
-                white-space: nowrap;
-            }
-            .yomi-badge.kun {
-                border: 2px solid #D6EAF8;
-                color: #2874A6;
-                background: #EBF5FB;
-            }
-            .yomi-badge.on {
-                border: 2px solid #FADBD8;
-                color: #B03A2E;
-                background: #FDEDEC;
-            }
-            .yomi-pc {
-                writing-mode: vertical-rl;
-                text-orientation: upright;
-                font-size: 1.5rem;
-                font-weight: bold;
-                letter-spacing: 0.2rem;
-                line-height: 2.2; 
-                text-align: start;
-            }
-            .yomi-mobile {
-                display: none;
-            }
-            
-            @media (max-width: 500px) {
-                .kanji-layout {
-                    flex-direction: column;
-                    align-items: center;
-                    gap: 15px;
-                }
-                .side-col {
-                    display: none; 
-                }
-                .yomi-mobile {
-                    display: flex;
-                    flex-direction: column;
-                    align-items: center;
-                    gap: 10px;
-                    width: 100%;
-                    font-size: 1.2rem;
-                    font-weight: bold;
-                }
-            }
+        .kl{display:flex;justify-content:center;align-items:stretch;gap:25px;width:100%;margin-top:10px;}
+        .sc{display:flex;flex-direction:column;align-items:center;width:80px;}
+        .yb{writing-mode:horizontal-tb;padding:6px 14px;border-radius:20px;font-size:0.9rem;font-weight:bold;margin-bottom:20px;white-space:nowrap;}
+        .yb.kun{border:2px solid #D6EAF8;color:#2874A6;background:#EBF5FB;}
+        .yb.on{border:2px solid #FADBD8;color:#B03A2E;background:#FDEDEC;}
+        .ypc{writing-mode:vertical-rl;text-orientation:upright;font-size:1.5rem;font-weight:bold;letter-spacing:0.2rem;line-height:2.2;text-align:start;}
+        .ym{display:none;}
+        @media(max-width:500px){.kl{flex-direction:column;align-items:center;gap:15px;}.sc{display:none;}.ym{display:flex;flex-direction:column;align-items:center;gap:10px;width:100%;font-size:1.2rem;font-weight:bold;}}
         </style>
-        
-        <div class="kanji-layout">
-            <div class="side-col">
-                ${kunyomi.length > 0 ? `
-                <div class="yomi-badge kun">くんよみ</div>
-                <div class="yomi-pc" style="color: #2874A6;">${displayKunPC}</div>
-                ` : ''}
+        <div class="kl">
+            <div class="sc">${kunyomi.length>0?`<div class="yb kun">くんよみ</div><div class="ypc" style="color:#2874A6;">${dKP}</div>`:''}</div>
+            <div class="ym">${kunyomi.length>0?`<div style="color:#2874A6;">${dKM}</div>`:''}${onyomi.length>0?`<div style="color:#B03A2E;">${dOM}</div>`:''}</div>
+            <div style="position:relative;width:${CANVAS_SIZE}px;height:${CANVAS_SIZE}px;margin:0;background:white;flex-shrink:0;border-radius:24px;box-shadow:0 4px 12px rgba(0,0,0,0.05);">
+                <canvas id="bg-canvas"    width="${CANVAS_SIZE}" height="${CANVAS_SIZE}" style="position:absolute;top:0;left:0;z-index:1;"></canvas>
+                <canvas id="fixed-canvas" width="${CANVAS_SIZE}" height="${CANVAS_SIZE}" style="position:absolute;top:0;left:0;z-index:2;"></canvas>
+                <canvas id="draw-canvas"  width="${CANVAS_SIZE}" height="${CANVAS_SIZE}" style="position:absolute;top:0;left:0;z-index:3;touch-action:none;cursor:crosshair;"></canvas>
             </div>
-
-            <div class="yomi-mobile">
-                ${kunyomi.length > 0 ? `<div style="color: #2874A6;">${displayKunMobile}</div>` : ''}
-                ${onyomi.length > 0 ? `<div style="color: #B03A2E;">${displayOnMobile}</div>` : ''}
-            </div>
-
-            <div style="position: relative; width: ${CANVAS_SIZE}px; height: ${CANVAS_SIZE}px; margin: 0; background-color: white; flex-shrink: 0; border-radius: 24px; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
-                <canvas id="bg-canvas" width="${CANVAS_SIZE}" height="${CANVAS_SIZE}" style="position: absolute; top: 0; left: 0; z-index: 1;"></canvas>
-                <canvas id="fixed-canvas" width="${CANVAS_SIZE}" height="${CANVAS_SIZE}" style="position: absolute; top: 0; left: 0; z-index: 2;"></canvas>
-                <canvas id="draw-canvas" width="${CANVAS_SIZE}" height="${CANVAS_SIZE}" style="position: absolute; top: 0; left: 0; z-index: 3; touch-action: none; cursor: crosshair;"></canvas>
-            </div>
-
-            <div class="side-col">
-                ${onyomi.length > 0 ? `
-                <div class="yomi-badge on">おんよみ</div>
-                <div class="yomi-pc" style="color: #B03A2E;">${displayOnPC}</div>
-                ` : ''}
-            </div>
-        </div>
-    `;
-
-    initCanvasEngine();
-    currentStrokeIndex = 0;
-
+            <div class="sc">${onyomi.length>0?`<div class="yb on">おんよみ</div><div class="ypc" style="color:#B03A2E;">${dOP}</div>`:''}</div>
+        </div>`;
+    initCanvasEngine(); currentStrokeIndex=0;
     bgCanvasCtx.save();
-    bgCanvasCtx.strokeStyle = '#D6EAF8'; 
-    bgCanvasCtx.lineWidth = 3;           
-    bgCanvasCtx.setLineDash([8, 8]);     
+    bgCanvasCtx.strokeStyle='#D6EAF8'; bgCanvasCtx.lineWidth=3; bgCanvasCtx.setLineDash([8,8]);
     bgCanvasCtx.beginPath();
-    bgCanvasCtx.moveTo(CANVAS_SIZE / 2, 0);
-    bgCanvasCtx.lineTo(CANVAS_SIZE / 2, CANVAS_SIZE);
-    bgCanvasCtx.moveTo(0, CANVAS_SIZE / 2);
-    bgCanvasCtx.lineTo(CANVAS_SIZE, CANVAS_SIZE / 2);
-    bgCanvasCtx.stroke();
-    bgCanvasCtx.restore();
-
+    bgCanvasCtx.moveTo(CANVAS_SIZE/2,0); bgCanvasCtx.lineTo(CANVAS_SIZE/2,CANVAS_SIZE);
+    bgCanvasCtx.moveTo(0,CANVAS_SIZE/2); bgCanvasCtx.lineTo(CANVAS_SIZE,CANVAS_SIZE/2);
+    bgCanvasCtx.stroke(); bgCanvasCtx.restore();
     try {
-        currentKanjiPaths = await fetchKanjiVG(item.char);
-
-        if (currentMode === 'practice' || currentMode === 'tokkun' || currentMode === 'nigate') {
+        currentKanjiPaths=await fetchKanjiVG(item.char);
+        if(currentMode==='practice'||currentMode==='tokkun'||currentMode==='nigate'){
             bgCanvasCtx.save();
-            bgCanvasCtx.translate(PADDING, PADDING);
-            bgCanvasCtx.scale(SCALE, SCALE);
-            currentKanjiPaths.forEach(pathData => {
-                bgCanvasCtx.stroke(new Path2D(pathData));
-            });
+            bgCanvasCtx.translate(PADDING,PADDING); bgCanvasCtx.scale(SCALE,SCALE);
+            currentKanjiPaths.forEach(pd=>bgCanvasCtx.stroke(new Path2D(pd)));
             bgCanvasCtx.restore();
         }
-    } catch (error) {
-        msgArea.innerText = "エラー: データがよみこめません";
-        console.error(error);
-    }
+    } catch(e){msg.innerText="エラー: データがよみこめません";console.error(e);}
 }
 
+// ============================================================
+// 完了処理（周回チェック込み）
+// ============================================================
 function handleComplete() {
     playSound('complete');
-    const msg = document.getElementById('result-msg');
-    const icon = document.getElementById('result-icon');
-    
-    const isPractice = (currentMode === 'practice' || currentMode === 'tokkun' || currentMode === 'nigate');
-    const targetStorage = isPractice ? progressPractice : progressTest;
-    const storageKey = isPractice ? 'kanjiMasterPractice' : 'kanjiMasterTest';
-
-    const oldLevel = getStats().level;
-    targetStorage[currentChar.char] = true;
-    localStorage.setItem(storageKey, JSON.stringify(targetStorage));
-    const newLevel = getStats().level;
-    
-    if (!isRandomTest && newLevel > oldLevel) pendingLevelUp = true;
-
-    if (isPractice) {
-        msg.innerText = "できたー！"; msg.style.color = "#00D084"; icon.innerText = "⭐";
-    } else {
-        msg.innerText = "だいせいかい！"; msg.style.color = "#FF1493"; icon.innerText = "👑";
-    }
-
-    setTimeout(() => {
-        document.getElementById('result-overlay').classList.add('active');
-    }, 800);
+    const msg=document.getElementById('result-msg'),icon=document.getElementById('result-icon');
+    const isPractice=(currentMode==='practice'||currentMode==='tokkun'||currentMode==='nigate');
+    const store=isPractice?progressPractice:progressTest;
+    const sKey=isPractice?'kanjiMasterPractice':'kanjiMasterTest';
+    const oldLv=getStats().level;
+    store[currentChar.char]=true; localStorage.setItem(sKey,JSON.stringify(store));
+    const newLv=getStats().level;
+    const grade=currentChar._foundGrade||currentGrade;
+    if(!isRandomTest){ if(checkAndIncrementLap(grade)){pendingLapUp=true;pendingLapGrade=grade;} }
+    if(!isRandomTest&&newLv>oldLv) pendingLevelUp=true;
+    msg.innerText=isPractice?'できたー！':'だいせいかい！';
+    msg.style.color=isPractice?'#00D084':'#FF1493';
+    icon.innerText=isPractice?'⭐':'👑';
+    setTimeout(()=>document.getElementById('result-overlay').classList.add('active'),800);
 }
-
 function handleNextClick() {
     document.getElementById('result-overlay').classList.remove('active');
-    if (pendingLevelUp) {
-        pendingLevelUp = false;
-        showLevelUpDisplay(getStats().level);
-        return;
-    }
+    if(pendingLapUp){pendingLapUp=false;showLapUpDisplay(pendingLapGrade);return;}
+    if(pendingLevelUp){pendingLevelUp=false;showLevelUpDisplay(getStats().level);return;}
     moveToNextKanji();
 }
-
 function moveToNextKanji() {
-    if (isRandomTest) {
+    if(isRandomTest){
         randomIndex++;
-        if (randomIndex < randomQueue.length) {
-            startApp(randomQueue[randomIndex]);
-        } else {
-            isRandomTest = false;
-            bonusXP += 10;
-            localStorage.setItem('kanjiMasterBonusXP', bonusXP);
-            document.getElementById('random-clear-overlay').classList.add('active');
-            playSound('levelup');
-            updateUI();
-        }
+        if(randomIndex<randomQueue.length){startApp(randomQueue[randomIndex]);return;}
+        isRandomTest=false; bonusXP+=10; localStorage.setItem('kanjiMasterBonusXP',bonusXP);
+        if(checkAndIncrementLap(currentGrade)){pendingLapUp=true;pendingLapGrade=currentGrade;}
+        document.getElementById('random-clear-overlay').classList.add('active');
+        playSound('levelup'); updateUI();
     } else {
-        let list = [];
-        if (currentMode === 'tokkun' || currentMode === 'nigate') {
-             const targetFolder = currentMode === 'tokkun' ? tokkunKanji : nigateKanji;
-             for (let g = 1; g <= 6; g++) {
-                if (allKanjiData[g]) {
-                    list = list.concat(allKanjiData[g].filter(item => targetFolder[item.char]));
-                }
-            }
-        } else {
-            list = allKanjiData[currentGrade];
-            if (currentChar._foundGrade) list = allKanjiData[currentChar._foundGrade];
-        }
-        
-        if (!list || list.length === 0) { showScreen('list-screen'); return; }
-
-        const idx = list.findIndex(k => k.char === currentChar.char);
-        if (idx >= 0 && idx < list.length - 1) {
-            startApp(list[idx + 1]);
-        } else {
-            showScreen('list-screen');
-        }
+        let list=[];
+        if(currentMode==='tokkun'||currentMode==='nigate'){
+            const f=currentMode==='tokkun'?tokkunKanji:nigateKanji;
+            for(let g=1;g<=6;g++) if(allKanjiData[g]) list=list.concat(allKanjiData[g].filter(i=>f[i.char]));
+        } else { list=allKanjiData[currentChar._foundGrade||currentGrade]||[]; }
+        if(!list.length){showScreen('list-screen');return;}
+        const idx=list.findIndex(k=>k.char===currentChar.char);
+        if(idx>=0&&idx<list.length-1) startApp(list[idx+1]); else showScreen('list-screen');
     }
 }
 
+// ============================================================
+// レベルアップ演出
+// ============================================================
 function showLevelUpDisplay(level) {
     playSound('levelup');
     document.getElementById('levelup-overlay').classList.add('active');
-    document.getElementById('new-level-num').innerText = level;
-    const newTitleData = getTitleData(level);
-    document.getElementById('levelup-mascot').innerText = newTitleData.mascot;
+    document.getElementById('new-level-num').innerText=level;
+    document.getElementById('levelup-mascot').innerText=getTitleData(level).mascot;
 }
-
 function closeLevelUp() {
     document.getElementById('levelup-overlay').classList.remove('active');
-    if (pendingGoHome) {
-        pendingGoHome = false;
-        showScreen('title-screen');
-    } else {
-        moveToNextKanji();
-    }
+    if(pendingGoHome){pendingGoHome=false;showScreen('title-screen');}
+    else moveToNextKanji();
 }
 
+// ============================================================
+// 周回アップ演出
+// ============================================================
+function showLapUpDisplay(grade) {
+    playSound('lapup');
+    const lap=getGradeLap(grade),theme=getLapTheme(lap);
+    if(!document.getElementById('lapup-overlay')) createLapUpOverlay();
+    document.getElementById('lapup-overlay').classList.add('active');
+    document.getElementById('lapup-grade').innerText=`${grade}ねんせい`;
+    document.getElementById('lapup-lap').innerText=`${lap}しゅう目`;
+    document.getElementById('lapup-emoji').innerText=theme.emoji;
+    document.getElementById('lapup-name').innerText=theme.name;
+    const inner=document.getElementById('lapup-inner');
+    if(inner) inner.style.background=`linear-gradient(135deg,${theme.primary},${theme.secondary})`;
+}
+function createLapUpOverlay() {
+    const div=document.createElement('div'); div.id='lapup-overlay'; div.className='overlay';
+    div.innerHTML=`
+        <div id="lapup-inner" style="border-radius:28px;padding:40px 32px;text-align:center;color:white;max-width:320px;width:90%;box-shadow:0 8px 32px rgba(0,0,0,0.25);animation:lapup-pop 0.5s cubic-bezier(0.34,1.56,0.64,1);">
+            <div id="lapup-emoji" style="font-size:3.5rem;margin-bottom:12px;"></div>
+            <div id="lapup-grade" style="font-size:1rem;font-weight:700;opacity:0.9;margin-bottom:4px;"></div>
+            <div id="lapup-lap"   style="font-size:2rem;font-weight:900;margin-bottom:8px;"></div>
+            <div style="font-size:1rem;opacity:0.9;margin-bottom:24px;">ぜんぶの かんじを クリア！<br>つぎの しゅうへ すすもう！</div>
+            <div id="lapup-name"  style="font-size:0.85rem;opacity:0.75;margin-bottom:20px;"></div>
+            <button onclick="closeLapUp()" style="background:white;color:#333;border:none;border-radius:999px;padding:14px 40px;font-size:1.1rem;font-weight:800;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,0.15);">つぎへ すすむ！</button>
+        </div>
+        <style>@keyframes lapup-pop{0%{transform:scale(0.5);opacity:0}100%{transform:scale(1);opacity:1}}</style>`;
+    document.body.appendChild(div);
+}
+function closeLapUp() {
+    document.getElementById('lapup-overlay').classList.remove('active');
+    if(pendingLevelUp){pendingLevelUp=false;showLevelUpDisplay(getStats().level);}
+    else if(pendingGoHome){pendingGoHome=false;showScreen('title-screen');}
+    else moveToNextKanji();
+}
 function handleRandomClearClick() {
     document.getElementById('random-clear-overlay').classList.remove('active');
-    const currentLevel = getStats().level;
-    if (currentLevel > levelBeforeRandomTest) {
-        pendingGoHome = true;
-        showLevelUpDisplay(currentLevel);
-    } else {
-        showScreen('title-screen');
-    }
+    if(pendingLapUp){pendingLapUp=false;showLapUpDisplay(pendingLapGrade);return;}
+    const lv=getStats().level;
+    if(lv>levelBeforeRandomTest){pendingGoHome=true;showLevelUpDisplay(lv);}
+    else showScreen('title-screen');
 }
 
-function retry() { 
-    if (hintTimeout) { clearTimeout(hintTimeout); hintTimeout = null; }
-    isAnimating = false; 
-    startApp(currentChar); 
-}
-
-function showResetConfirm() { playSound('click'); document.getElementById('reset-confirm').classList.add('active'); }
+// ============================================================
+// リセット
+// ============================================================
+function retry(){ if(hintTimeout){clearTimeout(hintTimeout);hintTimeout=null;} isAnimating=false; startApp(currentChar); }
+function showResetConfirm()  { playSound('click'); document.getElementById('reset-confirm').classList.add('active'); }
 function closeResetConfirm() { playSound('click'); document.getElementById('reset-confirm').classList.remove('active'); }
-
 function executeReset() {
-    playSound('click');
-    localStorage.clear();
-    progressPractice = {}; progressTest = {}; 
-    tokkunKanji = {}; nigateKanji = {}; 
-    bonusXP = 0;
+    playSound('click'); localStorage.clear();
+    progressPractice={}; progressTest={}; tokkunKanji={}; nigateKanji={}; bonusXP=0; lapCount={};
     document.getElementById('reset-confirm').classList.remove('active');
     location.reload();
 }
