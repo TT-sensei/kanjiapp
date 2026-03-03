@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Kosugi+Maru:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=BIZ+UDPMincho&family=Kosugi+Maru:wght@400;700&display=swap');
 
 :root {
     --primary: #FF1493;
@@ -26,6 +26,13 @@ html, body {
     width: 100%;
     height: 100%;
     box-sizing: border-box;
+}
+
+/* ★ 漢字表示部分だけ明朝体 */
+.kanji-card,
+#character-target,
+#current-reading {
+    font-family: 'BIZ UDPMincho', serif;
 }
 
 /* 画面共通 */
@@ -56,7 +63,7 @@ h1 { font-size: 3rem; margin: 0; background: linear-gradient(90deg, var(--primar
 .btn-nigate-test { background: linear-gradient(135deg, #7B1FA2, #AB47BC); color: white; }
 .btn-random      { grid-column: span 2; background: linear-gradient(135deg, #34495E, #5D6D7E); color: white; flex-direction: row; gap: 8px; padding: 18px 10px; font-size: 1.1rem; margin-top: 10px; }
 
-/* ★ 学年ボタン：進捗バー・周回バッジを収めるため高さをautoに変更 */
+/* 学年ボタン */
 .grade-selector { display: flex; justify-content: center; gap: 8px; margin: 25px 0; flex-wrap: wrap; }
 .grade-btn {
     width: 75px;
@@ -101,7 +108,7 @@ h1 { font-size: 3rem; margin: 0; background: linear-gradient(90deg, var(--primar
 .search-area { margin-bottom: 20px; }
 #search-box { width: 75%; max-width: 240px; padding: 10px; font-size: 0.95rem; border: 3px solid var(--primary); border-radius: 20px; text-align: center; background: white; box-shadow: var(--shadow-soft); font-family: inherit; }
 
-/* ★ リスト進捗ゲージコンテナ */
+/* リスト進捗ゲージコンテナ */
 #list-progress-bar-container { width: 100%; max-width: 480px; margin: 0 auto; }
 
 /* 漢字グリッド */
@@ -119,7 +126,8 @@ h1 { font-size: 3rem; margin: 0; background: linear-gradient(90deg, var(--primar
     position: relative;
     border: 3px solid transparent;
     font-weight: 700;
-    transition: border-color 0.3s, background 0.3s; /* ★ 周回カラー切替をなめらかに */
+    transition: border-color 0.3s, background 0.3s;
+    font-family: 'BIZ UDPMincho', serif; /* ★ 明朝体 */
 }
 .kanji-card:active { transform: scale(0.92); box-shadow: 0 2px 0 rgba(0,0,0,0.1); }
 .kanji-card.cleared-practice { border-color: var(--secondary); background: linear-gradient(135deg, #E5FFF5, #F0FFFA); }
@@ -168,7 +176,7 @@ h1 { font-size: 3rem; margin: 0; background: linear-gradient(90deg, var(--primar
 #levelup-mascot { font-size: 4rem; margin: 10px 0; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.1)); }
 .new-level-text { font-size: 1.3rem; margin: 10px 0; font-weight: 700; }
 
-/* ★ 周回アップ演出アニメーション */
+/* 周回アップ演出アニメーション */
 @keyframes lapup-pop {
     0%   { transform: scale(0.5) rotate(-5deg); opacity: 0; }
     60%  { transform: scale(1.08) rotate(2deg);  opacity: 1; }
@@ -186,7 +194,7 @@ h1 { font-size: 3rem; margin: 0; background: linear-gradient(90deg, var(--primar
 /* その他 */
 #mode-display { padding: 8px 20px; border-radius: 20px; color: white; font-size: 0.95rem; font-weight: 700; display: inline-block; }
 #message-area { margin: 15px 0; font-size: 1.3rem; font-weight: 700; min-height: 30px; }
-#current-reading { font-size: 1.2rem; font-weight: 700; min-height: 40px; }
+#current-reading { font-size: 1.2rem; font-weight: 700; min-height: 40px; font-family: 'BIZ UDPMincho', serif; /* ★ 明朝体 */ }
 .reset-link { margin-top: 20px; font-size: 0.85rem; }
 .reset-link span { color: var(--primary); text-decoration: underline; cursor: pointer; font-weight: 700; }
 
