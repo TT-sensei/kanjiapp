@@ -5,13 +5,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>かんじマスター・コンプリート</title>
-
-```
 <script src="kanji-data.js"></script>
 <script src="title-data.js"></script>
 <link rel="stylesheet" href="style.css">
-```
-
 </head>
 <body>
   <div id="title-screen" class="screen active">
@@ -90,7 +86,6 @@
        <button aria-label="練習モード" class="menu-btn btn-practice" onclick="selectMode('practice')">✏️<br>れんしゅう</button> 
        <button aria-label="テストモード" class="menu-btn btn-test" onclick="selectMode('test')">🏅<br>テスト</button>
 
-```
    <button aria-label="とっくん漢字" class="menu-btn btn-tokkun" onclick="selectMode('tokkun')">💪<br>とっくんをみる</button>
    <button aria-label="にがてな漢字" class="menu-btn btn-nigate" onclick="selectMode('nigate')">💦<br>にがてをみる</button>
    
@@ -98,8 +93,6 @@
    <button aria-label="にがてテスト" class="menu-btn btn-nigate-test" onclick="startFolderRandomTest('nigate')">🎯<br>にがてテスト</button>
    
    <button aria-label="ランダムテスト" class="menu-btn btn-random" onclick="startRandomTest()">🎲 ランダムテスト (10問)</button>
-```
-
    </div>
 
    <div class="reset-link"><span onclick="showResetConfirm()">📋 データリセット</span></div>
@@ -160,7 +153,6 @@
     <h2 id="message-area"></h2>
     <div id="current-reading" style="font-size:3rem; font-weight:bold; text-align:center; margin:5px 0; color:#333;"></div>
 
-```
 <div id="practice-area">
   <div id="character-target"></div>
 </div>
@@ -169,7 +161,6 @@
   <button aria-label="書き順再生" class="control-btn" onclick="playAnimation()">▶</button> 
   <button aria-label="リトライ" class="control-btn" onclick="retry()">↺</button>
 </div>
-```
 
   </div>
 
