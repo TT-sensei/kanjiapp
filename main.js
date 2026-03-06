@@ -21,7 +21,6 @@ let tokkunKanji      = JSON.parse(localStorage.getItem(‘kanjiMasterTokkun’))
 let nigateKanji      = JSON.parse(localStorage.getItem(‘kanjiMasterNigate’))   || {};
 let bonusXP          = parseInt(localStorage.getItem(‘kanjiMasterBonusXP’))    || 0;
 let lapCount         = JSON.parse(localStorage.getItem(‘kanjiMasterLap’))      || {};
-let mistakeCount     = JSON.parse(localStorage.getItem(‘kanjiMasterMistakes’)) || {};
 
 let currentChar   = null;
 let currentMode   = ‘practice’;
@@ -562,23 +561,31 @@ fixedCanvasCtx.restore(); hintTimeout=null;
 }
 
 function evaluateStroke() {
-if (userPoints.length<2){drawCanvasCtx.clearRect(0,0,CANVAS_SIZE,CANVAS_SIZE);return;}
-const pd=currentKanjiPaths[currentStrokeIndex];
-const pe=document.createElementNS(‘http://www.w3.org/2000/svg’,‘path’); pe.setAttribute(‘d’,pd);
-const tLen=pe.getTotalLength();
-const sp=p=>({x:p.x*SCALE+PADDING,y:p.y*SCALE+PADDING});
-const tS=sp(pe.getPointAtLength(0)),tM1=sp(pe.getPointAtLength(tLen*0.33)),tM2=sp(pe.getPointAtLength(tLen*0.66)),tE=sp(pe.getPointAtLength(tLen));
-let uLen=0,uD=[0];
-for (let i=1;i<userPoints.length;i++){uLen+=Math.hypot(userPoints[i].x-userPoints[i-1].x,userPoints[i].y-userPoints[i-1].y);uD.push(uLen);}
-const uAt=d=>{
-if(d<=0)return userPoints[0]; if(d>=uLen)return userPoints[userPoints.length-1];
-for(let i=1;i<userPoints.length;i++){if(uD[i]>=d){const seg=uD[i]-uD[i-1],r=seg===0?0:(d-uD[i-1])/seg,a=userPoints[i-1],b=userPoints[i];return{x:a.x+(b.x-a.x)*r,y:a.y+(b.y-a.y)*r};}}
-return userPoints[userPoints.length-1];
-};
-const uS=userPoints[0],uM1=uAt(uLen*0.33),uM2=uAt(uLen*0.66),uE=userPoints[userPoints.length-1];
-const THR=50;
-const ok=[Math.hypot(uS.x-tS.x,uS.y-tS.y),Math.hypot(uM1.x-tM1.x,uM1.y-tM1.y),Math.hypot(uM2.x-tM2.x,uM2.y-tM2.y),Math.hypot(uE.x-tE.x,uE.y-tE.y)].every(d=>d<THR)&&uLen>(tLen*SCALE)*0.4;
-if (ok) {
+    if (userPoints.length<2){drawCanvasCtx.clearRect(0,0,CANVAS_SIZE,CANVAS_SIZE);return;}
+    const pd=currentKanjiPaths[currentStrokeIndex];
+    const pe=document.createElementNS('http://www.w3.org/2000/svg','path'); pe.setAttribute('d',pd);
+    const tLen=pe.getTotalLength();
+    const sp=p=>({x:p.x*SCALE+PADDING,y:p.y*SCALE+PADDING});
+
+    // ★ チェックポイントを4点→7点に増加
+    const checkPoints = [0, 0.17, 0.33, 0.5, 0.67, 0.83, 1.0];
+    const targets = checkPoints.map(t => sp(pe.getPointAtLength(tLen * t)));
+
+    let uLen=0,uD=[0];
+    for (let i=1;i<userPoints.length;i++){uLen+=Math.hypot(userPoints[i].x-userPoints[i-1].x,userPoints[i].y-userPoints[i-1].y);uD.push(uLen);}
+    const uAt=d=>{
+        if(d<=0)return userPoints[0]; if(d>=uLen)return userPoints[userPoints.length-1];
+        for(let i=1;i<userPoints.length;i++){if(uD[i]>=d){const seg=uD[i]-uD[i-1],r=seg===0?0:(d-uD[i-1])/seg,a=userPoints[i-1],b=userPoints[i];return{x:a.x+(b.x-a.x)*r,y:a.y+(b.y-a.y)*r};}}
+        return userPoints[userPoints.length-1];
+    };
+
+    const userSamples = checkPoints.map(t => uAt(uLen * t));
+
+    // ★ THRを50→38に引き下げ
+    const THR = 38;
+    const ok = targets.every((t, i) => Math.hypot(userSamples[i].x - t.x, userSamples[i].y - t.y) < THR)
+        && uLen > (tLen * SCALE) * 0.4;
+    if (ok) {
 playSound(‘stroke’); // ★ 一画成功：ぷに音
 document.getElementById(‘message-area’).innerText=‘いいぞ！ その調子！’;
 if(hintTimeout){clearTimeout(hintTimeout);hintTimeout=null;}
@@ -593,19 +600,8 @@ for(let i=0;i<currentStrokeIndex;i++) fixedCanvasCtx.stroke(new Path2D(currentKa
 fixedCanvasCtx.restore();
 if(currentStrokeIndex>=currentKanjiPaths.length) handleComplete();
 } else {
-playSound(‘error’);
-// ★ ミスカウント +1、3回でにがて自動登録
-const char = currentChar.char;
-mistakeCount[char] = (mistakeCount[char] || 0) + 1;
-localStorage.setItem(‘kanjiMasterMistakes’, JSON.stringify(mistakeCount));
-if (mistakeCount[char] >= 3 && !nigateKanji[char]) {
-nigateKanji[char] = true;
-localStorage.setItem(‘kanjiMasterNigate’, JSON.stringify(nigateKanji));
-updateFolderBtns();
-document.getElementById(‘message-area’).innerText=‘おしい！ にがてに とうろくしたよ💦’;
-} else {
+playSound(‘error’); // ★ 不正解：暗く下降する音
 document.getElementById(‘message-area’).innerText=‘おしい！ ここを見て！’;
-}
 drawCanvasCtx.clearRect(0,0,CANVAS_SIZE,CANVAS_SIZE); showStrokeHint(currentStrokeIndex);
 }
 }
@@ -830,7 +826,7 @@ function closeResetConfirm() {playSound(‘click’);document.getElementById(‘
 function executeReset() {
 playSound(‘click’);
 localStorage.clear();
-progressPractice={}; progressTest={}; tokkunKanji={}; nigateKanji={}; bonusXP=0; lapCount={}; mistakeCount={};
+progressPractice={}; progressTest={}; tokkunKanji={}; nigateKanji={}; bonusXP=0; lapCount={};
 document.getElementById(‘reset-confirm’).classList.remove(‘active’);
 location.reload();
 }
