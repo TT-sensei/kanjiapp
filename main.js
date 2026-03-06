@@ -21,6 +21,7 @@ let tokkunKanji      = JSON.parse(localStorage.getItem(‘kanjiMasterTokkun’))
 let nigateKanji      = JSON.parse(localStorage.getItem(‘kanjiMasterNigate’))   || {};
 let bonusXP          = parseInt(localStorage.getItem(‘kanjiMasterBonusXP’))    || 0;
 let lapCount         = JSON.parse(localStorage.getItem(‘kanjiMasterLap’))      || {};
+let mistakeCount     = JSON.parse(localStorage.getItem(‘kanjiMasterMistakes’)) || {}; // ★ ミスカウント
 
 let currentChar   = null;
 let currentMode   = ‘practice’;
@@ -71,14 +72,12 @@ allKanjiData[g] = parseCompressedData(g, compressedKanjiData[g]);
 // 周回システム
 // ============================================================
 
-/** 今の周回でクリアした文字リストを取得 */
 function getLapClearedList(grade) {
 const lap = getGradeLap(grade);
 const key = `kanjiMasterLP_${grade}_${lap}`;
 return JSON.parse(localStorage.getItem(key)) || [];
 }
 
-/** 今の周回でクリアした文字を追記 */
 function addLapCleared(grade, char) {
 const lap = getGradeLap(grade);
 const key = `kanjiMasterLP_${grade}_${lap}`;
@@ -89,7 +88,6 @@ localStorage.setItem(key, JSON.stringify(list));
 }
 }
 
-/** 指定学年の現周回クリア数 / 全文字数 */
 function getGradeProgress(grade) {
 const list = allKanjiData[grade];
 if (!list || list.length === 0) return { cleared: 0, total: 0 };
@@ -100,7 +98,6 @@ return { cleared, total: list.length };
 
 function getGradeLap(grade) { return lapCount[grade] || 0; }
 
-/** 全クリア検出 → lapCount++ (クリアデータはリセットしない) */
 function checkAndIncrementLap(grade) {
 const list = allKanjiData[grade];
 if (!list || !list.length) return false;
@@ -132,7 +129,6 @@ o.start(startT); o.stop(startT + dur);
 switch(type) {
 
 ```
-    // ★ 一画ごとのぷに音
     case 'stroke': {
         const o = audioContext.createOscillator();
         const g = audioContext.createGain();
@@ -150,7 +146,6 @@ switch(type) {
         break;
     }
 
-    // ★ 正解音（明るく上昇）
     case 'success': {
         const notes = [523, 659, 784, 1047];
         notes.forEach((freq, i) => {
@@ -168,7 +163,6 @@ switch(type) {
         break;
     }
 
-    // ★ 不正解音（暗く下降）
     case 'error': {
         const notes = [330, 277];
         notes.forEach((freq, i) => {
@@ -191,7 +185,6 @@ switch(type) {
     case 'click':    osc(500,'triangle',0.1,0.08); break;
     case 'complete': osc(600,'sine',0.15); setTimeout(()=>osc(900,'sine',0.25),120); break;
 
-    // ★ レベルアップ音（ファンファーレ）
     case 'levelup': {
         const melody = [
             [0.0,  523, 0.12],
@@ -231,7 +224,7 @@ switch(type) {
 }
 
 // ============================================================
-// 経験値・レベル（周回ボーナス方式・XPリセットなし）
+// 経験値・レベル
 // ============================================================
 function getStats() {
 let totalXP = bonusXP;
@@ -239,15 +232,13 @@ for (let g = 1; g <= 6; g++) {
 const list = allKanjiData[g];
 if (!list) continue;
 const lap = getGradeLap(g);
-// 完了済み周回分ボーナス（1周 = 漢字数 × 3XP）
 totalXP += lap * list.length * 3;
-// 現在周回内のクリア数
 const { cleared } = getGradeProgress(g);
 totalXP += cleared;
 }
-const level         = Math.floor(totalXP / XP_PER_LEVEL) + 1;
+const level          = Math.floor(totalXP / XP_PER_LEVEL) + 1;
 const currentLevelXP = totalXP % XP_PER_LEVEL;
-const nextLevelXP   = XP_PER_LEVEL - currentLevelXP;
+const nextLevelXP    = XP_PER_LEVEL - currentLevelXP;
 return { level, totalXP, currentLevelXP, nextLevelXP };
 }
 
@@ -409,11 +400,8 @@ filtered.forEach(item => {
     const iLap=getGradeLap(ig);
     const iTheme=getLapTheme(iLap);
 
-    // 今の周回でクリアしているか
     const lapClearedList=getLapClearedList(ig);
     const isClearedThisLap=lapClearedList.includes(item.char);
-
-    // 過去を含めてクリアしているか（バッジ表示用）
     const everPracticed=!!progressPractice[item.char];
     const everTested=!!progressTest[item.char];
 
@@ -427,7 +415,6 @@ filtered.forEach(item => {
         card.classList.add(isFolderMode||currentMode==='practice'?'cleared-practice':'cleared-test');
     }
 
-    // ★ バッジを周回テーマカラーで表示
     let badges='';
     if (everPracticed) {
         const practLap = getPracticeLap(item.char, ig);
@@ -457,7 +444,6 @@ filtered.forEach(item => {
 
 }
 
-/** その文字を最後にれんしゅうクリアした周回番号を返す */
 function getPracticeLap(char, grade) {
 const total = getGradeLap(grade);
 for (let l = total; l >= 0; l–) {
@@ -468,7 +454,6 @@ if (list.includes(char)) return l;
 return 0;
 }
 
-/** その文字を最後にテストクリアした周回番号を返す */
 function getTestLap(char, grade) {
 return getPracticeLap(char, grade);
 }
@@ -566,36 +551,58 @@ const pd=currentKanjiPaths[currentStrokeIndex];
 const pe=document.createElementNS(‘http://www.w3.org/2000/svg’,‘path’); pe.setAttribute(‘d’,pd);
 const tLen=pe.getTotalLength();
 const sp=p=>({x:p.x*SCALE+PADDING,y:p.y*SCALE+PADDING});
-const tS=sp(pe.getPointAtLength(0)),tM1=sp(pe.getPointAtLength(tLen*0.33)),tM2=sp(pe.getPointAtLength(tLen*0.66)),tE=sp(pe.getPointAtLength(tLen));
+
+```
+const checkPoints = [0, 0.17, 0.33, 0.5, 0.67, 0.83, 1.0];
+const targets = checkPoints.map(t => sp(pe.getPointAtLength(tLen * t)));
+
 let uLen=0,uD=[0];
 for (let i=1;i<userPoints.length;i++){uLen+=Math.hypot(userPoints[i].x-userPoints[i-1].x,userPoints[i].y-userPoints[i-1].y);uD.push(uLen);}
 const uAt=d=>{
-if(d<=0)return userPoints[0]; if(d>=uLen)return userPoints[userPoints.length-1];
-for(let i=1;i<userPoints.length;i++){if(uD[i]>=d){const seg=uD[i]-uD[i-1],r=seg===0?0:(d-uD[i-1])/seg,a=userPoints[i-1],b=userPoints[i];return{x:a.x+(b.x-a.x)*r,y:a.y+(b.y-a.y)*r};}}
-return userPoints[userPoints.length-1];
+    if(d<=0)return userPoints[0]; if(d>=uLen)return userPoints[userPoints.length-1];
+    for(let i=1;i<userPoints.length;i++){if(uD[i]>=d){const seg=uD[i]-uD[i-1],r=seg===0?0:(d-uD[i-1])/seg,a=userPoints[i-1],b=userPoints[i];return{x:a.x+(b.x-a.x)*r,y:a.y+(b.y-a.y)*r};}}
+    return userPoints[userPoints.length-1];
 };
-const uS=userPoints[0],uM1=uAt(uLen*0.33),uM2=uAt(uLen*0.66),uE=userPoints[userPoints.length-1];
-const THR=50;
-const ok=[Math.hypot(uS.x-tS.x,uS.y-tS.y),Math.hypot(uM1.x-tM1.x,uM1.y-tM1.y),Math.hypot(uM2.x-tM2.x,uM2.y-tM2.y),Math.hypot(uE.x-tE.x,uE.y-tE.y)].every(d=>d<THR)&&uLen>(tLen*SCALE)*0.4;
+
+const userSamples = checkPoints.map(t => uAt(uLen * t));
+
+const THR = 38;
+const ok = targets.every((t, i) => Math.hypot(userSamples[i].x - t.x, userSamples[i].y - t.y) < THR)
+    && uLen > (tLen * SCALE) * 0.4;
+
 if (ok) {
-playSound(‘stroke’); // ★ 一画成功：ぷに音
-document.getElementById(‘message-area’).innerText=‘いいぞ！ その調子！’;
-if(hintTimeout){clearTimeout(hintTimeout);hintTimeout=null;}
-currentStrokeIndex++;
-drawCanvasCtx.clearRect(0,0,CANVAS_SIZE,CANVAS_SIZE);
-fixedCanvasCtx.clearRect(0,0,CANVAS_SIZE,CANVAS_SIZE);
-fixedCanvasCtx.save();
-fixedCanvasCtx.translate(PADDING,PADDING); fixedCanvasCtx.scale(SCALE,SCALE);
-fixedCanvasCtx.strokeStyle=’#333333’; fixedCanvasCtx.lineWidth=5;
-fixedCanvasCtx.lineCap=‘round’; fixedCanvasCtx.lineJoin=‘round’;
-for(let i=0;i<currentStrokeIndex;i++) fixedCanvasCtx.stroke(new Path2D(currentKanjiPaths[i]));
-fixedCanvasCtx.restore();
-if(currentStrokeIndex>=currentKanjiPaths.length) handleComplete();
+    playSound('stroke');
+    document.getElementById('message-area').innerText='いいぞ！ その調子！';
+    if(hintTimeout){clearTimeout(hintTimeout);hintTimeout=null;}
+    currentStrokeIndex++;
+    drawCanvasCtx.clearRect(0,0,CANVAS_SIZE,CANVAS_SIZE);
+    fixedCanvasCtx.clearRect(0,0,CANVAS_SIZE,CANVAS_SIZE);
+    fixedCanvasCtx.save();
+    fixedCanvasCtx.translate(PADDING,PADDING); fixedCanvasCtx.scale(SCALE,SCALE);
+    fixedCanvasCtx.strokeStyle='#333333'; fixedCanvasCtx.lineWidth=5;
+    fixedCanvasCtx.lineCap='round'; fixedCanvasCtx.lineJoin='round';
+    for(let i=0;i<currentStrokeIndex;i++) fixedCanvasCtx.stroke(new Path2D(currentKanjiPaths[i]));
+    fixedCanvasCtx.restore();
+    if(currentStrokeIndex>=currentKanjiPaths.length) handleComplete();
 } else {
-playSound(‘error’); // ★ 不正解：暗く下降する音
-document.getElementById(‘message-area’).innerText=‘おしい！ ここを見て！’;
-drawCanvasCtx.clearRect(0,0,CANVAS_SIZE,CANVAS_SIZE); showStrokeHint(currentStrokeIndex);
+    playSound('error');
+    // ★ ミスカウント +1、3回でにがて自動登録
+    const char = currentChar.char;
+    mistakeCount[char] = (mistakeCount[char] || 0) + 1;
+    localStorage.setItem('kanjiMasterMistakes', JSON.stringify(mistakeCount));
+    if (mistakeCount[char] >= 3 && !nigateKanji[char]) {
+        nigateKanji[char] = true;
+        localStorage.setItem('kanjiMasterNigate', JSON.stringify(nigateKanji));
+        updateFolderBtns();
+        document.getElementById('message-area').innerText='おしい！ にがてに とうろくしたよ💦';
+    } else {
+        document.getElementById('message-area').innerText='おしい！ ここを見て！';
+    }
+    drawCanvasCtx.clearRect(0,0,CANVAS_SIZE,CANVAS_SIZE);
+    showStrokeHint(currentStrokeIndex);
 }
+```
+
 }
 
 async function playAnimation() {
@@ -701,7 +708,7 @@ try {
 // 完了処理
 // ============================================================
 function handleComplete() {
-playSound(‘complete’); // ★ 全画完了：正解音（明るく上昇）
+playSound(‘complete’);
 const msg=document.getElementById(‘result-msg’),icon=document.getElementById(‘result-icon’);
 const isPractice=(currentMode===‘practice’||currentMode===‘tokkun’||currentMode===‘nigate’);
 const store=isPractice?progressPractice:progressTest;
@@ -764,7 +771,7 @@ if(idx>=0&&idx<list.length-1) startApp(list[idx+1]); else showScreen(‘list-scr
 // レベルアップ演出
 // ============================================================
 function showLevelUpDisplay(level) {
-playSound(‘levelup’); // ★ レベルアップ：ファンファーレ
+playSound(‘levelup’);
 document.getElementById(‘levelup-overlay’).classList.add(‘active’);
 document.getElementById(‘new-level-num’).innerText=level;
 document.getElementById(‘levelup-mascot’).innerText=getTitleData(level).mascot;
@@ -818,7 +825,7 @@ function closeResetConfirm() {playSound(‘click’);document.getElementById(‘
 function executeReset() {
 playSound(‘click’);
 localStorage.clear();
-progressPractice={}; progressTest={}; tokkunKanji={}; nigateKanji={}; bonusXP=0; lapCount={};
+progressPractice={}; progressTest={}; tokkunKanji={}; nigateKanji={}; bonusXP=0; lapCount={}; mistakeCount={}; // ★ ミスカウントもリセット
 document.getElementById(‘reset-confirm’).classList.remove(‘active’);
 location.reload();
 }
