@@ -129,19 +129,18 @@ function playSound(type) {
     switch(type) {
 
         case 'stroke': {
+            const baseFreq = 680 + Math.random() * 120;
             const o = audioContext.createOscillator();
             const g = audioContext.createGain();
-            const f = audioContext.createBiquadFilter();
-            f.type = 'lowpass'; f.frequency.value = 800;
-            o.connect(f); f.connect(g); g.connect(audioContext.destination);
+            o.connect(g); g.connect(audioContext.destination);
             o.type = 'sine';
-            o.frequency.setValueAtTime(320, now);
-            o.frequency.linearRampToValueAtTime(480, now + 0.04);
-            o.frequency.exponentialRampToValueAtTime(200, now + 0.18);
+            o.frequency.setValueAtTime(baseFreq, now);
+            o.frequency.linearRampToValueAtTime(baseFreq * 1.2, now + 0.015);
+            o.frequency.exponentialRampToValueAtTime(baseFreq * 0.75, now + 0.12);
             g.gain.setValueAtTime(0, now);
-            g.gain.linearRampToValueAtTime(0.35, now + 0.03);
-            g.gain.exponentialRampToValueAtTime(0.001, now + 0.22);
-            o.start(now); o.stop(now + 0.25);
+            g.gain.linearRampToValueAtTime(0.25, now + 0.012);
+            g.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
+            o.start(now); o.stop(now + 0.18);
             break;
         }
 
