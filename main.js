@@ -1,6 +1,127 @@
 // ============================================================
 //  かんじマスター main.js  ── 周回システム・進捗ゲージ完全版
 // ============================================================
+// ===== Web Audio API 効果音 =====
+const AudioCtx = window.AudioContext || window.webkitAudioContext;
+let audioCtx = null;
+
+function getAudioCtx() {
+  if (!audioCtx) audioCtx = new AudioCtx();
+  // ユーザー操作後に resume（autoplay policy対策）
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+  return audioCtx;
+}
+
+// ぷに音（一画ごと）
+function playStroke() {
+  const ctx = getAudioCtx();
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+  const filter = ctx.createBiquadFilter();
+
+  filter.type = 'lowpass';
+  filter.frequency.value = 800;
+
+  osc.connect(filter);
+  filter.connect(gain);
+  gain.connect(ctx.destination);
+
+  osc.type = 'sine';
+  const now = ctx.currentTime;
+
+  // ぷに感：少し上がってすぐ下がるピッチ
+  osc.frequency.setValueAtTime(320, now);
+  osc.frequency.linearRampToValueAtTime(480, now + 0.04);
+  osc.frequency.exponentialRampToValueAtTime(200, now + 0.18);
+
+  gain.gain.setValueAtTime(0, now);
+  gain.gain.linearRampToValueAtTime(0.35, now + 0.03);
+  gain.gain.exponentialRampToValueAtTime(0.001, now + 0.22);
+
+  osc.start(now);
+  osc.stop(now + 0.25);
+}
+
+// 正解音（明るく上昇）
+function playCorrect() {
+  const ctx = getAudioCtx();
+  const notes = [523, 659, 784, 1047]; // C5 E5 G5 C6
+  notes.forEach((freq, i) => {
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+
+    osc.type = 'triangle';
+    const t = ctx.currentTime + i * 0.1;
+    osc.frequency.setValueAtTime(freq, t);
+    gain.gain.setValueAtTime(0, t);
+    gain.gain.linearRampToValueAtTime(0.3, t + 0.03);
+    gain.gain.exponentialRampToValueAtTime(0.001, t + 0.25);
+
+    osc.start(t);
+    osc.stop(t + 0.28);
+  });
+}
+
+// 不正解音（暗く下降）
+function playIncorrect() {
+  const ctx = getAudioCtx();
+  const notes = [330, 277]; // E4 → C#4
+  notes.forEach((freq, i) => {
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+
+    osc.type = 'sawtooth';
+    const filter = ctx.createBiquadFilter();
+    filter.type = 'lowpass';
+    filter.frequency.value = 600;
+    osc.connect(filter);
+    filter.connect(gain);
+
+    const t = ctx.currentTime + i * 0.18;
+    osc.frequency.setValueAtTime(freq, t);
+    gain.gain.setValueAtTime(0, t);
+    gain.gain.linearRampToValueAtTime(0.25, t + 0.04);
+    gain.gain.exponentialRampToValueAtTime(0.001, t + 0.3);
+
+    osc.start(t);
+    osc.stop(t + 0.35);
+  });
+}
+
+// レベルアップ音（ファンファーレ風）
+function playLevelUp() {
+  const ctx = getAudioCtx();
+  // メロディ：時間・周波数・長さ
+  const melody = [
+    [0.0,  523, 0.12],
+    [0.1,  659, 0.12],
+    [0.2,  784, 0.12],
+    [0.3,  523, 0.08],
+    [0.38, 784, 0.08],
+    [0.46, 1047,0.35],
+  ];
+
+  melody.forEach(([offset, freq, dur]) => {
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+
+    osc.type = 'triangle';
+    const t = ctx.currentTime + offset;
+    osc.frequency.setValueAtTime(freq, t);
+    gain.gain.setValueAtTime(0, t);
+    gain.gain.linearRampToValueAtTime(0.3, t + 0.03);
+    gain.gain.exponentialRampToValueAtTime(0.001, t + dur);
+
+    osc.start(t);
+    osc.stop(t + dur + 0.05);
+  });
+}
 
 // --- 周回テーマカラー定義 ---
 const LAP_THEMES = [
