@@ -21,7 +21,7 @@ let tokkunKanji      = JSON.parse(localStorage.getItem('kanjiMasterTokkun'))   |
 let nigateKanji      = JSON.parse(localStorage.getItem('kanjiMasterNigate'))   || {};
 let bonusXP          = parseInt(localStorage.getItem('kanjiMasterBonusXP'))    || 0;
 let lapCount         = JSON.parse(localStorage.getItem('kanjiMasterLap'))      || {};
-let mistakeCount     = JSON.parse(localStorage.getItem('kanjiMasterMistakes')) || {}; // ★ ミスカウント
+let mistakeCount     = JSON.parse(localStorage.getItem('kanjiMasterMistakes')) || {};
 
 let currentChar   = null;
 let currentMode   = 'practice';
@@ -71,7 +71,6 @@ for (let g = 1; g <= 6; g++) {
 // ============================================================
 // 周回システム
 // ============================================================
-
 function getLapClearedList(grade) {
     const lap = getGradeLap(grade);
     const key = `kanjiMasterLP_${grade}_${lap}`;
@@ -111,112 +110,39 @@ function checkAndIncrementLap(grade) {
 }
 
 // ============================================================
-// 効果音
+// 効果音（かなカナ方式）
 // ============================================================
 let audioContext;
 function playSound(type) {
-    if (!audioContext) audioContext = new (window.AudioContext || window.webkitAudioContext)();
-    if (audioContext.state === 'suspended') audioContext.resume();
-    const now = audioContext.currentTime;
-    const osc = (freq, wv, dur, vol=0.1, startT=now) => {
-        const o = audioContext.createOscillator(), g = audioContext.createGain();
-        o.type = wv; o.frequency.setValueAtTime(freq, startT);
-        g.gain.setValueAtTime(vol, startT);
-        g.gain.exponentialRampToValueAtTime(0.01, startT + dur);
-        o.connect(g); g.connect(audioContext.destination);
-        o.start(startT); o.stop(startT + dur);
-    };
-    switch(type) {
-
-        case 'stroke': {
-            const baseFreq = 680 + Math.random() * 120;
-            const o = audioContext.createOscillator();
-            const g = audioContext.createGain();
-            o.connect(g); g.connect(audioContext.destination);
-            o.type = 'sine';
-            o.frequency.setValueAtTime(baseFreq, now);
-            o.frequency.linearRampToValueAtTime(baseFreq * 1.2, now + 0.015);
-            o.frequency.exponentialRampToValueAtTime(baseFreq * 0.75, now + 0.12);
-            g.gain.setValueAtTime(0, now);
-            g.gain.linearRampToValueAtTime(0.25, now + 0.012);
-            g.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
-            o.start(now); o.stop(now + 0.18);
-            break;
+    try {
+        if (!audioContext) audioContext = new (window.AudioContext||window.webkitAudioContext)();
+        if (audioContext.state === 'suspended') audioContext.resume();
+        const now = audioContext.currentTime;
+        const o = (f,w,d,v=0.1,s=now) => {
+            const os=audioContext.createOscillator(), g=audioContext.createGain();
+            os.type=w; os.frequency.setValueAtTime(f,s);
+            g.gain.setValueAtTime(v,s);
+            g.gain.exponentialRampToValueAtTime(0.01,s+d);
+            os.connect(g); g.connect(audioContext.destination);
+            os.start(s); os.stop(s+d);
+        };
+        if (type==='stroke') {
+            o(520,'sine',0.06,0.18,now);
+            o(1040,'sine',0.18,0.13,now+0.04);
+            o(1560,'sine',0.12,0.06,now+0.09);
+        } else if (type==='error') {
+            o(200,'sawtooth',0.25,0.15);
+        } else if (type==='click') {
+            o(500,'triangle',0.1,0.08);
+        } else if (type==='complete'||type==='success') {
+            [[0,880,0.08,0.18],[0.07,1108,0.08,0.15],[0.13,1318,0.1,0.15],
+             [0.2,1760,0.18,0.12],[0.28,2093,0.15,0.1],[0.33,1760,0.12,0.08]]
+            .forEach(([off,f,d,v])=>o(f,'sine',d,v,now+off));
+        } else if (type==='levelup'||type==='lapup') {
+            [[0,523,0.12],[0.1,659,0.12],[0.2,784,0.12],[0.3,1047,0.35]]
+            .forEach(([off,f,d])=>o(f,'triangle',d,0.2,now+off));
         }
-
-        case 'success': {
-            const notes = [523, 659, 784, 1047];
-            notes.forEach((freq, i) => {
-                const t = now + i * 0.1;
-                const o = audioContext.createOscillator();
-                const g = audioContext.createGain();
-                o.connect(g); g.connect(audioContext.destination);
-                o.type = 'triangle';
-                o.frequency.setValueAtTime(freq, t);
-                g.gain.setValueAtTime(0, t);
-                g.gain.linearRampToValueAtTime(0.3, t + 0.03);
-                g.gain.exponentialRampToValueAtTime(0.001, t + 0.25);
-                o.start(t); o.stop(t + 0.28);
-            });
-            break;
-        }
-
-        case 'error': {
-            const notes = [330, 277];
-            notes.forEach((freq, i) => {
-                const t = now + i * 0.18;
-                const o = audioContext.createOscillator();
-                const g = audioContext.createGain();
-                const f = audioContext.createBiquadFilter();
-                f.type = 'lowpass'; f.frequency.value = 600;
-                o.connect(f); f.connect(g); g.connect(audioContext.destination);
-                o.type = 'sawtooth';
-                o.frequency.setValueAtTime(freq, t);
-                g.gain.setValueAtTime(0, t);
-                g.gain.linearRampToValueAtTime(0.25, t + 0.04);
-                g.gain.exponentialRampToValueAtTime(0.001, t + 0.3);
-                o.start(t); o.stop(t + 0.35);
-            });
-            break;
-        }
-
-        case 'click':    osc(500,'triangle',0.1,0.08); break;
-        case 'complete': osc(600,'sine',0.15); setTimeout(()=>osc(900,'sine',0.25),120); break;
-
-        case 'levelup': {
-            const melody = [
-                [0.0,  523, 0.12],
-                [0.1,  659, 0.12],
-                [0.2,  784, 0.12],
-                [0.3,  523, 0.08],
-                [0.38, 784, 0.08],
-                [0.46, 1047, 0.35],
-            ];
-            melody.forEach(([offset, freq, dur]) => {
-                const t = now + offset;
-                const o = audioContext.createOscillator();
-                const g = audioContext.createGain();
-                o.connect(g); g.connect(audioContext.destination);
-                o.type = 'triangle';
-                o.frequency.setValueAtTime(freq, t);
-                g.gain.setValueAtTime(0, t);
-                g.gain.linearRampToValueAtTime(0.3, t + 0.03);
-                g.gain.exponentialRampToValueAtTime(0.001, t + dur);
-                o.start(t); o.stop(t + dur + 0.05);
-            });
-            break;
-        }
-
-        case 'lapup':
-            [523,659,783,659,783,1046,1046,1318].forEach((f,i)=>{
-                const o=audioContext.createOscillator(),g=audioContext.createGain();
-                o.type='square'; o.frequency.value=f;
-                g.gain.setValueAtTime(0.15,now+i*0.12);
-                g.gain.exponentialRampToValueAtTime(0.01,now+i*0.12+0.4);
-                o.connect(g); g.connect(audioContext.destination);
-                o.start(now+i*0.12); o.stop(now+i*0.12+0.4);
-            }); break;
-    }
+    } catch(e) {}
 }
 
 // ============================================================
@@ -502,7 +428,7 @@ function handleBackFromPractice() {
 // キャンバス判定エンジン
 // ============================================================
 async function fetchKanjiVG(char) {
-    const hex=char.charCodeAt(0).toString(16).padStart(5,'0');
+    const hex=char.codePointAt(0).toString(16).padStart(5,'0');
     const res=await fetch(`https://cdn.jsdelivr.net/gh/KanjiVG/kanjivg@master/kanji/${hex}.svg`);
     if (!res.ok) throw new Error('漢字データが見つかりません');
     const doc=new DOMParser().parseFromString(await res.text(),'image/svg+xml');
@@ -547,59 +473,156 @@ function showStrokeHint(index) {
     },1000);
 }
 
+// ============================================================
+// DTW判定エンジン（かなカナ方式）
+// ============================================================
+const _svgMeasure = (()=>{
+    const s = document.createElementNS('http://www.w3.org/2000/svg','svg');
+    s.style.cssText = 'position:absolute;visibility:hidden;width:0;height:0';
+    document.body.appendChild(s);
+    return s;
+})();
+
+function resamplePath(d, N=32) {
+    const p = document.createElementNS('http://www.w3.org/2000/svg','path');
+    p.setAttribute('d', d);
+    _svgMeasure.appendChild(p);
+    const len = p.getTotalLength();
+    const pts = [];
+    for (let i=0; i<N; i++) {
+        const pt = p.getPointAtLength(len * i / (N-1));
+        pts.push({ x: pt.x * SCALE + PADDING, y: pt.y * SCALE + PADDING });
+    }
+    _svgMeasure.removeChild(p);
+    return pts;
+}
+
+function resampleUserPts(pts, N=32) {
+    if (pts.length < 2) return pts;
+    const ds = [0];
+    for (let i=1; i<pts.length; i++)
+        ds.push(ds[i-1] + Math.hypot(pts[i].x-pts[i-1].x, pts[i].y-pts[i-1].y));
+    const total = ds[ds.length-1];
+    if (total < 1) return pts;
+    const res = [];
+    for (let i=0; i<N; i++) {
+        const tgt = total * i / (N-1);
+        let lo=0, hi=ds.length-1;
+        while (lo < hi-1) {
+            const mid = (lo+hi)>>1;
+            if (ds[mid] <= tgt) lo=mid; else hi=mid;
+        }
+        const t = ds[lo]===ds[hi] ? 0 : (tgt-ds[lo])/(ds[hi]-ds[lo]);
+        res.push({
+            x: pts[lo].x + (pts[hi].x-pts[lo].x)*t,
+            y: pts[lo].y + (pts[hi].y-pts[lo].y)*t
+        });
+    }
+    return res;
+}
+
+function dtwDistance(s1, s2) {
+    const n=s1.length, m=s2.length;
+    const dt = Array.from({length:n+1}, ()=>new Float32Array(m+1).fill(Infinity));
+    dt[0][0] = 0;
+    for (let i=1; i<=n; i++)
+        for (let j=1; j<=m; j++) {
+            const d = Math.hypot(s1[i-1].x-s2[j-1].x, s1[i-1].y-s2[j-1].y);
+            dt[i][j] = d + Math.min(dt[i-1][j], dt[i][j-1], dt[i-1][j-1]);
+        }
+    return dt[n][m] / Math.max(n, m);
+}
+
+function checkDirection(ur, ref) {
+    const N=ur.length;
+    if (N < 4) return true;
+    const uVx=ur[N-1].x-ur[0].x, uVy=ur[N-1].y-ur[0].y;
+    const M=ref.length;
+    const rVx=ref[M-1].x-ref[0].x, rVy=ref[M-1].y-ref[0].y;
+    const dot=uVx*rVx+uVy*rVy;
+    const uL=Math.hypot(uVx,uVy), rL=Math.hypot(rVx,rVy);
+    if (uL<1||rL<1) return true;
+    return (dot/(uL*rL)) > -0.3;
+}
+
+function getSVGEndPt(d) {
+    const p = document.createElementNS('http://www.w3.org/2000/svg','path');
+    p.setAttribute('d', d);
+    _svgMeasure.appendChild(p);
+    const len = p.getTotalLength();
+    const pt  = p.getPointAtLength(len);
+    const r   = { x: pt.x*SCALE+PADDING, y: pt.y*SCALE+PADDING };
+    _svgMeasure.removeChild(p);
+    return r;
+}
+
 function evaluateStroke() {
-    if (userPoints.length<2){drawCanvasCtx.clearRect(0,0,CANVAS_SIZE,CANVAS_SIZE);return;}
-    const pd=currentKanjiPaths[currentStrokeIndex];
-    const pe=document.createElementNS('http://www.w3.org/2000/svg','path'); pe.setAttribute('d',pd);
-    const tLen=pe.getTotalLength();
-    const sp=p=>({x:p.x*SCALE+PADDING,y:p.y*SCALE+PADDING});
+    if (userPoints.length < 2) {
+        drawCanvasCtx.clearRect(0,0,CANVAS_SIZE,CANVAS_SIZE);
+        return;
+    }
+    const pd  = currentKanjiPaths[currentStrokeIndex];
+    const ref = resamplePath(pd, 32);
 
-    const checkPoints = [0, 0.17, 0.33, 0.5, 0.67, 0.83, 1.0];
-    const targets = checkPoints.map(t => sp(pe.getPointAtLength(tLen * t)));
+    // 線の長さチェック
+    const refLen = ref.reduce((a,p,i)=>i===0?0:a+Math.hypot(p.x-ref[i-1].x,p.y-ref[i-1].y), 0);
+    const userLen = userPoints.reduce((a,p,i)=>i===0?0:a+Math.hypot(p.x-userPoints[i-1].x,p.y-userPoints[i-1].y), 0);
+    if (userLen < refLen * 0.25) {
+        playSound('error');
+        document.getElementById('message-area').innerText = 'もうすこし ながく かいてね！';
+        drawCanvasCtx.clearRect(0,0,CANVAS_SIZE,CANVAS_SIZE);
+        showStrokeHint(currentStrokeIndex);
+        return;
+    }
 
-    let uLen=0,uD=[0];
-    for (let i=1;i<userPoints.length;i++){uLen+=Math.hypot(userPoints[i].x-userPoints[i-1].x,userPoints[i].y-userPoints[i-1].y);uD.push(uLen);}
-    const uAt=d=>{
-        if(d<=0)return userPoints[0]; if(d>=uLen)return userPoints[userPoints.length-1];
-        for(let i=1;i<userPoints.length;i++){if(uD[i]>=d){const seg=uD[i]-uD[i-1],r=seg===0?0:(d-uD[i-1])/seg,a=userPoints[i-1],b=userPoints[i];return{x:a.x+(b.x-a.x)*r,y:a.y+(b.y-a.y)*r};}}
-        return userPoints[userPoints.length-1];
-    };
+    const ur = resampleUserPts(userPoints, 32);
 
-    const userSamples = checkPoints.map(t => uAt(uLen * t));
+    // 方向チェック
+    if (!checkDirection(ur, ref)) {
+        playSound('error');
+        document.getElementById('message-area').innerText = 'かくむきに きをつけてね！';
+        drawCanvasCtx.clearRect(0,0,CANVAS_SIZE,CANVAS_SIZE);
+        showStrokeHint(currentStrokeIndex);
+        return;
+    }
 
-    const THR = 38;
-    const ok = targets.every((t, i) => Math.hypot(userSamples[i].x - t.x, userSamples[i].y - t.y) < THR)
-        && uLen > (tLen * SCALE) * 0.4;
+    // DTW距離チェック
+    const dtw    = dtwDistance(ur, ref);
+    const endRef = getSVGEndPt(pd);
+    const endPt  = userPoints[userPoints.length-1];
+    const endDist = Math.hypot(endPt.x-endRef.x, endPt.y-endRef.y);
+    const ok = dtw < CANVAS_SIZE*0.20
+        && (endDist < CANVAS_SIZE*0.22*1.4 || dtw < CANVAS_SIZE*0.20*0.60);
+
+    drawCanvasCtx.clearRect(0,0,CANVAS_SIZE,CANVAS_SIZE);
 
     if (ok) {
         playSound('stroke');
-        document.getElementById('message-area').innerText='いいぞ！ その調子！';
-        if(hintTimeout){clearTimeout(hintTimeout);hintTimeout=null;}
+        document.getElementById('message-area').innerText = 'いいぞ！ その調子！';
+        if (hintTimeout) { clearTimeout(hintTimeout); hintTimeout=null; }
         currentStrokeIndex++;
-        drawCanvasCtx.clearRect(0,0,CANVAS_SIZE,CANVAS_SIZE);
         fixedCanvasCtx.clearRect(0,0,CANVAS_SIZE,CANVAS_SIZE);
         fixedCanvasCtx.save();
         fixedCanvasCtx.translate(PADDING,PADDING); fixedCanvasCtx.scale(SCALE,SCALE);
         fixedCanvasCtx.strokeStyle='#333333'; fixedCanvasCtx.lineWidth=5;
         fixedCanvasCtx.lineCap='round'; fixedCanvasCtx.lineJoin='round';
-        for(let i=0;i<currentStrokeIndex;i++) fixedCanvasCtx.stroke(new Path2D(currentKanjiPaths[i]));
+        for (let i=0; i<currentStrokeIndex; i++)
+            fixedCanvasCtx.stroke(new Path2D(currentKanjiPaths[i]));
         fixedCanvasCtx.restore();
-        if(currentStrokeIndex>=currentKanjiPaths.length) handleComplete();
+        if (currentStrokeIndex >= currentKanjiPaths.length) handleComplete();
     } else {
         playSound('error');
-        // ★ ミスカウント +1、3回でにがて自動登録
         const char = currentChar.char;
-        mistakeCount[char] = (mistakeCount[char] || 0) + 1;
+        mistakeCount[char] = (mistakeCount[char]||0) + 1;
         localStorage.setItem('kanjiMasterMistakes', JSON.stringify(mistakeCount));
         if (mistakeCount[char] >= 3 && !nigateKanji[char]) {
             nigateKanji[char] = true;
             localStorage.setItem('kanjiMasterNigate', JSON.stringify(nigateKanji));
             updateFolderBtns();
-            document.getElementById('message-area').innerText='おしい！ にがてに とうろくしたよ💦';
+            document.getElementById('message-area').innerText = 'おしい！ にがてに とうろくしたよ💦';
         } else {
-            document.getElementById('message-area').innerText='おしい！ ここを見て！';
+            document.getElementById('message-area').innerText = 'おしい！ ここを見て！';
         }
-        drawCanvasCtx.clearRect(0,0,CANVAS_SIZE,CANVAS_SIZE);
         showStrokeHint(currentStrokeIndex);
     }
 }
@@ -827,7 +850,7 @@ function closeResetConfirm() {playSound('click');document.getElementById('reset-
 function executeReset() {
     playSound('click');
     localStorage.clear();
-    progressPractice={}; progressTest={}; tokkunKanji={}; nigateKanji={}; bonusXP=0; lapCount={}; mistakeCount={}; // ★ ミスカウントもリセット
+    progressPractice={}; progressTest={}; tokkunKanji={}; nigateKanji={}; bonusXP=0; lapCount={}; mistakeCount={};
     document.getElementById('reset-confirm').classList.remove('active');
     location.reload();
 }
