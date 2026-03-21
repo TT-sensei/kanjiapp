@@ -105,8 +105,28 @@ h1 { font-size: 3rem; margin: 0; background: linear-gradient(90deg, var(--primar
 .header-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; background: white; padding: 15px 15px; border-radius: 20px; box-shadow: var(--shadow-soft); border: 3px solid white; flex-wrap: wrap; gap: 10px; }
 .back-btn { background: linear-gradient(135deg, #9E9E9E, #B0BEC5); color: white; border: none; padding: 8px 18px; border-radius: 25px; cursor: pointer; font-size: 1rem; font-weight: 600; box-shadow: 0 3px 0 rgba(0,0,0,0.1); font-family: inherit; }
 .back-btn:active { transform: translateY(3px); box-shadow: 0 1px 0 rgba(0,0,0,0.1); }
-.search-area { margin-bottom: 20px; }
+.search-area { margin-bottom: 14px; }
 #search-box { width: 75%; max-width: 240px; padding: 10px; font-size: 0.95rem; border: 3px solid var(--primary); border-radius: 20px; text-align: center; background: white; box-shadow: var(--shadow-soft); font-family: inherit; }
+
+/* ★ 検索用学年フィルターボタン */
+.search-grade-btn {
+    padding: 6px 12px;
+    border-radius: 20px;
+    border: 2px solid #DDD;
+    background: white;
+    color: #555;
+    font-size: 0.82rem;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.15s;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+    white-space: nowrap;
+}
+.search-grade-btn:active { transform: translateY(2px); box-shadow: none; }
+.search-grade-btn.active {
+    box-shadow: 0 3px 0 rgba(0,0,0,0.12);
+}
 
 /* リスト進捗ゲージコンテナ */
 #list-progress-bar-container { width: 100%; max-width: 480px; margin: 0 auto; }
@@ -126,12 +146,39 @@ h1 { font-size: 3rem; margin: 0; background: linear-gradient(90deg, var(--primar
     position: relative;
     border: 3px solid transparent;
     font-weight: 600;
-    transition: border-color 0.3s, background 0.3s;
-    font-family: 'Klee One', cursive; /* ★ Klee One */
+    transition: border-color 0.3s, background 0.3s, transform 0.1s;
+    font-family: 'Klee One', cursive;
 }
 .kanji-card:active { transform: scale(0.92); box-shadow: 0 2px 0 rgba(0,0,0,0.1); }
 .kanji-card.cleared-practice { border-color: var(--secondary); background: linear-gradient(135deg, #E5FFF5, #F0FFFA); }
 .kanji-card.cleared-test     { border-color: var(--primary);   background: linear-gradient(135deg, #FFE5F5, #FFF0F7); }
+
+/* ★ 一括登録モードの選択状態 */
+.kanji-card.bulk-selected {
+    border-color: #FF9800 !important;
+    background: linear-gradient(135deg, #FFF8E1, #FFF3CD) !important;
+    box-shadow: 0 0 0 3px rgba(255,152,0,0.35), 0 4px 0 rgba(0,0,0,0.12) !important;
+    transform: scale(0.95);
+}
+.kanji-card.bulk-selected::after {
+    content: '✓';
+    position: absolute;
+    top: -10px;
+    right: -10px;
+    width: 22px;
+    height: 22px;
+    background: #FF9800;
+    color: white;
+    border-radius: 50%;
+    font-size: 0.75rem;
+    font-weight: 900;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid white;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    line-height: 1;
+}
 
 /* バッジ類 */
 .mark-badge { position: absolute; top: -8px; right: -8px; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; border: 3px solid white; box-shadow: 0 3px 8px rgba(0,0,0,0.2); }
@@ -194,7 +241,7 @@ h1 { font-size: 3rem; margin: 0; background: linear-gradient(90deg, var(--primar
 /* その他 */
 #mode-display { padding: 8px 20px; border-radius: 20px; color: white; font-size: 0.95rem; font-weight: 600; display: inline-block; }
 #message-area { margin: 15px 0; font-size: 1.3rem; font-weight: 600; min-height: 30px; }
-#current-reading { font-size: 1.2rem; font-weight: 600; min-height: 40px; font-family: 'Klee One', cursive; /* ★ Klee One */ }
+#current-reading { font-size: 1.2rem; font-weight: 600; min-height: 40px; font-family: 'Klee One', cursive; }
 .reset-link { margin-top: 20px; font-size: 0.85rem; }
 .reset-link span { color: var(--primary); text-decoration: underline; cursor: pointer; font-weight: 600; }
 
