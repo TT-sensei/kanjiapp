@@ -3,251 +3,354 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>かんじマスター・コンプリート</title>
-<script src="kanji-data.js"></script>
-<script src="title-data.js"></script>
-<link rel="stylesheet" href="style.css">
+    <title>かんじマスター</title>
+    <script src="kanji-data.js"></script>
+    <script src="title-data.js"></script>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div id="title-screen" class="screen active">
-   <h1>🌟 かんじマスター</h1>
-   <div class="mascot-area" id="title-mascot">🥚</div>
-   <div class="level-title-area">
-    Lv.<span id="title-level">1</span> 
-    <span class="title-badge" id="title-name">漢字タマゴ</span>
-   </div>
 
-   <div class="grade-selector">
-     <button class="grade-btn selected" data-grade="1" onclick="setGrade(1)">
-       <div class="grade-btn-icon">📚</div>
-       <div>1年</div>
-       <div style="background:#eee;border-radius:999px;height:4px;margin-top:4px;overflow:hidden;">
-         <div id="grade-progress-1" style="height:100%;width:0%;transition:width 0.4s;border-radius:999px;"></div>
-       </div>
-       <div id="grade-progress-text-1" style="font-size:0.6rem;color:#999;margin-top:2px;">0/80</div>
-       <div id="grade-lap-1" style="display:none;font-size:0.65rem;font-weight:bold;margin-top:1px;"></div>
-     </button>
-     <button class="grade-btn" data-grade="2" onclick="setGrade(2)">
-       <div class="grade-btn-icon">📖</div>
-       <div>2年</div>
-       <div style="background:#eee;border-radius:999px;height:4px;margin-top:4px;overflow:hidden;">
-         <div id="grade-progress-2" style="height:100%;width:0%;transition:width 0.4s;border-radius:999px;"></div>
-       </div>
-       <div id="grade-progress-text-2" style="font-size:0.6rem;color:#999;margin-top:2px;">0/160</div>
-       <div id="grade-lap-2" style="display:none;font-size:0.65rem;font-weight:bold;margin-top:1px;"></div>
-     </button>
-     <button class="grade-btn" data-grade="3" onclick="setGrade(3)">
-       <div class="grade-btn-icon">✏️</div>
-       <div>3年</div>
-       <div style="background:#eee;border-radius:999px;height:4px;margin-top:4px;overflow:hidden;">
-         <div id="grade-progress-3" style="height:100%;width:0%;transition:width 0.4s;border-radius:999px;"></div>
-       </div>
-       <div id="grade-progress-text-3" style="font-size:0.6rem;color:#999;margin-top:2px;">0/200</div>
-       <div id="grade-lap-3" style="display:none;font-size:0.65rem;font-weight:bold;margin-top:1px;"></div>
-     </button>
-     <button class="grade-btn" data-grade="4" onclick="setGrade(4)">
-       <div class="grade-btn-icon">📝</div>
-       <div>4年</div>
-       <div style="background:#eee;border-radius:999px;height:4px;margin-top:4px;overflow:hidden;">
-         <div id="grade-progress-4" style="height:100%;width:0%;transition:width 0.4s;border-radius:999px;"></div>
-       </div>
-       <div id="grade-progress-text-4" style="font-size:0.6rem;color:#999;margin-top:2px;">0/202</div>
-       <div id="grade-lap-4" style="display:none;font-size:0.65rem;font-weight:bold;margin-top:1px;"></div>
-     </button>
-     <button class="grade-btn" data-grade="5" onclick="setGrade(5)">
-       <div class="grade-btn-icon">🖊️</div>
-       <div>5年</div>
-       <div style="background:#eee;border-radius:999px;height:4px;margin-top:4px;overflow:hidden;">
-         <div id="grade-progress-5" style="height:100%;width:0%;transition:width 0.4s;border-radius:999px;"></div>
-       </div>
-       <div id="grade-progress-text-5" style="font-size:0.6rem;color:#999;margin-top:2px;">0/193</div>
-       <div id="grade-lap-5" style="display:none;font-size:0.65rem;font-weight:bold;margin-top:1px;"></div>
-     </button>
-     <button class="grade-btn" data-grade="6" onclick="setGrade(6)">
-       <div class="grade-btn-icon">📑</div>
-       <div>6年</div>
-       <div style="background:#eee;border-radius:999px;height:4px;margin-top:4px;overflow:hidden;">
-         <div id="grade-progress-6" style="height:100%;width:0%;transition:width 0.4s;border-radius:999px;"></div>
-       </div>
-       <div id="grade-progress-text-6" style="font-size:0.6rem;color:#999;margin-top:2px;">0/191</div>
-       <div id="grade-lap-6" style="display:none;font-size:0.65rem;font-weight:bold;margin-top:1px;"></div>
-     </button>
-   </div>
+<!-- ============================================================
+     タイトル画面
+     視線の流れ：
+       1. ヒーローブロック（現在地を把握）
+       2. 学年ボタン（目標を選ぶ）
+       3. 検索（ピンポイントで探す）
+       4. アクションメニュー（練習/テスト/フォルダ）
+============================================================ -->
+<div id="title-screen" class="screen active">
 
-   <div class="home-search-box">
-     <input type="text" id="home-search-input" placeholder="さがしたい かんじ"> 
-     <button aria-label="検索する" onclick="handleHomeSearch()">🔍</button>
-   </div>
-
-   <div class="menu-grid">
-       <button aria-label="練習モード" class="menu-btn btn-practice" onclick="selectMode('practice')">✏️<br>れんしゅう</button> 
-       <button aria-label="テストモード" class="menu-btn btn-test" onclick="selectMode('test')">🏅<br>テスト</button>
-
-   <button aria-label="とっくん漢字" class="menu-btn btn-tokkun" onclick="selectMode('tokkun')">💪<br>とっくんをみる</button>
-   <button aria-label="にがてな漢字" class="menu-btn btn-nigate" onclick="selectMode('nigate')">💦<br>にがてをみる</button>
-   
-   <button aria-label="とっくんテスト" class="menu-btn btn-tokkun-test" onclick="startFolderRandomTest('tokkun')">🎯<br>とっくんテスト</button>
-   <button aria-label="にがてテスト" class="menu-btn btn-nigate-test" onclick="startFolderRandomTest('nigate')">🎯<br>にがてテスト</button>
-   
-   <button aria-label="ランダムテスト" class="menu-btn btn-random" onclick="startRandomTest()">🎲 ランダムテスト (10問)</button>
-   </div>
-
-   <div class="reset-link"><span onclick="showResetConfirm()">📋 データリセット</span></div>
-
-   <div class="footer-note"><strong>⚠️ 保護者・先生方へ</strong><br>
-     本アプリは学習支援のために作成されました。漢字のデータは日本の学習指導要領を参照しています。 
-    <div style="margin-top: 10px; padding: 12px; background-color: #f9f9f9; border-left: 5px solid var(--accent3); font-size:0.85rem; border-radius: 8px;"><strong>【判定に関するご注意】</strong><br>
-      ・標準的な字体を使用しているため、教科書の字体と細部が異なる場合があります。<br>
-      ・<strong>学校で習った書き方が最も正しい基準です。</strong>アプリの判定はあくまで目安としてご活用ください。
+    <!-- ヒーロー：マスコット + 現在のレベル・称号 -->
+    <div class="title-hero">
+        <div class="app-title"><span>漢</span>かんじマスター</div>
+        <div class="hero-status">
+            <div class="mascot-wrap" id="title-mascot">🥚</div>
+            <div class="level-info">
+                <div class="level-label">げんざいのレベル</div>
+                <div class="level-num"><span>Lv.</span><span id="title-level">1</span></div>
+                <div class="title-badge" id="title-name">漢字タマゴ</div>
+            </div>
+        </div>
+        <div class="hero-xp">
+            <div class="hero-xp-track">
+                <div class="hero-xp-fill" id="xp-bar"></div>
+            </div>
+            <div class="hero-xp-label">つぎのレベルまで あと <span id="next-xp">5</span>こ</div>
+        </div>
     </div>
-   </div>
 
-   <div class="app-credits-container">
-    <div class="credit-warning-box">
-     <div class="credit-warning-title">⚠️ 筆順（書き順）について</div>
-     <div>データの都合上、一部の漢字で標準と異なる筆順が表示される場合があります。<br><strong>学校の教科書や先生の指導と異なる場合は、教科書を正解としてください。</strong></div>
+    <!-- 学年選択 -->
+    <div class="grade-section">
+        <div class="section-title">学年をえらぶ</div>
+        <div class="grade-grid">
+            <button class="grade-btn selected" data-grade="1" onclick="setGrade(1)">
+                <div class="grade-btn-icon">📚</div>
+                <div class="grade-btn-label">1年</div>
+                <div class="grade-progress-wrap">
+                    <div class="grade-progress-fill" id="grade-progress-1" style="width:0%"></div>
+                </div>
+                <div class="grade-progress-text" id="grade-progress-text-1">0/80</div>
+                <div class="grade-lap-badge" id="grade-lap-1"></div>
+            </button>
+            <button class="grade-btn" data-grade="2" onclick="setGrade(2)">
+                <div class="grade-btn-icon">📖</div>
+                <div class="grade-btn-label">2年</div>
+                <div class="grade-progress-wrap">
+                    <div class="grade-progress-fill" id="grade-progress-2" style="width:0%"></div>
+                </div>
+                <div class="grade-progress-text" id="grade-progress-text-2">0/160</div>
+                <div class="grade-lap-badge" id="grade-lap-2"></div>
+            </button>
+            <button class="grade-btn" data-grade="3" onclick="setGrade(3)">
+                <div class="grade-btn-icon">✏️</div>
+                <div class="grade-btn-label">3年</div>
+                <div class="grade-progress-wrap">
+                    <div class="grade-progress-fill" id="grade-progress-3" style="width:0%"></div>
+                </div>
+                <div class="grade-progress-text" id="grade-progress-text-3">0/200</div>
+                <div class="grade-lap-badge" id="grade-lap-3"></div>
+            </button>
+            <button class="grade-btn" data-grade="4" onclick="setGrade(4)">
+                <div class="grade-btn-icon">📝</div>
+                <div class="grade-btn-label">4年</div>
+                <div class="grade-progress-wrap">
+                    <div class="grade-progress-fill" id="grade-progress-4" style="width:0%"></div>
+                </div>
+                <div class="grade-progress-text" id="grade-progress-text-4">0/202</div>
+                <div class="grade-lap-badge" id="grade-lap-4"></div>
+            </button>
+            <button class="grade-btn" data-grade="5" onclick="setGrade(5)">
+                <div class="grade-btn-icon">🖊️</div>
+                <div class="grade-btn-label">5年</div>
+                <div class="grade-progress-wrap">
+                    <div class="grade-progress-fill" id="grade-progress-5" style="width:0%"></div>
+                </div>
+                <div class="grade-progress-text" id="grade-progress-text-5">0/193</div>
+                <div class="grade-lap-badge" id="grade-lap-5"></div>
+            </button>
+            <button class="grade-btn" data-grade="6" onclick="setGrade(6)">
+                <div class="grade-btn-icon">📑</div>
+                <div class="grade-btn-label">6年</div>
+                <div class="grade-progress-wrap">
+                    <div class="grade-progress-fill" id="grade-progress-6" style="width:0%"></div>
+                </div>
+                <div class="grade-progress-text" id="grade-progress-text-6">0/191</div>
+                <div class="grade-lap-badge" id="grade-lap-6"></div>
+            </button>
+        </div>
     </div>
-    <h3 class="credit-section-title">使用データ・ライセンス</h3>
-    <ul class="credit-list">
-     <li class="credit-item">
-      <div class="credit-name">1. KanjiVG</div>
-      <div class="credit-desc">Copyright (c) 2009-2023 Ulrich Apel.<br>Licensed under the Creative Commons Attribution-Share Alike 3.0 License.</div></li>
-    </ul>
-   </div>
-  </div>
 
-  <!-- ======================================================= -->
-  <!-- リスト画面                                               -->
-  <!-- ======================================================= -->
-  <div id="list-screen" class="screen">
-   <div class="header-bar">
-    <button class="back-btn" onclick="showScreen('title-screen')">🏠 ホーム</button>
-    <div style="font-weight:700; font-size:1.1rem;"><span id="list-mascot">🥚</span> Lv.<span id="list-level">1</span></div>
-   </div>
-   <div class="xp-container">
-    <div class="xp-bar" id="xp-bar"></div>
-   </div>
-   <div style="text-align:right; font-size:0.85rem; margin-bottom:12px; color:#666; font-weight:600;">
-    つぎのレベルまで あと <span id="next-xp">5</span>こ
-   </div>
-
-   <div class="search-area">
-    <input type="text" id="search-box" placeholder="かんじ を さがす..." oninput="filterList()">
-   </div>
-
-   <!-- ★ 学年フィルターバー（検索・フォルダモード時のみ表示） -->
-   <div id="search-grade-filter-row" style="display:none; justify-content:center; flex-wrap:wrap; gap:6px; margin-bottom:12px;">
-    <div id="search-grade-filter" style="display:flex; gap:5px; flex-wrap:wrap; justify-content:center;"></div>
-   </div>
-
-   <div style="margin-bottom:15px; display:flex; justify-content:center; align-items:center; gap:10px; flex-wrap:wrap;">
-    <span id="mode-display"></span>
-    <!-- ★ 一括登録ボタン -->
-    <button id="bulk-register-btn" onclick="enterBulkRegisterMode()"
-      style="background:linear-gradient(135deg,#FF9800,#FFB74D);color:white;border:none;
-             padding:6px 14px;border-radius:20px;font-size:0.85rem;font-weight:700;
-             cursor:pointer;box-shadow:0 3px 0 rgba(0,0,0,0.12);font-family:inherit;">
-      ✏️ まとめて登録
-    </button>
-   </div>
-
-   <!-- ★ 一括登録モードのアクションバー -->
-   <div id="bulk-register-bar" style="display:none; flex-direction:column; align-items:center; gap:10px;
-        background:linear-gradient(135deg,#FFF8E1,#FFF3E0); border:2px solid #FFB74D;
-        border-radius:20px; padding:14px 16px; margin-bottom:14px;
-        box-shadow:0 4px 12px rgba(255,152,0,0.15);">
-    <div style="font-size:0.95rem; font-weight:700; color:#E65100;">
-      ✏️ 登録モード ― えらんだ漢字：<span id="bulk-count">0</span>こ
+    <!-- 検索 -->
+    <div class="home-search-wrap">
+        <div class="home-search-inner">
+            <input type="text" id="home-search-input"
+                   placeholder="漢字・読みで さがす"
+                   inputmode="search">
+            <button aria-label="検索" onclick="handleHomeSearch()">🔍</button>
+        </div>
     </div>
-    <div style="display:flex; gap:10px; flex-wrap:wrap; justify-content:center;">
-      <button onclick="bulkRegister('tokkun')"
-        style="background:linear-gradient(135deg,#4CAF50,#81C784);color:white;border:none;
-               padding:10px 22px;border-radius:20px;font-size:0.95rem;font-weight:700;
-               cursor:pointer;box-shadow:0 4px 0 rgba(0,0,0,0.12);font-family:inherit;">
-        💪 とっくんに登録
-      </button>
-      <button onclick="bulkRegister('nigate')"
-        style="background:linear-gradient(135deg,#9C27B0,#BA68C8);color:white;border:none;
-               padding:10px 22px;border-radius:20px;font-size:0.95rem;font-weight:700;
-               cursor:pointer;box-shadow:0 4px 0 rgba(0,0,0,0.12);font-family:inherit;">
-        💦 にがてに登録
-      </button>
-      <button onclick="cancelBulkRegisterMode()"
-        style="background:#EEE;color:#666;border:2px solid #CCC;
-               padding:10px 18px;border-radius:20px;font-size:0.9rem;font-weight:600;
-               cursor:pointer;font-family:inherit;">
-        キャンセル
-      </button>
+
+    <!-- アクションメニュー -->
+    <div class="menu-section">
+        <!-- 主要アクション：練習 / テスト -->
+        <div class="menu-primary">
+            <button class="menu-btn btn-practice" onclick="selectMode('practice')">
+                <span class="menu-btn-icon">✏️</span>
+                れんしゅう
+            </button>
+            <button class="menu-btn btn-test" onclick="selectMode('test')">
+                <span class="menu-btn-icon">🏅</span>
+                テスト
+            </button>
+        </div>
+
+        <!-- フォルダ系 -->
+        <div class="menu-folder">
+            <button class="menu-btn btn-tokkun" onclick="selectMode('tokkun')">
+                <span class="menu-btn-icon">💪</span>
+                とっくんをみる
+            </button>
+            <button class="menu-btn btn-nigate" onclick="selectMode('nigate')">
+                <span class="menu-btn-icon">💦</span>
+                にがてをみる
+            </button>
+            <button class="menu-btn btn-tokkun-test" onclick="startFolderRandomTest('tokkun')">
+                <span class="menu-btn-icon">🎯</span>
+                とっくんテスト
+            </button>
+            <button class="menu-btn btn-nigate-test" onclick="startFolderRandomTest('nigate')">
+                <span class="menu-btn-icon">🎯</span>
+                にがてテスト
+            </button>
+        </div>
+
+        <!-- ランダム -->
+        <button class="menu-btn btn-random menu-random" onclick="startRandomTest()">
+            <span class="menu-btn-icon">🎲</span>
+            ランダムテスト（10問）
+        </button>
     </div>
-   </div>
 
-   <div id="list-progress-bar-container"></div>
-
-   <div id="kanji-grid" class="kanji-grid"></div>
-  </div>
-
-  <!-- 練習画面 -->
-  <div id="practice-screen" class="screen">
-    <div class="header-bar">
-      <button class="back-btn" onclick="handleBackFromPractice()">↩ もどる</button>
-      <div style="display:flex; gap:8px;">
-        <button id="tokkun-toggle" class="folder-btn tokkun-btn" onclick="toggleFolder('tokkun')">☆ とっくん</button>
-        <button id="nigate-toggle" class="folder-btn nigate-btn" onclick="toggleFolder('nigate')">☆ にがて</button>
-      </div>
+    <!-- リセット -->
+    <div class="reset-link">
+        <span onclick="showResetConfirm()">データリセット</span>
     </div>
+
+    <!-- クレジット（折りたたみ） -->
+    <div class="credits-section">
+        <button class="credits-toggle" onclick="this.nextElementSibling.classList.toggle('open'); this.querySelector('.caret').textContent = this.nextElementSibling.classList.contains('open') ? '▲' : '▼'">
+            <span>⚠️ 保護者・先生方へ ／ ライセンス</span>
+            <span class="caret">▼</span>
+        </button>
+        <div class="credits-body">
+            <div class="credit-warn">
+                <strong>筆順・字体について</strong><br>
+                標準と異なる筆順が表示される場合があります。
+                <strong>学校の教科書・先生の指導が正解です。</strong>
+                アプリの判定はあくまで目安としてご利用ください。
+            </div>
+            <strong>使用データ：KanjiVG</strong><br>
+            Copyright (c) 2009-2023 Ulrich Apel.<br>
+            Licensed under the Creative Commons Attribution-Share Alike 3.0 License.
+        </div>
+    </div>
+
+</div><!-- /title-screen -->
+
+
+<!-- ============================================================
+     リスト画面
+============================================================ -->
+<div id="list-screen" class="screen">
+
+    <!-- スティッキーヘッダー -->
+    <div class="list-header">
+        <button class="back-btn" onclick="showScreen('title-screen')">🏠 ホーム</button>
+        <div class="list-header-right">
+            <div class="list-level-chip">
+                <span id="list-mascot">🥚</span> Lv.<span id="list-level">1</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- XPバー -->
+    <div class="list-xp-wrap">
+        <div class="list-xp-track">
+            <div class="list-xp-fill" id="list-xp-bar"></div>
+        </div>
+        <div class="list-xp-label">あと <span id="next-xp">5</span>こ</div>
+    </div>
+
+    <!-- 検索バー -->
+    <div class="list-search-wrap">
+        <input type="text" id="search-box"
+               placeholder="🔍 かんじ・よみかたで さがす"
+               oninput="filterList()"
+               inputmode="search">
+    </div>
+
+    <!-- 学年フィルター（検索・フォルダ時のみ表示） -->
+    <div id="search-grade-filter-row" style="display:none; padding: 8px 14px 0; gap:6px; flex-wrap:wrap;">
+        <div id="search-grade-filter" style="display:flex; gap:5px; flex-wrap:wrap;"></div>
+    </div>
+
+    <!-- モードバッジ + 一括登録ボタン -->
+    <div class="list-mode-bar">
+        <span id="mode-display"></span>
+        <button id="bulk-register-btn" onclick="enterBulkRegisterMode()">
+            ✏️ まとめて登録
+        </button>
+    </div>
+
+    <!-- 一括登録バー -->
+    <div id="bulk-register-bar" style="display:none; margin: 0 14px 10px;">
+        <div class="bulk-bar-label">
+            えらんだ漢字：<span id="bulk-count">0</span>こ
+        </div>
+        <div class="bulk-bar-actions">
+            <button class="bulk-act-btn bulk-act-tokkun" onclick="bulkRegister('tokkun')">
+                💪 とっくんに登録
+            </button>
+            <button class="bulk-act-btn bulk-act-nigate" onclick="bulkRegister('nigate')">
+                💦 にがてに登録
+            </button>
+            <button class="bulk-cancel-btn" onclick="cancelBulkRegisterMode()">キャンセル</button>
+        </div>
+    </div>
+
+    <!-- 進捗ゲージ -->
+    <div id="list-progress-bar-container"></div>
+
+    <!-- 漢字グリッド -->
+    <div class="kanji-grid-wrap">
+        <div id="kanji-grid" class="kanji-grid"></div>
+    </div>
+
+</div><!-- /list-screen -->
+
+
+<!-- ============================================================
+     練習画面
+============================================================ -->
+<div id="practice-screen" class="screen">
+
+    <div class="practice-header">
+        <button class="back-btn" onclick="handleBackFromPractice()">↩ もどる</button>
+        <div class="folder-btns">
+            <button id="tokkun-toggle" class="folder-btn tokkun-btn" onclick="toggleFolder('tokkun')">☆ とっくん</button>
+            <button id="nigate-toggle" class="folder-btn nigate-btn"  onclick="toggleFolder('nigate')">☆ にがて</button>
+        </div>
+    </div>
+
     <h2 id="message-area"></h2>
-    <div id="current-reading" style="font-size:3rem; font-weight:bold; text-align:center; margin:5px 0; color:#333;"></div>
+    <div id="current-reading" style="display:none; font-size:1.2rem; font-weight:600; text-align:center; margin:4px 0;"></div>
 
-<div id="practice-area">
-  <div id="character-target"></div>
-</div>
-
-<div class="controls">
-  <button aria-label="書き順再生" class="control-btn" onclick="playAnimation()">▶</button> 
-  <button aria-label="リトライ" class="control-btn" onclick="retry()">↺</button>
-</div>
-
-  </div>
-
-  <div id="result-overlay" class="overlay">
-   <div class="result-content">
-    <div class="big-icon" id="result-icon">⭐</div>
-    <h2 id="result-msg">できた！</h2>
-    <button class="next-btn" onclick="handleNextClick()">つぎへ ➜</button> 
-    <button class="retry-btn" onclick="document.getElementById('result-overlay').classList.remove('active'); retry();">もういっかい</button>
-   </div>
-  </div>
-
-  <div id="levelup-overlay" class="overlay">
-   <div class="result-content">
-    <h2>レベルアップ！！</h2>
-    <div class="levelup-anim">✨</div>
-    <div class="new-level-text">Lv.<span id="new-level-num">2</span> になった！</div>
-    <div id="levelup-mascot">🐣</div>
-    <p style="font-size:0.9rem; margin:10px 0;">すごいぞ！<br>さらに強くなったね！</p>
-    <button class="next-btn" onclick="closeLevelUp()">🎉 やったー！</button>
-   </div>
-  </div>
-
-  <div id="random-clear-overlay" class="overlay">
-    <div class="result-content">
-     <h2 style="color:var(--accent4);">テストクリア！</h2>
-     <div class="big-icon">🎉</div>
-     <p style="font-size:1.1rem; font-weight:bold; margin:15px 0;">せいかい！<br>ボーナス経験値 +10 ゲット！</p>
-     <button class="next-btn" onclick="handleRandomClearClick()">🏠 ホームへ</button>
+    <div class="practice-canvas-section">
+        <div id="practice-area">
+            <div id="character-target"></div>
+        </div>
     </div>
-  </div>
 
-  <div id="reset-confirm" class="confirm-modal">
-   <div class="confirm-content">
-    <h3 style="font-size:1.2rem;">ほんとうに データを けしますか？</h3>
-    <p style="color:#666;">レベルも 登録した漢字も １からに なります。</p>
-    <button class="confirm-btn confirm-btn-yes" onclick="executeReset()">はい、けします</button> 
-    <button class="confirm-btn confirm-btn-no" onclick="closeResetConfirm()">キャンセル</button>
-   </div>
-  </div>
+    <div class="controls">
+        <button class="control-btn" aria-label="書き順を再生" onclick="playAnimation()">▶</button>
+        <button class="control-btn" aria-label="もう一度" onclick="retry()">↺</button>
+    </div>
 
-  <script src="main.js"></script>
+</div><!-- /practice-screen -->
+
+
+<!-- ============================================================
+     オーバーレイ群
+============================================================ -->
+
+<!-- 完了オーバーレイ -->
+<div id="result-overlay" class="overlay">
+    <div class="result-content">
+        <div class="big-icon" id="result-icon">⭐</div>
+        <h2 id="result-msg">できた！</h2>
+        <button class="next-btn" onclick="handleNextClick()">つぎへ ➜</button>
+        <button class="retry-btn" onclick="document.getElementById('result-overlay').classList.remove('active'); retry();">もういっかい</button>
+    </div>
+</div>
+
+<!-- レベルアップ -->
+<div id="levelup-overlay" class="overlay">
+    <div class="result-content">
+        <h2>レベルアップ！！</h2>
+        <div class="levelup-anim">✨</div>
+        <div class="new-level-text">Lv.<span id="new-level-num">2</span> になった！</div>
+        <div id="levelup-mascot">🐣</div>
+        <p>すごいぞ！さらに 強くなったね！</p>
+        <button class="next-btn" onclick="closeLevelUp()">🎉 やったー！</button>
+    </div>
+</div>
+
+<!-- ランダムテストクリア -->
+<div id="random-clear-overlay" class="overlay">
+    <div class="result-content">
+        <h2>テストクリア！</h2>
+        <div class="big-icon">🎉</div>
+        <p style="font-size:1rem; font-weight:700; margin:12px 0;">ボーナス経験値 +10 ゲット！</p>
+        <button class="next-btn" onclick="handleRandomClearClick()">🏠 ホームへ</button>
+    </div>
+</div>
+
+<!-- リセット確認 -->
+<div id="reset-confirm" class="confirm-modal">
+    <div class="confirm-content">
+        <h3>ほんとうに データを けしますか？</h3>
+        <p>レベルも 登録した漢字も １から になります。</p>
+        <button class="confirm-btn confirm-btn-yes" onclick="executeReset()">はい、けします</button>
+        <button class="confirm-btn confirm-btn-no"  onclick="closeResetConfirm()">キャンセル</button>
+    </div>
+</div>
+
+
+<!-- ============================================================
+     JS（main.jsに手を加えた修正版インライン差分）
+     bulk-register-bar の内部構造をmain.jsが参照するため
+     classList / style.display の対象IDを維持する。
+     リスト画面XPバーIDを list-xp-bar に変更した部分のみ調整。
+============================================================ -->
+<script>
+// list-xp-bar を updateUI() で扱えるよう patch
+// main.js の updateUI() は id="xp-bar" を参照しているので
+// list画面のバーは別IDにし、updateUI を上書きする
+(function patchUpdateUI() {
+    // main.js ロード後に上書き
+    window.addEventListener('DOMContentLoaded', () => {
+        const _orig = window.updateUI;
+        window.updateUI = function() {
+            _orig && _orig();
+            // list-xp-bar をタイトル画面の xp-bar と同期
+            const src = document.getElementById('xp-bar');
+            const dst = document.getElementById('list-xp-bar');
+            if (src && dst) dst.style.width = src.style.width;
+        };
+    });
+})();
+</script>
+<script src="main.js"></script>
 
 </body>
 </html>
