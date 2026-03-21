@@ -187,13 +187,18 @@ function getTitleData(level) {
 // ============================================================
 function updateUI() {
     const s = getStats(), m = getTitleData(s.level);
-    document.getElementById('title-mascot').innerText = m.mascot;
-    document.getElementById('title-level').innerText  = s.level;
-    document.getElementById('title-name').innerText   = m.title;
-    document.getElementById('list-mascot').innerText  = m.mascot;
-    document.getElementById('list-level').innerText   = s.level;
-    document.getElementById('next-xp').innerText      = s.nextLevelXP;
-    document.getElementById('xp-bar').style.width     = `${(s.currentLevelXP/XP_PER_LEVEL)*100}%`;
+    const set = (id, val, prop='innerText') => {
+        const el = document.getElementById(id);
+        if (el) el[prop] = val;
+    };
+    set('title-mascot', m.mascot);
+    set('title-level',  s.level);
+    set('title-name',   m.title);
+    set('list-mascot',  m.mascot);
+    set('list-level',   s.level);
+    set('next-xp',      s.nextLevelXP);
+    const xpBar = document.getElementById('xp-bar');
+    if (xpBar) xpBar.style.width = `${(s.currentLevelXP/XP_PER_LEVEL)*100}%`;
     updateGradeProgressBars();
 }
 
@@ -330,10 +335,7 @@ function enterBulkRegisterMode() {
     playSound('click');
     isBulkRegisterMode = true;
     bulkSelectedChars.clear();
-    document.getElementById('bulk-register-bar').style.display = 'flex';
-    document.getElementById('bulk-register-btn').style.display = 'none';
-    document.getElementById('bulk-count').innerText = '0';
-    renderList();
+    renderList(); // renderList内でbarとbtnの表示を制御
 }
 
 function exitBulkRegisterMode() {
@@ -414,6 +416,16 @@ function renderList() {
     const filterRow = document.getElementById('search-grade-filter-row');
     if (filterRow) {
         filterRow.style.display = (isSearch || isFolderMode) ? 'flex' : 'none';
+    }
+
+    // --- 一括登録モードのバー/ボタン表示切替 ---
+    const bulkBar = document.getElementById('bulk-register-bar');
+    const bulkBtn = document.getElementById('bulk-register-btn');
+    if (bulkBar) bulkBar.style.display = isBulkRegisterMode ? 'flex' : 'none';
+    if (bulkBtn) bulkBtn.style.display = isBulkRegisterMode ? 'none' : '';
+    if (isBulkRegisterMode) {
+        const countEl = document.getElementById('bulk-count');
+        if (countEl) countEl.innerText = bulkSelectedChars.size;
     }
 
     if (currentMode==='practice') {
