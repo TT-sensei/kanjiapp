@@ -52,6 +52,11 @@ let randomQueue           = [];
 let randomIndex           = 0;
 let levelBeforeRandomTest = 1;
 
+// ★ デイリーチャレンジ
+let isDailyChallenge      = false;
+let dailyQueue            = [];
+let dailyIndex            = 0;
+
 let pendingLevelUp  = false;
 let pendingGoHome   = false;
 let pendingLapUp    = false;
@@ -200,6 +205,7 @@ function updateUI() {
     const xpBar = document.getElementById('xp-bar');
     if (xpBar) xpBar.style.width = `${(s.currentLevelXP/XP_PER_LEVEL)*100}%`;
     updateGradeProgressBars();
+    updateDailyCard();
 }
 
 function updateGradeProgressBars() {
@@ -594,9 +600,154 @@ function startFolderRandomTest(folderType) {
     randomIndex = 0; isRandomTest=true; currentMode='test';
     levelBeforeRandomTest = getStats().level; startApp(randomQueue[0]);
 }
+// ============================================================
+// ★ デイリーチャレンジ
+// ============================================================
+function getTodayKey() {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+
+function isDailyDone() {
+    return localStorage.getItem('kanjiMasterDailyDone') === getTodayKey();
+}
+
+function getStreak() {
+    return parseInt(localStorage.getItem('kanjiMasterStreak')) || 0;
+}
+
+function updateDailyCard() {
+    const card    = document.getElementById('daily-challenge-card');
+    const subEl   = document.getElementById('daily-card-sub');
+    const btnEl   = document.getElementById('daily-card-btn');
+    const strkEl  = document.getElementById('daily-streak-display');
+    if (!card) return;
+
+    const streak = getStreak();
+    if (isDailyDone()) {
+        card.classList.add('done');
+        card.onclick = null;
+        if (subEl) subEl.innerText = '✅ きょうはクリアしたよ！';
+        if (btnEl) btnEl.innerText = '🎉 クリア！';
+    } else {
+        card.classList.remove('done');
+        card.onclick = startDailyChallenge;
+        if (subEl) subEl.innerText = '5もんに ちょうせん！';
+        if (btnEl) btnEl.innerText = '▶ スタート';
+    }
+    if (strkEl) {
+        strkEl.innerText = streak > 0 ? `🔥 ${streak}にちれんぞく！` : '';
+        strkEl.style.display = streak > 0 ? 'inline-block' : 'none';
+    }
+}
+
+function startDailyChallenge() {
+    if (isDailyDone()) return;
+    playSound('click');
+
+    // 未クリアの漢字を全学年から集める（現在の学年を優先）
+    const lapCleared = getLapClearedList(currentGrade);
+    const gradeList  = allKanjiData[currentGrade] || [];
+    let pool = gradeList.filter(i => !lapCleared.includes(i.char));
+    pool.forEach(m => m._foundGrade = currentGrade);
+
+    // 足りなければクリア済みから補充（同学年）
+    if (pool.length < 5) {
+        const cleared = gradeList.filter(i => lapCleared.includes(i.char));
+        cleared.forEach(m => m._foundGrade = currentGrade);
+        pool = pool.concat(cleared);
+    }
+
+    // それでも足りなければ他学年から補充
+    if (pool.length < 5) {
+        for (let g = 1; g <= 6 && pool.length < 5; g++) {
+            if (g === currentGrade || !allKanjiData[g]) continue;
+            const extra = allKanjiData[g].slice();
+            extra.forEach(m => m._foundGrade = g);
+            pool = pool.concat(extra);
+        }
+    }
+
+    dailyQueue = [...pool].sort(() => 0.5 - Math.random()).slice(0, 5);
+    dailyIndex = 0;
+    isDailyChallenge = true;
+    currentMode = 'practice';
+    levelBeforeRandomTest = getStats().level;
+    startApp(dailyQueue[0]);
+}
+
+function completeDailyChallenge() {
+    // クリア記録
+    const today = getTodayKey();
+    const lastDay = localStorage.getItem('kanjiMasterDailyDone') || '';
+    const streak = getStreak();
+
+    // 連続日数計算：2日以内のブランクは継続扱い（土日休み対応）
+    let newStreak = 1;
+    if (lastDay) {
+        const last = new Date(lastDay);
+        const now  = new Date(today);
+        const diffDays = Math.round((now - last) / 86400000);
+        if (diffDays >= 1 && diffDays <= 2) newStreak = streak + 1;
+        else if (diffDays === 0) newStreak = streak;
+    }
+
+    localStorage.setItem('kanjiMasterDailyDone',  today);
+    localStorage.setItem('kanjiMasterStreak', String(newStreak));
+
+    // ボーナスXP：基本+5、5日ごとにさらに+5
+    const streakBonus = Math.floor(newStreak / 5) * 5;
+    const totalBonus  = 5 + streakBonus;
+    bonusXP += totalBonus;
+    localStorage.setItem('kanjiMasterBonusXP', bonusXP);
+
+    // 周回チェック（まとめて）
+    if (checkAndIncrementLap(currentGrade)) {
+        pendingLapUp = true;
+        pendingLapGrade = currentGrade;
+    }
+
+    // レベルアップチェック
+    const newLv = getStats().level;
+    if (newLv > levelBeforeRandomTest) pendingLevelUp = true;
+
+    // オーバーレイ表示
+    const msgEl  = document.getElementById('daily-streak-msg');
+    const iconEl = document.getElementById('daily-clear-icon');
+    if (msgEl) {
+        const isMilestone = newStreak > 0 && newStreak % 5 === 0;
+        if (isMilestone) {
+            if (iconEl) iconEl.innerText = '🏆';
+            msgEl.innerHTML = `🏆 ${newStreak}にちれんぞく！<br>ボーナス +${totalBonus} ゲット！`;
+        } else if (newStreak >= 2) {
+            if (iconEl) iconEl.innerText = '🔥';
+            msgEl.innerHTML = `🔥 ${newStreak}にちれんぞく！　ボーナス +${totalBonus}`;
+        } else {
+            if (iconEl) iconEl.innerText = '🌟';
+            msgEl.innerHTML = `ボーナス +${totalBonus}　また あしたも チャレンジしよう！`;
+        }
+    }
+    playSound('levelup');
+    document.getElementById('daily-clear-overlay').classList.add('active');
+    updateUI();
+}
+
+function handleDailyClearClick() {
+    document.getElementById('daily-clear-overlay').classList.remove('active');
+    isDailyChallenge = false;
+    if (pendingLapUp) { pendingLapUp=false; showLapUpDisplay(pendingLapGrade); return; }
+    const lv = getStats().level;
+    if (pendingLevelUp) { pendingLevelUp=false; pendingGoHome=true; showLevelUpDisplay(lv); return; }
+    showScreen('title-screen');
+}
+
+
 function handleBackFromPractice() {
     if (hintTimeout){clearTimeout(hintTimeout);hintTimeout=null;}
-    isAnimating=false; showScreen(isRandomTest?'title-screen':'list-screen');
+    isAnimating=false;
+    const wasDaily = isDailyChallenge;
+    isDailyChallenge = false;
+    showScreen(wasDaily||isRandomTest?'title-screen':'list-screen');
 }
 
 // ============================================================
@@ -844,7 +995,8 @@ async function startApp(item) {
     updateFolderBtns();
     const msg=document.getElementById('message-area');
     const rd=document.getElementById('current-reading'); if(rd)rd.style.display='none';
-    if (isRandomTest){msg.innerText=`🎲 テスト: ${randomIndex+1}/${randomQueue.length}問目`;msg.style.color="#9B59B6";}
+    if (isDailyChallenge){msg.innerText=`📅 チャレンジ: ${dailyIndex+1}/${dailyQueue.length}もんめ`;msg.style.color="#FF6B35";}
+    else if (isRandomTest){msg.innerText=`🎲 テスト: ${randomIndex+1}/${randomQueue.length}問目`;msg.style.color="#9B59B6";}
     else if (currentMode==='test'){msg.innerText="この かんじ を かこう！";msg.style.color="#FF1493";}
     else{msg.innerText="うすいせんを なぞろう！";msg.style.color="#00D084";}
 
@@ -915,11 +1067,12 @@ function handleComplete() {
 
     const newLv=getStats().level;
 
-    if (!isRandomTest){
+    const isBatchMode = isRandomTest || isDailyChallenge;
+    if (!isBatchMode){
         const lappedUp=checkAndIncrementLap(grade);
         if (lappedUp){pendingLapUp=true;pendingLapGrade=grade;}
     }
-    if (!isRandomTest&&newLv>oldLv) pendingLevelUp=true;
+    if (!isBatchMode&&newLv>oldLv) pendingLevelUp=true;
 
     msg.innerText=isPractice?'できたー！':'だいせいかい！';
     msg.style.color=isPractice?'#00D084':'#FF1493';
@@ -935,6 +1088,16 @@ function handleNextClick() {
 }
 
 function moveToNextKanji() {
+    if (isDailyChallenge) {
+        dailyIndex++;
+        if (dailyIndex < dailyQueue.length) {
+            startApp(dailyQueue[dailyIndex]);
+        } else {
+            isDailyChallenge = false;
+            completeDailyChallenge();
+        }
+        return;
+    }
     if (isRandomTest){
         randomIndex++;
         if (randomIndex<randomQueue.length){startApp(randomQueue[randomIndex]);return;}

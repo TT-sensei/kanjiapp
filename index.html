@@ -79,6 +79,18 @@
      <button aria-label="検索する" onclick="handleHomeSearch()">🔍</button>
    </div>
 
+   <!-- ★ デイリーチャレンジカード -->
+   <div id="daily-challenge-card" class="daily-card" onclick="startDailyChallenge()">
+     <div class="daily-card-left">
+       <div class="daily-card-title">📅 きょうのチャレンジ</div>
+       <div class="daily-card-sub" id="daily-card-sub">5もんに ちょうせん！</div>
+       <div class="daily-streak" id="daily-streak-display"></div>
+     </div>
+     <div class="daily-card-right">
+       <div class="daily-card-btn" id="daily-card-btn">▶ スタート</div>
+     </div>
+   </div>
+
    <div class="menu-grid">
        <button aria-label="練習モード" class="menu-btn btn-practice" onclick="selectMode('practice')">✏️<br>れんしゅう</button> 
        <button aria-label="テストモード" class="menu-btn btn-test" onclick="selectMode('test')">🏅<br>テスト</button>
@@ -235,6 +247,17 @@
      <div class="big-icon">🎉</div>
      <p style="font-size:1.1rem; font-weight:bold; margin:15px 0;">せいかい！<br>ボーナス経験値 +10 ゲット！</p>
      <button class="next-btn" onclick="handleRandomClearClick()">🏠 ホームへ</button>
+    </div>
+  </div>
+
+  <!-- ★ デイリーチャレンジクリアオーバーレイ -->
+  <div id="daily-clear-overlay" class="overlay">
+    <div class="result-content">
+     <h2 style="color:var(--accent3);">チャレンジ クリア！</h2>
+     <div class="big-icon" id="daily-clear-icon">🌟</div>
+     <div id="daily-streak-msg" style="font-size:1.1rem;font-weight:bold;margin:10px 0;"></div>
+     <p style="font-size:0.95rem; margin:12px 0;">ボーナス経験値 +15 ゲット！</p>
+     <button class="next-btn" onclick="handleDailyClearClick()">🏠 ホームへ</button>
     </div>
   </div>
 

@@ -245,7 +245,60 @@ h1 { font-size: 3rem; margin: 0; background: linear-gradient(90deg, var(--primar
 .reset-link { margin-top: 20px; font-size: 0.85rem; }
 .reset-link span { color: var(--primary); text-decoration: underline; cursor: pointer; font-weight: 600; }
 
-/* フッター・クレジット */
+/* ★ デイリーチャレンジカード */
+.daily-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: linear-gradient(135deg, #FF6B35, #FF9800, #FFD700);
+    border-radius: 24px;
+    padding: 18px 20px;
+    margin: 10px auto 18px;
+    width: 90%;
+    max-width: 400px;
+    box-shadow: 0 8px 0 rgba(200,90,0,0.25), 0 12px 20px rgba(255,107,53,0.3);
+    cursor: pointer;
+    box-sizing: border-box;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.1s, box-shadow 0.1s;
+    border: 3px solid rgba(255,255,255,0.4);
+}
+.daily-card::before {
+    content: '✨';
+    position: absolute;
+    top: -10px;
+    right: 80px;
+    font-size: 2rem;
+    opacity: 0.3;
+    animation: daily-twinkle 2s infinite alternate;
+}
+@keyframes daily-twinkle { from { opacity:0.2; transform:scale(0.8); } to { opacity:0.6; transform:scale(1.2); } }
+.daily-card:active { transform: translateY(6px); box-shadow: 0 2px 0 rgba(200,90,0,0.25); }
+.daily-card.done {
+    background: linear-gradient(135deg, #B0BEC5, #90A4AE);
+    box-shadow: 0 5px 0 rgba(0,0,0,0.1);
+    cursor: default;
+}
+.daily-card.done:active { transform: none; box-shadow: 0 5px 0 rgba(0,0,0,0.1); }
+.daily-card-left { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; }
+.daily-card-title { font-size: 1.1rem; font-weight: 700; color: white; text-shadow: 0 1px 3px rgba(0,0,0,0.2); }
+.daily-card-sub   { font-size: 0.85rem; color: rgba(255,255,255,0.9); font-weight: 600; }
+.daily-streak     { font-size: 0.85rem; color: white; font-weight: 700; background: rgba(0,0,0,0.15); border-radius: 10px; padding: 2px 10px; margin-top: 4px; display: inline-block; }
+.daily-card-right { flex-shrink: 0; }
+.daily-card-btn {
+    background: white;
+    color: #FF6B35;
+    font-weight: 800;
+    font-size: 0.95rem;
+    padding: 10px 18px;
+    border-radius: 16px;
+    box-shadow: 0 4px 0 rgba(0,0,0,0.12);
+    white-space: nowrap;
+    font-family: inherit;
+}
+
+
 .footer-note, .app-credits-container { text-align: left; background: rgba(255,255,255,0.9); padding: 20px; margin: 30px auto 10px; width: 90%; max-width: 400px; border-radius: 20px; box-shadow: var(--shadow-soft); font-size: 0.9rem; line-height: 1.5; box-sizing: border-box; border: 3px solid white; }
 .credit-warning-box { background: #FFF3E0; padding: 12px; border-radius: 10px; margin-bottom: 15px; border-left: 5px solid var(--accent3); }
 .credit-warning-title { font-weight: bold; color: #D35400; margin-bottom: 5px; }
