@@ -804,7 +804,7 @@ function showStrokeHint(index) {
 // ============================================================
 const _svgMeasure = (()=>{
     const s = document.createElementNS('http://www.w3.org/2000/svg','svg');
-    s.style.cssText = 'position:absolute;visibility:hidden;width:0;height:0';
+    s.style.cssText = 'position:absolute;left:-9999px;top:-9999px;width:1px;height:1px;opacity:0;pointer-events:none;';
     document.body.appendChild(s);
     return s;
 })();
@@ -963,7 +963,9 @@ async function playAnimation() {
         if (!isAnimating) break;
         const pd=currentKanjiPaths[i], p=new Path2D(pd);
         const pe=document.createElementNS('http://www.w3.org/2000/svg','path'); pe.setAttribute('d',pd);
+        _svgMeasure.appendChild(pe); // Chrome対策：計測用に一度DOMに入れる
         const len=pe.getTotalLength();
+        _svgMeasure.removeChild(pe);  // 計測したらすぐ外す
         await new Promise(res=>{
             let t=null;
             const step=ts=>{
