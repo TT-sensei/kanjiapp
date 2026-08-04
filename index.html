@@ -6,6 +6,12 @@
     <title>かんじマスター・コンプリート</title>
 <script src="kanji-data.js"></script>
 <script src="title-data.js"></script>
+<script src="kanjiExampleData_1.js"></script>
+<script src="kanjiExampleData_2.js"></script>
+<script src="kanjiExampleData_3.js"></script>
+<script src="kanjiExampleData_4.js"></script>
+<script src="kanjiExampleData_5.js"></script>
+<script src="kanjiExampleData_6.js"></script>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -79,29 +85,27 @@
      <button aria-label="検索する" onclick="handleHomeSearch()">🔍</button>
    </div>
 
-   <!-- ★ デイリーチャレンジカード -->
-   <div id="daily-challenge-card" class="daily-card" onclick="startDailyChallenge()">
-     <div class="daily-card-left">
-       <div class="daily-card-title">📅 きょうのチャレンジ</div>
-       <div class="daily-card-sub" id="daily-card-sub">5もんに ちょうせん！</div>
-       <div class="daily-streak" id="daily-streak-display"></div>
-     </div>
-     <div class="daily-card-right">
-       <div class="daily-card-btn" id="daily-card-btn">▶ スタート</div>
-     </div>
-   </div>
+   <div id="shared-scope-note" class="shared-scope-note" role="status" hidden></div>
 
    <div class="menu-grid">
+     <div class="menu-row menu-row-primary">
        <button aria-label="練習モード" class="menu-btn btn-practice" onclick="selectMode('practice')">✏️<br>れんしゅう</button> 
        <button aria-label="テストモード" class="menu-btn btn-test" onclick="selectMode('test')">🏅<br>テスト</button>
+       <button aria-label="今日のチャレンジ" class="menu-btn btn-daily" onclick="startDailyChallenge()">☀️<br>きょうの10もん</button>
+       <button aria-label="復習モード" class="menu-btn btn-review" onclick="openReviewPanel()">🔁<br>ふくしゅう</button>
+     </div>
 
-   <button aria-label="とっくん漢字" class="menu-btn btn-tokkun" onclick="selectMode('tokkun')">💪<br>とっくんをみる</button>
-   <button aria-label="にがてな漢字" class="menu-btn btn-nigate" onclick="selectMode('nigate')">💦<br>にがてをみる</button>
-   
-   <button aria-label="とっくんテスト" class="menu-btn btn-tokkun-test" onclick="startFolderRandomTest('tokkun')">🎯<br>とっくんテスト</button>
-   <button aria-label="にがてテスト" class="menu-btn btn-nigate-test" onclick="startFolderRandomTest('nigate')">🎯<br>にがてテスト</button>
-   
-   <button aria-label="ランダムテスト" class="menu-btn btn-random" onclick="startRandomTest()">🎲 ランダムテスト (10問)</button>
+     <div class="menu-row menu-row-training">
+       <button aria-label="とっくん漢字" class="menu-btn btn-tokkun" onclick="selectMode('tokkun')">💪<br>とっくんをみる</button>
+       <button aria-label="にがてな漢字" class="menu-btn btn-nigate" onclick="selectMode('nigate')">💦<br>にがてをみる</button>
+       <button aria-label="とっくんテスト" class="menu-btn btn-tokkun-test" onclick="startFolderRandomTest('tokkun')">🎯<br>とっくんテスト</button>
+       <button aria-label="にがてテスト" class="menu-btn btn-nigate-test" onclick="startFolderRandomTest('nigate')">🎯<br>にがてテスト</button>
+     </div>
+
+     <div class="menu-row menu-row-tools">
+       <button aria-label="学習カルテ" class="menu-btn btn-report" onclick="showLearningReport()">📊<br>がくしゅうカルテ</button>
+       <button aria-label="出題範囲を共有" class="menu-btn btn-share" onclick="openSharePicker()">🔗<br>はんいを共有</button>
+     </div>
    </div>
 
    <div class="reset-link"><span onclick="showResetConfirm()">📋 データリセット</span></div>
@@ -125,6 +129,14 @@
       <div class="credit-name">1. KanjiVG</div>
       <div class="credit-desc">Copyright (c) 2009-2023 Ulrich Apel.<br>Licensed under the Creative Commons Attribution-Share Alike 3.0 License.</div></li>
     </ul>
+   </div>
+  </div>
+
+  <div id="feature-modal" class="confirm-modal" role="dialog" aria-modal="true" aria-labelledby="feature-modal-title">
+   <div class="feature-modal-content">
+    <button class="modal-close" aria-label="閉じる" onclick="closeFeatureModal()">×</button>
+    <h2 id="feature-modal-title"></h2>
+    <div id="feature-modal-body"></div>
    </div>
   </div>
 
@@ -225,8 +237,13 @@
    <div class="result-content">
     <div class="big-icon" id="result-icon">⭐</div>
     <h2 id="result-msg">できた！</h2>
-    <button class="next-btn" onclick="handleNextClick()">つぎへ ➜</button> 
-    <button class="retry-btn" onclick="document.getElementById('result-overlay').classList.remove('active'); retry();">もういっかい</button>
+    <div class="result-actions" aria-label="つぎの そうさ">
+      <button id="result-test-btn" class="result-action result-action-test" onclick="switchResultMode('test')">🏅 テストへ</button>
+      <button class="result-action result-action-retry" onclick="retryFromResult()">↺ もういちど</button>
+      <button class="result-action result-action-next" onclick="handleNextClick()">つぎへ ➜</button>
+      <button id="result-practice-btn" class="result-action result-action-practice" onclick="switchResultMode('practice')">✏️ れんしゅうへ</button>
+      <button class="result-action result-action-home" onclick="goHomeFromResult()">🏠 ホームへ</button>
+    </div>
    </div>
   </div>
 
@@ -247,17 +264,6 @@
      <div class="big-icon">🎉</div>
      <p style="font-size:1.1rem; font-weight:bold; margin:15px 0;">せいかい！<br>ボーナス経験値 +10 ゲット！</p>
      <button class="next-btn" onclick="handleRandomClearClick()">🏠 ホームへ</button>
-    </div>
-  </div>
-
-  <!-- ★ デイリーチャレンジクリアオーバーレイ -->
-  <div id="daily-clear-overlay" class="overlay">
-    <div class="result-content">
-     <h2 style="color:var(--accent3);">チャレンジ クリア！</h2>
-     <div class="big-icon" id="daily-clear-icon">🌟</div>
-     <div id="daily-streak-msg" style="font-size:1.1rem;font-weight:bold;margin:10px 0;"></div>
-     <p style="font-size:0.95rem; margin:12px 0;">ボーナス経験値 +5 ゲット！</p>
-     <button class="next-btn" onclick="handleDailyClearClick()">🏠 ホームへ</button>
     </div>
   </div>
 
