@@ -356,3 +356,18 @@ h1 { font-size: 3rem; margin: 0; background: linear-gradient(90deg, var(--primar
     cursor: pointer;
 }
 .reading-hint-btn:active { transform: translateY(2px); box-shadow: 0 1px 0 #F57F17; }
+
+/* おたのしみバッジ */
+.image-mascot{background-repeat:no-repeat;background-position:center;background-size:contain;color:transparent;font-size:0;}
+.mascot-area.image-mascot{width:120px;height:120px;margin:20px auto;filter:drop-shadow(0 4px 8px rgba(0,0,0,.1));}
+.mini-mascot{display:inline-block;width:30px;height:30px;vertical-align:middle;background-repeat:no-repeat;background-position:center;background-size:contain;}
+.reward-card{position:relative;display:flex;align-items:center;gap:10px;width:96%;max-width:760px;margin:18px auto;padding:13px 62px 13px 16px;border:0;border-radius:22px;background:linear-gradient(135deg,#6d5ce7,#9c78e8);color:#fff;text-align:left;cursor:pointer;box-shadow:0 5px 0 rgba(70,45,150,.25);font-family:inherit;}
+.reward-card-icon{font-size:1.8rem;flex:none}.reward-card-copy{display:flex;flex-direction:column;gap:3px;min-width:0}.reward-card-copy strong{font-size:1rem}.reward-card-copy small{font-size:.7rem;opacity:.88}.reward-card-count{margin-left:auto;background:rgba(255,255,255,.2);padding:5px 8px;border-radius:999px;font-weight:800;white-space:nowrap}
+.reward-overlay{background:rgba(36,25,85,.82);z-index:120}.reward-content{position:relative;width:calc(100% - 28px);max-width:720px;max-height:88vh;overflow:auto;background:#fff;color:var(--text);border-radius:26px;padding:24px 16px 20px;box-shadow:0 12px 44px rgba(0,0,0,.3)}.reward-content h2{text-align:center;margin:0 0 4px;color:#5b45c9}.reward-subtitle{text-align:center;color:#777;font-size:.8rem;margin:0 0 12px}.reward-content .modal-close{position:absolute;right:10px;top:8px;border:0;background:none;font-size:1.8rem;color:#777;cursor:pointer}.reward-group-title{margin:16px 0 7px;color:#5141b0;font-weight:800;font-size:.9rem}.reward-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:7px}.reward-tile{position:relative;border:1px solid #e6e0ff;border-radius:12px;padding:4px;background:#faf9ff;text-align:center;font-size:.55rem;color:#555;overflow:hidden}.reward-tile img{display:block;width:100%;aspect-ratio:1;object-fit:contain}.reward-tile.locked img{filter:grayscale(1);opacity:.18}.reward-tile.locked:after{content:'?';position:absolute;left:50%;top:35%;transform:translate(-50%,-50%);font-size:1.2rem;font-weight:900;color:#aaa}.reward-tile span{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:2px}.reward-tile.earned span{color:#5b45c9;font-weight:700;}
+@media (max-width:600px){.reward-grid{grid-template-columns:repeat(4,1fr)}.reward-card-copy small{font-size:.62rem}}
+
+#levelup-mascot.image-mascot{width:96px;height:96px;margin:10px auto;}
+
+.correct-navi-face{width:96px;height:96px;margin:0 auto 4px;background-repeat:no-repeat;background-position:center;background-size:contain;}
+
+.grade-face{width:42px;height:42px;margin:0 auto 3px;background-repeat:no-repeat;background-position:center;background-size:contain;font-size:0;}
