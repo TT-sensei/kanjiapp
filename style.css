@@ -371,3 +371,135 @@ h1 { font-size: 3rem; margin: 0; background: linear-gradient(90deg, var(--primar
 .correct-navi-face{width:96px;height:96px;margin:0 auto 4px;background-repeat:no-repeat;background-position:center;background-size:contain;}
 
 .grade-face{width:42px;height:42px;margin:0 auto 3px;background-repeat:no-repeat;background-position:center;background-size:contain;font-size:0;}
+
+/* =========================================================
+   スタート画面：日常教室テーマ
+   背景はスタート画面だけに適用し、学習画面の配色は維持する
+   ========================================================= */
+#title-screen {
+    position: relative;
+    background-color: #ead4ab;
+    background-image:
+        linear-gradient(180deg, rgba(25, 62, 50, 0.20) 0%, rgba(25, 62, 50, 0.10) 42%, rgba(255, 246, 224, 0.34) 100%),
+        url('https://tt-sensei.github.io/navi-character-/assets/web/backgrounds/daily/daily-classroom.webp');
+    background-position: center top, center top;
+    background-size: cover, cover;
+    background-repeat: no-repeat, no-repeat;
+    background-attachment: fixed, fixed;
+    padding-top: 36px;
+    padding-bottom: 50px;
+}
+
+/* 黒板の上で読みやすいタイトル */
+#title-screen h1 {
+    color: #fff9e8;
+    background: none;
+    background-clip: border-box;
+    -webkit-background-clip: border-box;
+    -webkit-text-fill-color: #fff9e8;
+    text-shadow: 0 3px 0 rgba(35, 61, 49, 0.82), 0 0 12px rgba(35, 61, 49, 0.42);
+}
+
+/* レベルと称号の「浮いている感じ」は残す */
+#title-screen .level-title-area {
+    width: max-content;
+    max-width: calc(100% - 24px);
+    margin: 0 auto 20px;
+    padding: 8px 14px;
+    border: 2px solid rgba(255, 249, 232, 0.88);
+    border-radius: 999px;
+    background: rgba(255, 250, 238, 0.92);
+    color: #31584b;
+    box-shadow: 0 5px 0 rgba(90, 61, 34, 0.28), 0 10px 18px rgba(50, 42, 28, 0.16);
+    box-sizing: border-box;
+}
+
+#title-screen .title-badge {
+    background: linear-gradient(135deg, #d79a2b, #efbd55);
+    border: 1px solid rgba(255, 255, 255, 0.72);
+    box-shadow: 0 3px 0 rgba(145, 91, 22, 0.28);
+}
+
+/* 学年カード */
+#title-screen .grade-selector {
+    gap: 8px;
+    margin: 22px auto;
+}
+
+#title-screen .grade-btn {
+    background: rgba(255, 250, 238, 0.90);
+    border-color: rgba(255, 255, 255, 0.92);
+    color: #31584b;
+    box-shadow: 0 4px 0 rgba(90, 61, 34, 0.24), 0 8px 16px rgba(50, 42, 28, 0.12);
+}
+
+#title-screen .grade-btn.selected {
+    background: #fffdf5;
+    border-color: #e0a83e;
+    box-shadow: 0 0 0 3px rgba(224, 168, 62, 0.24), 0 5px 0 rgba(145, 91, 22, 0.28), 0 10px 18px rgba(50, 42, 28, 0.16);
+}
+
+/* 検索欄 */
+#title-screen .home-search-box input {
+    border-color: rgba(255, 255, 255, 0.92);
+    background: rgba(255, 253, 245, 0.94);
+    color: #31584b;
+}
+
+#title-screen .home-search-box button {
+    background: linear-gradient(135deg, #3e7d67, #65a487);
+    border-color: rgba(255, 250, 238, 0.86);
+    box-shadow: 0 5px 0 rgba(39, 83, 65, 0.32);
+}
+
+/* 教室になじむ、少し落ち着いたメニュー色 */
+#title-screen .menu-btn {
+    border: 2px solid rgba(255, 250, 238, 0.58);
+    box-shadow: 0 5px 0 rgba(55, 58, 40, 0.28), 0 9px 16px rgba(50, 42, 28, 0.13);
+    text-shadow: 0 1px 2px rgba(38, 48, 38, 0.20);
+}
+
+#title-screen .btn-practice    { background: linear-gradient(135deg, #3e8068, #65a486); color: #fffdf5; }
+#title-screen .btn-test        { background: linear-gradient(135deg, #c96d62, #e08b76); color: #fffdf5; }
+#title-screen .btn-daily       { background: linear-gradient(135deg, #d89b3f, #edbd62); color: #5d4125; text-shadow: none; }
+#title-screen .btn-review      { background: linear-gradient(135deg, #4d8d9d, #70b6bc); color: #fffdf5; }
+#title-screen .btn-tokkun      { background: linear-gradient(135deg, #65915f, #84ad78); color: #fffdf5; }
+#title-screen .btn-nigate      { background: linear-gradient(135deg, #866fa0, #a48bb9); color: #fffdf5; }
+#title-screen .btn-tokkun-test { background: linear-gradient(135deg, #4f7c58, #719b6f); color: #fffdf5; }
+#title-screen .btn-nigate-test { background: linear-gradient(135deg, #745e91, #9479ad); color: #fffdf5; }
+#title-screen .btn-report      { background: linear-gradient(135deg, #65799e, #8ea2c5); color: #fffdf5; }
+#title-screen .btn-share       { background: linear-gradient(135deg, #4b86aa, #73b2cf); color: #fffdf5; }
+
+/* バッジコレクションは特別感を残す */
+#title-screen .reward-card {
+    border: 2px solid rgba(255, 250, 238, 0.64);
+    background: linear-gradient(135deg, #5f5296, #8170b5);
+    box-shadow: 0 5px 0 rgba(65, 48, 123, 0.30), 0 10px 18px rgba(50, 42, 28, 0.14);
+}
+
+#title-screen .reset-link span {
+    color: #6c4d39;
+}
+
+#title-screen .footer-note,
+#title-screen .app-credits-container {
+    background: rgba(255, 251, 239, 0.93);
+    border-color: rgba(255, 255, 255, 0.82);
+}
+
+/* スマホ縦画面：学年を必ず 1・2・3 / 4・5・6 に固定 */
+@media (max-width: 600px) {
+    #title-screen .grade-selector {
+        display: grid;
+        grid-template-columns: repeat(3, 64px);
+        justify-content: center;
+        gap: 7px;
+        width: max-content;
+        max-width: 100%;
+    }
+
+    #title-screen .grade-btn {
+        width: 64px;
+        min-height: 68px;
+    }
+}
