@@ -16,13 +16,16 @@
 </head>
 <body>
   <div id="title-screen" class="screen active">
+   <div class="title-top-panel">
+    <div class="title-brand-panel">
    <h1>🌟 かんじマスター</h1>
    <div class="mascot-area image-mascot" id="title-mascot" aria-label="いまのコレクションバッジ"></div>
    <div class="level-title-area">
     Lv.<span id="title-level">1</span> 
     <span class="title-badge" id="title-name">漢字タマゴ</span>
    </div>
-
+    </div>
+    <div class="title-grade-panel">
    <div class="grade-selector">
      <button class="grade-btn selected" data-grade="1" onclick="setGrade(1)">
        <div class="grade-btn-icon grade-face" style="background-image:url('https://tt-sensei.github.io/navi-character-/assets/web/characters/riku/expressions/02-happy.webp')" aria-label="1年生ナビキャラ"></div>
@@ -78,6 +81,8 @@
        <div id="grade-progress-text-6" style="font-size:0.6rem;color:#999;margin-top:2px;">0/191</div>
        <div id="grade-lap-6" style="display:none;font-size:0.65rem;font-weight:bold;margin-top:1px;"></div>
      </button>
+   </div>
+    </div>
    </div>
 
    <div class="home-search-box">
