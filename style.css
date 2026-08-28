@@ -600,3 +600,91 @@ h1 { font-size: 3rem; margin: 0; background: linear-gradient(90deg, var(--primar
         margin: 10px auto;
     }
 }
+
+/* 保護者・先生向けの注意書きは1つにまとめて折りたたむ */
+#title-screen .parent-note {
+    width: 90%;
+    max-width: 760px;
+    margin: 18px auto 10px;
+    border: 3px solid rgba(255, 255, 255, 0.82);
+    border-radius: 20px;
+    background: rgba(255, 251, 239, 0.93);
+    box-shadow: 0 4px 12px rgba(50, 42, 28, 0.12);
+    color: #4d4a40;
+    text-align: left;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    overflow: hidden;
+}
+
+#title-screen .parent-note summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 13px 18px;
+    color: #31584b;
+    font-weight: 700;
+    cursor: pointer;
+    list-style: none;
+    user-select: none;
+}
+
+#title-screen .parent-note summary::-webkit-details-marker {
+    display: none;
+}
+
+#title-screen .parent-note summary::after {
+    content: "＋";
+    flex: none;
+    font-size: 1.25rem;
+    line-height: 1;
+    color: #8a633d;
+}
+
+#title-screen .parent-note[open] summary::after {
+    content: "−";
+}
+
+#title-screen .parent-note-body {
+    padding: 0 20px 20px;
+    border-top: 1px solid rgba(143, 111, 73, 0.22);
+}
+
+#title-screen .parent-note-body p {
+    margin: 14px 0 10px;
+}
+
+#title-screen .parent-note-section {
+    margin-top: 10px;
+    padding: 12px;
+    background: rgba(255, 244, 220, 0.78);
+    border-left: 5px solid #d88948;
+    border-radius: 8px;
+}
+
+#title-screen .parent-note .credit-warning-box {
+    margin-top: 15px;
+}
+
+@media (max-width: 600px) {
+    #title-screen .parent-note-body {
+        padding-left: 14px;
+        padding-right: 14px;
+    }
+}
+
+@media (min-width: 760px) and (orientation: landscape) {
+    /* レベルと称号を、左側で上下1段ずつ表示 */
+    #title-screen .title-brand-panel .level-title-area {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 3px;
+        padding: 7px 12px;
+        line-height: 1.25;
+    }
+
+    #title-screen .parent-note {
+        margin-top: 10px;
+    }
+}
