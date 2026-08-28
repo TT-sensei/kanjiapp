@@ -122,26 +122,30 @@
 
    <div class="reset-link"><span onclick="showResetConfirm()">📋 データリセット</span></div>
 
-   <div class="footer-note"><strong>⚠️ 保護者・先生方へ</strong><br>
-     本アプリは学習支援のために作成されました。漢字のデータは日本の学習指導要領を参照しています。 
-    <div style="margin-top: 10px; padding: 12px; background-color: #f9f9f9; border-left: 5px solid var(--accent3); font-size:0.85rem; border-radius: 8px;"><strong>【判定に関するご注意】</strong><br>
+   <details class="parent-note">
+    <summary>⚠️ 保護者・先生方へ</summary>
+    <div class="parent-note-body">
+     <p>本アプリは学習支援のために作成されました。漢字のデータは日本の学習指導要領を参照しています。</p>
+
+     <div class="parent-note-section">
+      <strong>【判定に関するご注意】</strong><br>
       ・標準的な字体を使用しているため、教科書の字体と細部が異なる場合があります。<br>
       ・<strong>学校で習った書き方が最も正しい基準です。</strong>アプリの判定はあくまで目安としてご活用ください。
-    </div>
-   </div>
+     </div>
 
-   <div class="app-credits-container">
-    <div class="credit-warning-box">
-     <div class="credit-warning-title">⚠️ 筆順（書き順）について</div>
-     <div>データの都合上、一部の漢字で標準と異なる筆順が表示される場合があります。<br><strong>学校の教科書や先生の指導と異なる場合は、教科書を正解としてください。</strong></div>
+     <div class="credit-warning-box">
+      <div class="credit-warning-title">⚠️ 筆順（書き順）について</div>
+      <div>データの都合上、一部の漢字で標準と異なる筆順が表示される場合があります。<br><strong>学校の教科書や先生の指導と異なる場合は、教科書を正解としてください。</strong></div>
+     </div>
+     <h3 class="credit-section-title">使用データ・ライセンス</h3>
+     <ul class="credit-list">
+      <li class="credit-item">
+       <div class="credit-name">1. KanjiVG</div>
+       <div class="credit-desc">Copyright (c) 2009-2023 Ulrich Apel.<br>Licensed under the Creative Commons Attribution-Share Alike 3.0 License.</div>
+      </li>
+     </ul>
     </div>
-    <h3 class="credit-section-title">使用データ・ライセンス</h3>
-    <ul class="credit-list">
-     <li class="credit-item">
-      <div class="credit-name">1. KanjiVG</div>
-      <div class="credit-desc">Copyright (c) 2009-2023 Ulrich Apel.<br>Licensed under the Creative Commons Attribution-Share Alike 3.0 License.</div></li>
-    </ul>
-   </div>
+   </details>
   </div>
 
   <div id="feature-modal" class="confirm-modal" role="dialog" aria-modal="true" aria-labelledby="feature-modal-title">
