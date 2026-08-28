@@ -503,3 +503,100 @@ h1 { font-size: 3rem; margin: 0; background: linear-gradient(90deg, var(--primar
         min-height: 68px;
     }
 }
+
+/* =========================================================
+   横長画面：スタート情報と学年選択を左右に配置
+   縦画面では display: contents で従来の縦並びを維持する
+   ========================================================= */
+.title-top-panel,
+.title-brand-panel,
+.title-grade-panel {
+    display: contents;
+}
+
+@media (min-width: 760px) and (orientation: landscape) {
+    #title-screen.active {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr);
+        row-gap: 4px;
+        align-content: start;
+    }
+
+    #title-screen > .title-top-panel {
+        display: grid;
+        grid-template-columns: minmax(280px, 0.82fr) minmax(330px, 1.18fr);
+        align-items: center;
+        gap: 12px 18px;
+        width: 90%;
+        max-width: 900px;
+        margin: 0 auto 4px;
+    }
+
+    #title-screen > .title-top-panel > .title-brand-panel {
+        display: grid;
+        grid-template-columns: 104px minmax(0, 1fr);
+        grid-template-areas:
+            "brand-title brand-title"
+            "brand-mascot brand-status";
+        align-items: center;
+        gap: 5px 12px;
+        min-width: 0;
+    }
+
+    #title-screen .title-brand-panel h1 {
+        grid-area: brand-title;
+        font-size: 2.45rem;
+        line-height: 1.12;
+        letter-spacing: 1px;
+        text-align: left;
+        white-space: nowrap;
+    }
+
+    #title-screen .title-brand-panel .mascot-area.image-mascot {
+        grid-area: brand-mascot;
+        width: 96px;
+        height: 96px;
+        margin: 0 auto;
+    }
+
+    #title-screen .title-brand-panel .level-title-area {
+        grid-area: brand-status;
+        justify-self: start;
+        margin: 0;
+        font-size: 1.2rem;
+        gap: 8px;
+    }
+
+    #title-screen > .title-top-panel > .title-grade-panel {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 0;
+    }
+
+    #title-screen .title-grade-panel .grade-selector {
+        display: grid;
+        grid-template-columns: repeat(3, 75px);
+        grid-template-rows: repeat(2, minmax(75px, auto));
+        gap: 8px;
+        margin: 0;
+    }
+
+    #title-screen .title-grade-panel .grade-btn {
+        width: 75px;
+        min-height: 75px;
+    }
+
+    /* 横画面では主要操作の上下余白も少しだけ圧縮 */
+    #title-screen > .home-search-box {
+        margin: 8px auto;
+    }
+
+    #title-screen > .menu-grid {
+        margin: 8px auto;
+    }
+
+    #title-screen > .reward-card {
+        margin: 10px auto;
+    }
+}
