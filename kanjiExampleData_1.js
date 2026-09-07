@@ -61,7 +61,7 @@ const kanjiExampleData_1 = {
 
   "学": [
     { sentence: "まいにち 学びます。", reading: "まな", level: 1 },
-    { sentence: "学こうへ いきます。", reading: "がく", level: 2 },
+    { sentence: "学こうへ いきます。", reading: "がっ", level: 2 },
     { sentence: "ともだちと いっしょに 学ぶと たのしいです。", reading: "まな", level: 3 }
   ],
 
