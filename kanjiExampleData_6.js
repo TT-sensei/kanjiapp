@@ -395,7 +395,7 @@ const kanjiExampleData_6 = {
     { sentence: "大勢の 観衆が 選手に 声援を 送ります。", reading: "しゅう", level: 3 }
   ],
   "従": [
-    { sentence: "決まりに 従って 行動します。", reading: "じゅう", level: 1 },
+    { sentence: "決まりに 従って 行動します。", reading: "したが", level: 1 },
     { sentence: "親に 従う。", reading: "したが", level: 2 },
     { sentence: "決められた 手順に 従って 実験します。", reading: "したが", level: 3 }
   ],
