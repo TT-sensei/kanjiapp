@@ -72,6 +72,7 @@ let lapCount         = readStoredObject('kanjiMasterLap', {});
 let mistakeCount     = readStoredObject('kanjiMasterMistakes', {});
 let learningStats    = readStoredObject('kanjiMasterLearningStats', {});
 let sharedKanjiScope = [];
+let isSharedScopeActive = false;
 let shareSelection   = new Set();
 let sharePickerGrade = 1;
 
@@ -281,7 +282,7 @@ function updateUI() {
 }
 
 function getAllowedList(list) {
-    return sharedKanjiScope.length ? list.filter(item => sharedKanjiScope.includes(item.char)) : list;
+    return isSharedScopeActive ? list.filter(item => sharedKanjiScope.includes(item.char)) : list;
 }
 
 function saveLearningStats() {
@@ -649,7 +650,7 @@ function renderList() {
         }
     }
 
-    if (sharedKanjiScope.length) filtered = filtered.filter(item => sharedKanjiScope.includes(item.char));
+    if (isSharedScopeActive) filtered = filtered.filter(item => sharedKanjiScope.includes(item.char));
     grid.innerHTML = '';
     if (!filtered.length) { grid.innerHTML='<div style="grid-column:1/-1;padding:20px;">みつかりません...</div>'; return; }
 
@@ -1406,8 +1407,9 @@ async function copyShareUrl() {
 
 function applySharedScopeFromUrl() {
     const params = new URLSearchParams(location.search);
+    if (!params.has('kanji')) return;
+    isSharedScopeActive = true;
     const chars = Array.from(params.get('kanji') || '');
-    if (!chars.length) return;
     const known = new Set(Object.values(allKanjiData).flat().map(i=>i.char));
     sharedKanjiScope = [...new Set(chars.filter(c=>known.has(c)))];
     const grade = Number(params.get('grade'));
