@@ -13,18 +13,48 @@ const LAP_THEMES = [
 function getLapTheme(lap) { return LAP_THEMES[Math.min(lap, LAP_THEMES.length - 1)]; }
 
 // ============================================================
+// 保存データの安全な読み込み
+// 壊れたJSONや保存領域へのアクセス制限があっても、
+// アプリ全体の起動が止まらないようにする。
+// 読み込みに失敗しても、保存データ自体は削除しない。
+// ============================================================
+function readStoredJSON(key, fallback) {
+    try {
+        const raw = localStorage.getItem(key);
+        if (raw === null) return fallback;
+        const parsed = JSON.parse(raw);
+        return parsed === null || parsed === undefined ? fallback : parsed;
+    } catch (error) {
+        console.warn(`保存データ「${key}」を読み込めませんでした。`, error);
+        return fallback;
+    }
+}
+
+function readStoredNumber(key, fallback = 0) {
+    try {
+        const raw = localStorage.getItem(key);
+        if (raw === null || raw.trim() === '') return fallback;
+        const value = Number(raw);
+        return Number.isFinite(value) ? value : fallback;
+    } catch (error) {
+        console.warn(`保存データ「${key}」を読み込めませんでした。`, error);
+        return fallback;
+    }
+}
+
+// ============================================================
 // 状態管理
 // ============================================================
-let progressPractice = JSON.parse(localStorage.getItem('kanjiMasterPractice')) || {};
+let progressPractice = readStoredJSON('kanjiMasterPractice', {});
 let kanjiExampleDataByGrade = {};
 let currentTestExample = null; // テストモードでランダムに選ばれた例文(1つ)
-let progressTest     = JSON.parse(localStorage.getItem('kanjiMasterTest'))     || {};
-let tokkunKanji      = JSON.parse(localStorage.getItem('kanjiMasterTokkun'))   || {};
-let nigateKanji      = JSON.parse(localStorage.getItem('kanjiMasterNigate'))   || {};
-let bonusXP          = parseInt(localStorage.getItem('kanjiMasterBonusXP'))    || 0;
-let lapCount         = JSON.parse(localStorage.getItem('kanjiMasterLap'))      || {};
-let mistakeCount     = JSON.parse(localStorage.getItem('kanjiMasterMistakes')) || {};
-let learningStats    = JSON.parse(localStorage.getItem('kanjiMasterLearningStats')) || {};
+let progressTest     = readStoredJSON('kanjiMasterTest', {});
+let tokkunKanji      = readStoredJSON('kanjiMasterTokkun', {});
+let nigateKanji      = readStoredJSON('kanjiMasterNigate', {});
+let bonusXP          = readStoredNumber('kanjiMasterBonusXP', 0);
+let lapCount         = readStoredJSON('kanjiMasterLap', {});
+let mistakeCount     = readStoredJSON('kanjiMasterMistakes', {});
+let learningStats    = readStoredJSON('kanjiMasterLearningStats', {});
 let sharedKanjiScope = [];
 let shareSelection   = new Set();
 let sharePickerGrade = 1;
@@ -89,13 +119,13 @@ for (let g = 1; g <= 6; g++) {
 function getLapClearedList(grade) {
     const lap = getGradeLap(grade);
     const key = `kanjiMasterLP_${grade}_${lap}`;
-    return JSON.parse(localStorage.getItem(key)) || [];
+    return readStoredJSON(key, []);
 }
 
 function addLapCleared(grade, char) {
     const lap = getGradeLap(grade);
     const key = `kanjiMasterLP_${grade}_${lap}`;
-    const list = JSON.parse(localStorage.getItem(key)) || [];
+    const list = readStoredJSON(key, []);
     if (!list.includes(char)) {
         list.push(char);
         localStorage.setItem(key, JSON.stringify(list));
@@ -676,7 +706,7 @@ function getPracticeLap(char, grade) {
     const total = getGradeLap(grade);
     for (let l = total; l >= 0; l--) {
         const key  = `kanjiMasterLP_${grade}_${l}`;
-        const list = JSON.parse(localStorage.getItem(key)) || [];
+        const list = readStoredJSON(key, []);
         if (list.includes(char)) return l;
     }
     return 0;
