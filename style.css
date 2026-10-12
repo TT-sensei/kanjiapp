@@ -909,3 +909,26 @@ h1 { font-size: 3rem; margin: 0; background: linear-gradient(90deg, var(--primar
   #result-overlay .result-actions { gap: 6px; margin-top: 8px; }
   #result-overlay .result-action { min-height: 42px; }
 }
+
+
+/* 4つの並列グループから選ぶスタート導線 */
+.group-start-panel{width:96%;max-width:760px;margin:14px auto 18px;padding:15px;box-sizing:border-box;border:2px solid rgba(255,250,238,.86);border-radius:22px;background:rgba(255,251,239,.94);box-shadow:0 5px 0 rgba(55,58,40,.18),0 9px 18px rgba(50,42,28,.12);color:#31584b}
+.group-start-panel h2{margin:0 0 10px;font-size:1.15rem;color:#31584b}
+.group-mode-row{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.group-mode-btn{min-height:48px;padding:10px 8px;border:2px solid transparent;border-radius:14px;font:700 1rem inherit;cursor:pointer;box-shadow:0 3px 0 rgba(55,58,40,.18)}
+.group-mode-practice{background:linear-gradient(135deg,#3e8068,#65a486);color:#fffdf5}
+.group-mode-test{background:linear-gradient(135deg,#c96d62,#e08b76);color:#fffdf5}
+.group-mode-btn.selected{outline:3px solid #e0a83e;outline-offset:2px;transform:translateY(-1px)}
+.group-start-hint{margin:12px 0 8px;font-size:.82rem;color:#6a6a58}
+.kanji-group-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.kanji-group-grid button{min-width:0;min-height:94px;padding:9px 5px;border:2px solid #d9c9a8;border-radius:15px;background:#fffdf5;color:#31584b;font-family:inherit;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;box-shadow:0 3px 0 rgba(90,61,34,.12)}
+.kanji-group-grid button.ready{border-color:#8bb69a;background:#f5fff7}
+.kanji-group-grid button:active{transform:translateY(2px);box-shadow:0 1px 0 rgba(90,61,34,.12)}
+.kanji-group-grid strong{font-size:.9rem;white-space:nowrap}
+.kanji-group-grid .group-count{font-size:.76rem;font-weight:700}
+.kanji-group-grid .group-progress-text{font-size:.64rem;color:#6a776b;white-space:nowrap}
+.group-progress-track{display:block;width:90%;height:5px;overflow:hidden;border-radius:999px;background:#e8e6db}
+.group-progress-track i{display:block;height:100%;border-radius:999px;background:#579b72}
+.group-mode-note{margin:10px 0 0;min-height:1.3em;font-size:.8rem;color:#5d6c5f}
+#title-screen .menu-row-primary .btn-practice,#title-screen .menu-row-primary .btn-test{background:linear-gradient(135deg,#718096,#9aa6b2);color:#fff}
+@media(max-width:600px){.group-start-panel{padding:12px 9px}.kanji-group-grid{gap:5px}.kanji-group-grid button{min-height:88px;padding:7px 2px}.kanji-group-grid strong{font-size:.78rem}.kanji-group-grid .group-count{font-size:.7rem}.kanji-group-grid .group-progress-text{font-size:.56rem;letter-spacing:-.03em}.group-start-panel h2{font-size:1rem}}

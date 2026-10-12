@@ -92,10 +92,27 @@
 
    <div id="shared-scope-note" class="shared-scope-note" role="status" hidden></div>
 
+
+   <section class="group-start-panel" aria-labelledby="group-start-title">
+     <h2 id="group-start-title">なにをして べんきょうする？</h2>
+     <div class="group-mode-row">
+       <button class="group-mode-btn group-mode-practice" onclick="startGroupMode('practice')">✏️ れんしゅう</button>
+       <button class="group-mode-btn group-mode-test" onclick="startGroupMode('test')">🏅 テスト</button>
+     </div>
+     <p class="group-start-hint">学年をえらんで、4つのグループからえらぼう</p>
+     <div id="kanji-group-grid" class="kanji-group-grid">
+       <button onclick="startKanjiGroup(1)"><strong>グループ①</strong><span>漢字をえらぶ</span></button>
+       <button onclick="startKanjiGroup(2)"><strong>グループ②</strong><span>漢字をえらぶ</span></button>
+       <button onclick="startKanjiGroup(3)"><strong>グループ③</strong><span>漢字をえらぶ</span></button>
+       <button onclick="startKanjiGroup(4)"><strong>グループ④</strong><span>漢字をえらぶ</span></button>
+     </div>
+     <p id="kanji-group-mode-note" class="group-mode-note" aria-live="polite">まず「れんしゅう」か「テスト」をえらんでね。</p>
+   </section>
+
    <div class="menu-grid">
      <div class="menu-row menu-row-primary">
-       <button aria-label="練習モード" class="menu-btn btn-practice" onclick="selectMode('practice')">✏️<br>れんしゅう</button> 
-       <button aria-label="テストモード" class="menu-btn btn-test" onclick="selectMode('test')">🏅<br>テスト</button>
+       <button aria-label="練習モード" class="menu-btn btn-practice" onclick="selectMode('practice')">📚<br>一覧から練習</button> 
+       <button aria-label="テストモード" class="menu-btn btn-test" onclick="selectMode('test')">📋<br>一覧からテスト</button>
        <button aria-label="今日のチャレンジ" class="menu-btn btn-daily" onclick="startDailyChallenge()">☀️<br>きょうの10もん</button>
        <button aria-label="復習モード" class="menu-btn btn-review" onclick="openReviewPanel()">🔁<br>ふくしゅう</button>
      </div>

@@ -79,6 +79,8 @@ let sharePickerGrade = 1;
 let currentChar   = null;
 let currentMode   = 'practice';
 let currentGrade  = 1;
+let currentGroup = 0; // 0=全体/一覧、1〜4=学年内の並列グループ
+let selectedGroupMode = null;
 let practiceRound = 1;
 const PRACTICE_ROUNDS = 3;
 
@@ -341,7 +343,56 @@ function updateFolderBtns() {
 // ============================================================
 // 学年・画面切替
 // ============================================================
-function setGrade(grade) { playSound('click'); currentGrade=grade; updateTitleGradeButtons(); }
+function setGrade(grade) { playSound('click'); currentGrade=grade; updateTitleGradeButtons(); updateKanjiGroupCards(); }
+
+function getKanjiGroupItems(grade, group) {
+    const list = allKanjiData[grade] || [];
+    if (!group || group < 1 || group > 4 || !list.length) return list;
+    const start = Math.floor((group - 1) * list.length / 4);
+    const end = Math.floor(group * list.length / 4);
+    return list.slice(start, end);
+}
+
+function startGroupMode(mode) {
+    if (mode !== 'practice' && mode !== 'test') return;
+    playSound('click');
+    selectedGroupMode = mode;
+    document.querySelectorAll('.group-mode-btn').forEach(btn => btn.classList.toggle('selected', btn.classList.contains(mode === 'practice' ? 'group-mode-practice' : 'group-mode-test')));
+    const note = document.getElementById('kanji-group-mode-note');
+    if (note) note.textContent = mode === 'practice' ? 'れんしゅうするグループをえらんでね。' : 'テストするグループをえらんでね。';
+    updateKanjiGroupCards();
+}
+
+function startKanjiGroup(group) {
+    playSound('click');
+    if (!selectedGroupMode) {
+        const note = document.getElementById('kanji-group-mode-note');
+        if (note) note.textContent = '先に「れんしゅう」か「テスト」をえらんでね。';
+        return;
+    }
+    currentGroup = group;
+    currentMode = selectedGroupMode;
+    searchGradeFilter = 0;
+    document.getElementById('search-box').value = '';
+    showScreen('list-screen');
+}
+
+function updateKanjiGroupCards() {
+    const grid = document.getElementById('kanji-group-grid');
+    if (!grid) return;
+    grid.innerHTML = [1,2,3,4].map(group => {
+        const items = getKanjiGroupItems(currentGrade, group);
+        const cleared = items.filter(item => getLapClearedList(currentGrade).includes(item.char)).length;
+        const percent = items.length ? Math.round(cleared / items.length * 100) : 0;
+        const modeReady = !!selectedGroupMode;
+        return '<button type="button" class="' + (modeReady ? 'ready' : '') + '" onclick="startKanjiGroup(' + group + ')" aria-label="グループ' + group + '、' + items.length + '字">' +
+          '<strong>グループ' + ['①','②','③','④'][group-1] + '</strong>' +
+          '<span class="group-count">' + items.length + '字</span>' +
+          '<span class="group-progress-text">' + cleared + '/' + items.length + '字できた</span>' +
+          '<span class="group-progress-track"><i style="width:' + percent + '%"></i></span>' +
+        '</button>';
+    }).join('');
+}
 
 function updateTitleGradeButtons() {
     document.querySelectorAll('.grade-btn').forEach(btn => {
@@ -369,17 +420,18 @@ function showScreen(screenId) {
     else if (screenId==='title-screen') {
         document.getElementById('home-search-input').value='';
         document.getElementById('search-box').value='';
-        updateTitleGradeButtons(); updateUI();
+        updateTitleGradeButtons(); updateUI(); updateKanjiGroupCards();
     }
 }
 
 function handleHomeSearch() {
     const q=document.getElementById('home-search-input').value;
     if (!q) return;
+    currentGroup = 0;
     document.getElementById('search-box').value=q;
     currentMode='practice'; playSound('click'); showScreen('list-screen'); filterList();
 }
-function selectMode(mode) { playSound('click'); currentMode=mode; document.getElementById('search-box').value=''; showScreen('list-screen'); }
+function selectMode(mode) { playSound('click'); currentMode=mode; currentGroup=0; document.getElementById('search-box').value=''; showScreen('list-screen'); }
 function filterList() { renderList(); }
 function toHiragana(str) {
     if (!str) return '';
@@ -607,10 +659,10 @@ function renderList() {
     }
 
     if (currentMode==='practice') {
-        badge.innerText=searchText?`🌍 ぜんがくねん・れんしゅう`:`${currentGrade}ねんせい・✏️ れんしゅう`;
+        badge.innerText=searchText?`🌍 ぜんがくねん・れんしゅう`:`${currentGrade}ねんせい・${currentGroup ? 'グループ'+['①','②','③','④'][currentGroup-1]+'・' : ''}✏️ れんしゅう`;
         badge.style.background=`linear-gradient(135deg,${theme.primary},${theme.secondary})`;
     } else if (currentMode==='test') {
-        badge.innerText=searchText?`🌍 ぜんがくねん・テスト`:`${currentGrade}ねんせい・🏅 テスト`;
+        badge.innerText=searchText?`🌍 ぜんがくねん・テスト`:`${currentGrade}ねんせい・${currentGroup ? 'グループ'+['①','②','③','④'][currentGroup-1]+'・' : ''}🏅 テスト`;
         badge.style.background=`linear-gradient(135deg,${theme.primary},${theme.secondary})`;
     } else if (currentMode==='tokkun') {
         badge.innerText=`💪 とっくん漢字（${Object.keys(tokkunKanji).length}コ）`;
@@ -644,7 +696,8 @@ function renderList() {
         }
     } else {
         if (allKanjiData[currentGrade]) {
-            filtered = getAllowedList(allKanjiData[currentGrade]);
+            const gradeItems = currentGroup ? getKanjiGroupItems(currentGrade, currentGroup) : allKanjiData[currentGrade];
+            filtered = getAllowedList(gradeItems);
             filtered.forEach(m => m._foundGrade=currentGrade);
         }
     }
@@ -1484,4 +1537,4 @@ function applySharedScopeFromUrl() {
 // ============================================================
 // 初期化
 // ============================================================
-loadKanjiExampleData().then(() => { applySharedScopeFromUrl(); updateUI(); updateTitleGradeButtons(); });
+loadKanjiExampleData().then(() => { applySharedScopeFromUrl(); updateUI(); updateTitleGradeButtons(); updateKanjiGroupCards(); });
