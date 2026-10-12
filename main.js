@@ -1537,4 +1537,4 @@ function applySharedScopeFromUrl() {
 // ============================================================
 // 初期化
 // ============================================================
-loadKanjiExampleData().then(() => { applySharedScopeFromUrl(); updateUI(); updateTitleGradeButtons(); });
+loadKanjiExampleData().then(() => { applySharedScopeFromUrl(); updateUI(); updateTitleGradeButtons(); updateKanjiGroupCards(); });
