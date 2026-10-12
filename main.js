@@ -1176,6 +1176,9 @@ function handleComplete() {
 function updateResultActions(isPractice) {
     document.getElementById('result-test-btn').hidden = !isPractice;
     document.getElementById('result-practice-btn').hidden = isPractice;
+    const modeButton = document.getElementById('inline-result-mode-btn');
+    modeButton.textContent = isPractice ? '🏅 テストへ' : '✏️ れんしゅうへ';
+    modeButton.onclick = () => switchResultMode(isPractice ? 'test' : 'practice');
 }
 
 function closeResultOverlay() {
