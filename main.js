@@ -1013,7 +1013,7 @@ async function startApp(item, options = {}) {
     isAnimating=false; currentChar=item;
     const isPractice = currentMode==='practice'||currentMode==='tokkun'||currentMode==='nigate';
     if (isPractice && !options.continuePractice) practiceRound=1;
-    if (!options.continuePractice) noteAttempt(item.char);
+    if (!options.continuePractice && !options.retryAttempt) noteAttempt(item.char);
     if (currentMode==='test' && !options.keepTestExample) {
         currentTestExample = pickTestExample(item, options.differentTestExample ? currentTestExample : null);
     } else if (currentMode!=='test') {
@@ -1261,7 +1261,7 @@ function retry(){
     if(hintTimeout){clearTimeout(hintTimeout);hintTimeout=null;}
     isAnimating=false;
     const isPractice=currentMode==='practice'||currentMode==='tokkun'||currentMode==='nigate';
-    startApp(currentChar, { keepTestExample: true, continuePractice: isPractice }); // 同じ字・同じ練習段階からやり直す
+    startApp(currentChar, { keepTestExample: true, continuePractice: isPractice, retryAttempt: true }); // 同じ字・同じ練習段階からやり直す
 }
 function showResetConfirm()  {playSound('click');document.getElementById('reset-confirm').classList.add('active');}
 function closeResetConfirm() {playSound('click');document.getElementById('reset-confirm').classList.remove('active');}
