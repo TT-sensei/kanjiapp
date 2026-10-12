@@ -1056,6 +1056,7 @@ async function startApp(item, options = {}) {
     window.scrollTo(0,0);
     const resultPanel = document.getElementById('practice-result-panel');
     if (resultPanel) resultPanel.hidden = true;
+    document.getElementById('result-overlay').classList.remove('active');
     const practiceControls = document.querySelector('#practice-screen .controls');
     if (practiceControls) practiceControls.hidden = false;
     document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
@@ -1166,10 +1167,13 @@ function handleComplete() {
 
     msg.innerText=isPractice?'できたー！':'だいせいかい！';
     msg.style.color=isPractice?'#16834A':'#D81B60';
+    const popupMessage = document.getElementById('result-msg');
+    if (popupMessage) popupMessage.textContent = msg.innerText;
     updateResultActions(isPractice);
-    document.getElementById('practice-result-panel').hidden = false;
+    document.getElementById('practice-result-panel').hidden = true;
     document.querySelector('#practice-screen .controls').hidden = true;
     showRandomNaviFace();
+    document.getElementById('result-overlay').classList.add('active');
 }
 
 function updateResultActions(isPractice) {
@@ -1182,6 +1186,8 @@ function updateResultActions(isPractice) {
 
 function closeResultOverlay() {
     document.getElementById('result-overlay').classList.remove('active');
+    const resultPanel = document.getElementById('practice-result-panel');
+    if (resultPanel) resultPanel.hidden = true;
 }
 
 function resetPendingResultNavigation() {
