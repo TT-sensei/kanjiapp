@@ -97,7 +97,7 @@ let isAnimating = false;
 let hintTimeout = null;
 let bgCanvasCtx, fixedCanvasCtx, drawCanvasCtx;
 
-const CANVAS_SIZE = 250;
+const CANVAS_SIZE = 300;
 const KVG_SIZE    = 109;
 const PADDING     = 15;
 const SCALE       = (CANVAS_SIZE - PADDING * 2) / KVG_SIZE;
@@ -798,7 +798,7 @@ function initCanvasEngine() {
     drawCanvasCtx  = dc.getContext('2d');
     const setup=(ctx,col,w)=>{ctx.lineCap='round';ctx.lineJoin='round';ctx.strokeStyle=col;ctx.lineWidth=w;};
     setup(bgCanvasCtx,'#E0E0E0',5); setup(fixedCanvasCtx,'#333333',5); setup(drawCanvasCtx,'#FF6B35',5);
-    const pos=e=>{const r=dc.getBoundingClientRect();return{x:(e.clientX??(e.touches?e.touches[0].clientX:0))-r.left,y:(e.clientY??(e.touches?e.touches[0].clientY:0))-r.top};};
+    const pos=e=>{const r=dc.getBoundingClientRect();return{x:((e.clientX??(e.touches?e.touches[0].clientX:0))-r.left)*(dc.width/r.width),y:((e.clientY??(e.touches?e.touches[0].clientY:0))-r.top)*(dc.height/r.height)};};
     const sd=e=>{if(isAnimating||currentStrokeIndex>=currentKanjiPaths.length)return;isDrawing=true;userPoints=[pos(e)];drawCanvasCtx.beginPath();drawCanvasCtx.moveTo(userPoints[0].x,userPoints[0].y);};
     const dr=e=>{if(!isDrawing||isAnimating)return;const p=pos(e);userPoints.push(p);drawCanvasCtx.lineTo(p.x,p.y);drawCanvasCtx.stroke();};
     const ed=()=>{if(!isDrawing||isAnimating)return;isDrawing=false;evaluateStroke();};
@@ -1055,6 +1055,10 @@ async function startApp(item, options = {}) {
         currentTestExample = null;
     }
     window.scrollTo(0,0);
+    const resultPanel = document.getElementById('practice-result-panel');
+    if (resultPanel) resultPanel.hidden = true;
+    const practiceControls = document.querySelector('#practice-screen .controls');
+    if (practiceControls) practiceControls.hidden = false;
     document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
     document.getElementById('practice-screen').classList.add('active');
     updateFolderBtns();
@@ -1132,7 +1136,7 @@ async function startApp(item, options = {}) {
 // ============================================================
 function handleComplete() {
     playSound('complete');
-    const msg=document.getElementById('result-msg'),icon=document.getElementById('result-icon');
+    const msg=document.getElementById('inline-result-msg');
     const isPractice=(currentMode==='practice'||currentMode==='tokkun'||currentMode==='nigate');
 
     if (isPractice && practiceRound < PRACTICE_ROUNDS) {
@@ -1162,11 +1166,11 @@ function handleComplete() {
     if (!isRandomTest&&newLv>oldLv) pendingLevelUp=true;
 
     msg.innerText=isPractice?'できたー！':'だいせいかい！';
-    msg.style.color=isPractice?'#00D084':'#FF1493';
-    if(icon) icon.innerText='';
+    msg.style.color=isPractice?'#16834A':'#D81B60';
     updateResultActions(isPractice);
+    document.getElementById('practice-result-panel').hidden = false;
+    document.querySelector('#practice-screen .controls').hidden = true;
     showRandomNaviFace();
-    setTimeout(()=>document.getElementById('result-overlay').classList.add('active'),350);
 }
 
 function updateResultActions(isPractice) {
