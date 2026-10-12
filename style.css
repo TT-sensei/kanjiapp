@@ -948,7 +948,7 @@ h1 { font-size: 3rem; margin: 0; background: linear-gradient(90deg, var(--primar
 /* グループの漢字がカードだけで分かり、一覧は必要なときだけ開く */
 .kanji-group-grid button{min-height:84px;gap:3px}
 .kanji-group-grid .group-kanji-preview{display:block;width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:.76rem;font-weight:800;letter-spacing:.01em;color:#31584b}
-.group-list-open{display:block;margin:8px auto 0;padding:7px 14px;border:1px solid #c5d7c8;border-radius:999px;background:#f7fff8;color:#31584b;font:700 .84rem inherit;cursor:pointer}
+.group-list-open{display:block;margin:8px auto 0;padding:7px 14px;border:1px solid #c5d7c8;border-radius:999px;background:#f7fff8;color:#31584b;font-family:inherit;font-size:.84rem;font-weight:700;cursor:pointer}
 .kanji-group-list-overlay{z-index:150;background:rgba(26,43,36,.78);padding:14px}
 .kanji-group-list-content{position:relative;width:min(100%,680px);max-height:88vh;overflow:auto;box-sizing:border-box;padding:22px 16px 18px;border-radius:22px;background:#fffdf5;color:#31584b}
 .kanji-group-list-content h2{margin:0 35px 4px 0;font-size:1.25rem}
