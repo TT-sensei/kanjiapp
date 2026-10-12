@@ -774,12 +774,21 @@ function handleBackFromPractice() {
 // ============================================================
 // キャンバス判定エンジン
 // ============================================================
+const kanjiVGPathCache = new Map();
 async function fetchKanjiVG(char) {
-    const hex = char.codePointAt(0).toString(16).padStart(5,'0');
-    const res = await fetch(`https://cdn.jsdelivr.net/gh/KanjiVG/kanjivg@master/kanji/${hex}.svg`);
-    if (!res.ok) throw new Error('漢字データが見つかりません');
-    const doc = new DOMParser().parseFromString(await res.text(),'image/svg+xml');
-    return Array.from(doc.querySelectorAll('g[id^="kvg:StrokePaths_"] path')).map(p=>p.getAttribute('d'));
+    if (kanjiVGPathCache.has(char)) return kanjiVGPathCache.get(char);
+    const request = (async () => {
+        const hex = char.codePointAt(0).toString(16).padStart(5,'0');
+        const res = await fetch(`https://cdn.jsdelivr.net/gh/KanjiVG/kanjivg@master/kanji/${hex}.svg`);
+        if (!res.ok) throw new Error('漢字データが見つかりません');
+        const doc = new DOMParser().parseFromString(await res.text(),'image/svg+xml');
+        const paths = Array.from(doc.querySelectorAll('g[id^="kvg:StrokePaths_"] path')).map(p=>p.getAttribute('d'));
+        if (!paths.length) throw new Error('漢字データが見つかりません');
+        return paths;
+    })();
+    kanjiVGPathCache.set(char, request);
+    try { return await request; }
+    catch (error) { kanjiVGPathCache.delete(char); throw error; }
 }
 
 function initCanvasEngine() {
@@ -1011,7 +1020,9 @@ async function playAnimation() {
 // ============================================================
 // アプリ制御
 // ============================================================
+let appLoadToken = 0;
 async function startApp(item, options = {}) {
+    const loadToken = ++appLoadToken;
     if (hintTimeout){clearTimeout(hintTimeout);hintTimeout=null;}
     isAnimating=false; currentChar=item;
     const isPractice = currentMode==='practice'||currentMode==='tokkun'||currentMode==='nigate';
@@ -1080,14 +1091,17 @@ async function startApp(item, options = {}) {
     bgCanvasCtx.moveTo(0,CANVAS_SIZE/2); bgCanvasCtx.lineTo(CANVAS_SIZE,CANVAS_SIZE/2);
     bgCanvasCtx.stroke(); bgCanvasCtx.restore();
     try {
-        currentKanjiPaths=await fetchKanjiVG(item.char);
+        const loadedPaths = await fetchKanjiVG(item.char);
+        // 先に始めた漢字の通信が遅れても、後から選んだ問題を上書きしない。
+        if (loadToken !== appLoadToken) return;
+        currentKanjiPaths = loadedPaths;
         if (currentMode==='practice'||currentMode==='tokkun'||currentMode==='nigate'){
             bgCanvasCtx.save();
             bgCanvasCtx.translate(PADDING,PADDING); bgCanvasCtx.scale(SCALE,SCALE);
             currentKanjiPaths.forEach(pd=>bgCanvasCtx.stroke(new Path2D(pd)));
             bgCanvasCtx.restore();
         }
-    } catch(e){msg.innerText="エラー: データがよみこめません";console.error(e);}
+    } catch(e){if (loadToken !== appLoadToken) return; msg.innerText="エラー: データがよみこめません";console.error(e);}
 }
 
 // ============================================================
@@ -1129,7 +1143,7 @@ function handleComplete() {
     if(icon) icon.innerText='';
     updateResultActions(isPractice);
     showRandomNaviFace();
-        setTimeout(()=>document.getElementById('result-overlay').classList.add('active'),800);
+    setTimeout(()=>document.getElementById('result-overlay').classList.add('active'),350);
 }
 
 function updateResultActions(isPractice) {
