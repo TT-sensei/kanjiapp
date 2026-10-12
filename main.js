@@ -1400,7 +1400,16 @@ function updateShareSelectedCount() {
 }
 async function copyShareUrl() {
     if (!shareSelection.size) { alert('漢字を 1つ以上 えらんでね！'); return; }
-    const url = new URL(location.href); url.search=''; url.searchParams.set('grade',sharePickerGrade); url.searchParams.set('kanji',[...shareSelection].join(''));
+    const url = new URL(location.href); url.search='';
+    // 選択中の学年に対象漢字がない場合は、実際に選択されている漢字の学年から開始する。
+    let linkGrade = sharePickerGrade;
+    const selectedInPickerGrade = (allKanjiData[linkGrade] || []).some(item => shareSelection.has(item.char));
+    if (!selectedInPickerGrade) {
+        for (let grade=1; grade<=6; grade++) {
+            if ((allKanjiData[grade] || []).some(item => shareSelection.has(item.char))) { linkGrade=grade; break; }
+        }
+    }
+    url.searchParams.set('grade',linkGrade); url.searchParams.set('kanji',[...shareSelection].join(''));
     try { await navigator.clipboard.writeText(url.href); alert('共有URLを コピーしました！'); }
     catch (_) { prompt('このURLをコピーしてください',url.href); }
 }
@@ -1415,8 +1424,9 @@ function applySharedScopeFromUrl() {
     const grade = Number(params.get('grade'));
     if (grade>=1 && grade<=6) currentGrade=grade;
     const note=document.getElementById('shared-scope-note'); note.hidden=false;
+    const scopeGrades = [1,2,3,4,5,6].filter(g => (allKanjiData[g] || []).some(item => sharedKanjiScope.includes(item.char)));
     note.innerHTML = sharedKanjiScope.length
-        ? `<strong>🔗 してい学習中</strong>先生がえらんだ ${sharedKanjiScope.length}この漢字だけで学習します`
+        ? `<strong>🔗 してい学習中</strong>先生がえらんだ ${sharedKanjiScope.length}この漢字だけで学習します${scopeGrades.length > 1 ? '<br>学年を切り替えると、ほかの学年の漢字も学習できます。' : ''}`
         : '<strong>🔗 共有範囲を確認してね</strong>このURLに学習できる漢字がありません。先生に新しいURLを送ってもらってね。';
 }
 
