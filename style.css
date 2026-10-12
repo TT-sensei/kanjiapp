@@ -932,3 +932,15 @@ h1 { font-size: 3rem; margin: 0; background: linear-gradient(90deg, var(--primar
 .group-mode-note{margin:10px 0 0;min-height:1.3em;font-size:.8rem;color:#5d6c5f}
 #title-screen .menu-row-primary .btn-practice,#title-screen .menu-row-primary .btn-test{background:linear-gradient(135deg,#718096,#9aa6b2);color:#fff}
 @media(max-width:600px){.group-start-panel{padding:12px 9px}.kanji-group-grid{gap:5px}.kanji-group-grid button{min-height:88px;padding:7px 2px}.kanji-group-grid strong{font-size:.78rem}.kanji-group-grid .group-count{font-size:.7rem}.kanji-group-grid .group-progress-text{font-size:.56rem;letter-spacing:-.03em}.group-start-panel h2{font-size:1rem}}
+
+/* ホーム画面の入口を目的別に整理 */
+#title-screen .home-tools{width:96%;max-width:900px;margin:0 auto 16px;display:grid;grid-template-columns:1fr;gap:12px}
+#title-screen .home-tool-section{padding:12px 14px;border:1px solid rgba(255,255,255,.78);border-radius:18px;background:rgba(255,251,239,.72)}
+#title-screen .home-tool-section h2{margin:0 0 9px;color:#31584b;font-size:.98rem;font-weight:800}
+#title-screen .home-tool-section .menu-grid{width:100%;max-width:none;margin:0;padding:0;background:transparent;box-shadow:none}
+#title-screen .home-tool-section .menu-row{margin:0;gap:8px}
+#title-screen .home-tool-section .menu-btn{min-height:66px}
+#title-screen .home-tool-section .menu-row-primary{grid-template-columns:repeat(3,minmax(0,1fr))}
+#title-screen .home-tool-section:nth-child(2) .menu-row-primary{grid-template-columns:repeat(5,minmax(0,1fr))}
+#title-screen .home-tool-section .menu-row-tools{grid-template-columns:repeat(2,minmax(0,1fr))}
+@media(max-width:600px){#title-screen .home-tools{gap:9px}#title-screen .home-tool-section{padding:10px 9px}#title-screen .home-tool-section .menu-row-primary{grid-template-columns:repeat(3,minmax(0,1fr))}#title-screen .home-tool-section:nth-child(2) .menu-row-primary{grid-template-columns:repeat(3,minmax(0,1fr))}#title-screen .home-tool-section .menu-btn{min-height:60px;font-size:.78rem}}
