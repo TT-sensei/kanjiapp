@@ -758,7 +758,9 @@ function startFolderRandomTest(folderType) {
     const folder = folderType==='tokkun' ? tokkunKanji : nigateKanji;
     const fname  = folderType==='tokkun' ? 'とっくん' : 'にがて';
     for (let g=1; g<=6; g++) if (allKanjiData[g]) list = list.concat(allKanjiData[g].filter(i=>folder[i.char]));
-    if (list.length < 10) { alert(`${fname} に 10こ以上 登録すると テストできるよ！\n（いま: ${list.length}こ）\nれんしゅう画面で 登録してね。`); return; }
+    // 共有URLで指定された漢字の範囲を守る。
+    list = getAllowedList(list);
+    if (!list.length) { alert(`${fname} に テストできる漢字が まだ ないよ！\nれんしゅう画面で登録するか、先生に確認してね。`); return; }
     randomQueue = [...list].sort(()=>0.5-Math.random()).slice(0,10);
     randomIndex = 0; isRandomTest=true; currentMode='test';
     levelBeforeRandomTest = getStats().level; startApp(randomQueue[0]);
