@@ -1415,7 +1415,9 @@ function applySharedScopeFromUrl() {
     const grade = Number(params.get('grade'));
     if (grade>=1 && grade<=6) currentGrade=grade;
     const note=document.getElementById('shared-scope-note'); note.hidden=false;
-    note.innerHTML=`<strong>🔗 してい学習中</strong>先生がえらんだ ${sharedKanjiScope.length}この漢字だけで学習します`;
+    note.innerHTML = sharedKanjiScope.length
+        ? `<strong>🔗 してい学習中</strong>先生がえらんだ ${sharedKanjiScope.length}この漢字だけで学習します`
+        : '<strong>🔗 共有範囲を確認してね</strong>このURLに学習できる漢字がありません。先生に新しいURLを送ってもらってね。';
 }
 
 // ============================================================
