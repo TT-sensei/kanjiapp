@@ -235,7 +235,30 @@ h1 { font-size: 3rem; margin: 0; background: linear-gradient(90deg, var(--primar
 #practice-area #character-target { max-width: 100%; }
 #practice-area .drawing-canvas-wrap { width: min(300px, calc(100vw - 64px)) !important; height: auto !important; aspect-ratio: 1; }
 #practice-area canvas { display: block; width: 100%; height: 100%; max-width: none; }
-.practice-result-panel { width: min(100%, 420px); margin: 16px auto 0; padding: 16px; box-sizing: border-box; background: #fff; border: 2px solid #CDEED8; border-radius: 22px; box-shadow: var(--shadow-soft); color: var(--text); }
+/* 結果は画面中央に固定し、スクロールなしで次の操作へ進める */
+.practice-result-panel {
+  position: fixed;
+  z-index: 150;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: min(420px, calc(100vw - 28px));
+  max-height: calc(100dvh - 28px);
+  overflow-y: auto;
+  margin: 0;
+  padding: 16px;
+  box-sizing: border-box;
+  background: #fff;
+  border: 2px solid #CDEED8;
+  border-radius: 22px;
+  box-shadow: 0 0 0 100vmax rgba(20, 30, 45, 0.62), var(--shadow-soft);
+  color: var(--text);
+  animation: resultPanelIn 180ms ease-out;
+}
+@keyframes resultPanelIn {
+  from { opacity: 0; translate: 0 8px; }
+  to { opacity: 1; translate: 0 0; }
+}
 .practice-result-panel[hidden] { display: none !important; }
 .practice-result-panel h2 { margin: 0 0 4px; font-size: 1.7rem; }
 .practice-result-panel p { margin: 4px 0 12px; color: #666; font-size: .9rem; }
