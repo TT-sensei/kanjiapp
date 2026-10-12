@@ -78,7 +78,7 @@ let sharePickerGrade = 1;
 
 let currentChar   = null;
 let currentMode   = 'practice';
-let currentGrade  = 1;
+let currentGrade  = (() => { const saved = readStoredNumber('kanjiMasterLastGrade', 1); return Number.isInteger(saved) && saved >= 1 && saved <= 6 ? saved : 1; })();
 let currentGroup = 0; // 0=全体/一覧、1〜4=学年内の並列グループ
 let selectedGroupMode = null;
 let isGroupPractice = false;
@@ -344,7 +344,7 @@ function updateFolderBtns() {
 // ============================================================
 // 学年・画面切替
 // ============================================================
-function setGrade(grade) { playSound('click'); currentGrade=grade; updateTitleGradeButtons(); updateKanjiGroupCards(); }
+function setGrade(grade) { if (!Number.isInteger(grade) || grade < 1 || grade > 6) return; playSound('click'); currentGrade=grade; try { localStorage.setItem('kanjiMasterLastGrade', String(grade)); } catch (error) {} updateTitleGradeButtons(); updateKanjiGroupCards(); }
 
 function getKanjiGroupItems(grade, group) {
     const list = allKanjiData[grade] || [];
@@ -1551,7 +1551,7 @@ function applySharedScopeFromUrl() {
     const known = new Set(Object.values(allKanjiData).flat().map(i=>i.char));
     sharedKanjiScope = [...new Set(chars.filter(c=>known.has(c)))];
     const grade = Number(params.get('grade'));
-    if (grade>=1 && grade<=6) currentGrade=grade;
+    if (grade>=1 && grade<=6) { currentGrade=grade; try { localStorage.setItem('kanjiMasterLastGrade', String(grade)); } catch (error) {} }
     const note=document.getElementById('shared-scope-note'); note.hidden=false;
     const scopeGrades = [1,2,3,4,5,6].filter(g => (allKanjiData[g] || []).some(item => sharedKanjiScope.includes(item.char)));
     note.innerHTML = sharedKanjiScope.length
