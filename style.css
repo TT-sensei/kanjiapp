@@ -855,3 +855,57 @@ h1 { font-size: 3rem; margin: 0; background: linear-gradient(90deg, var(--primar
   .controls { margin-top: 10px; gap: 14px; }
   .control-btn { width: 56px; height: 56px; font-size: 1.5rem; }
 }
+
+
+/* 結果は利き手を問わず使える中央ポップアップ。ナビキャラも毎回ランダム表示 */
+#result-overlay {
+  padding: 16px;
+  background: rgba(20, 35, 31, 0.38);
+  backdrop-filter: blur(2px);
+  color: var(--text);
+}
+#result-overlay .result-content {
+  width: min(92vw, 360px);
+  max-width: 360px;
+  max-height: min(88dvh, 680px);
+  overflow-y: auto;
+  padding: 20px 18px;
+  border: 3px solid #CDEED8;
+  border-radius: 26px;
+  box-sizing: border-box;
+}
+#result-overlay .correct-navi-face {
+  width: clamp(76px, 14vw, 104px);
+  height: clamp(76px, 14vw, 104px);
+  margin-bottom: 6px;
+}
+#result-overlay .result-content h2 {
+  margin: 4px 0 8px;
+  color: #16834A;
+}
+#result-overlay .result-actions {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 9px;
+  margin-top: 12px;
+}
+#result-overlay .result-action {
+  min-height: 48px;
+  border-radius: 15px;
+  font-size: .95rem;
+}
+#result-overlay .result-action-next {
+  grid-column: 1 / -1;
+  grid-row: 1;
+  min-height: 56px;
+  font-size: 1.12rem;
+}
+#result-overlay .result-action-home {
+  grid-column: 1 / -1;
+}
+@media (max-height: 520px) {
+  #result-overlay .result-content { padding: 10px 14px; }
+  #result-overlay .correct-navi-face { width: 64px; height: 64px; }
+  #result-overlay .result-content h2 { font-size: 1.45rem; margin: 2px 0 5px; }
+  #result-overlay .result-actions { gap: 6px; margin-top: 8px; }
+  #result-overlay .result-action { min-height: 42px; }
+}
