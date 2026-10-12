@@ -944,3 +944,28 @@ h1 { font-size: 3rem; margin: 0; background: linear-gradient(90deg, var(--primar
 #title-screen .home-tool-section:nth-child(2) .menu-row-primary{grid-template-columns:repeat(5,minmax(0,1fr))}
 #title-screen .home-tool-section .menu-row-tools{grid-template-columns:repeat(2,minmax(0,1fr))}
 @media(max-width:600px){#title-screen .home-tools{gap:9px}#title-screen .home-tool-section{padding:10px 9px}#title-screen .home-tool-section .menu-row-primary{grid-template-columns:repeat(3,minmax(0,1fr))}#title-screen .home-tool-section:nth-child(2) .menu-row-primary{grid-template-columns:repeat(3,minmax(0,1fr))}#title-screen .home-tool-section .menu-btn{min-height:60px;font-size:.78rem}}
+
+/* グループの漢字がカードだけで分かり、一覧は必要なときだけ開く */
+.kanji-group-grid button{min-height:84px;gap:3px}
+.kanji-group-grid .group-kanji-preview{display:block;width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:.76rem;font-weight:800;letter-spacing:.01em;color:#31584b}
+.group-list-open{display:block;margin:8px auto 0;padding:7px 14px;border:1px solid #c5d7c8;border-radius:999px;background:#f7fff8;color:#31584b;font:700 .84rem inherit;cursor:pointer}
+.kanji-group-list-overlay{z-index:150;background:rgba(26,43,36,.78);padding:14px}
+.kanji-group-list-content{position:relative;width:min(100%,680px);max-height:88vh;overflow:auto;box-sizing:border-box;padding:22px 16px 18px;border-radius:22px;background:#fffdf5;color:#31584b}
+.kanji-group-list-content h2{margin:0 35px 4px 0;font-size:1.25rem}
+.group-list-subtitle{margin:0 0 12px;color:#68766a;font-size:.85rem}
+.group-list-section{margin-top:12px;padding-top:10px;border-top:1px solid #e3dccb}
+.group-list-section h3{margin:0 0 8px;font-size:.95rem}
+.group-list-section h3 span{font-size:.78rem;font-weight:500;color:#6c796e}
+.group-list-kanji{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:5px}
+.group-list-kanji span{display:flex;align-items:center;justify-content:center;min-height:38px;border:1px solid #e2d7bc;border-radius:9px;background:#fff8e8;font-size:1.15rem;font-weight:700}
+@media(max-width:600px){
+ .kanji-group-grid button{min-height:78px;padding:6px 2px}
+ .kanji-group-grid .group-kanji-preview{font-size:.66rem;letter-spacing:-.04em}
+ .kanji-group-grid .group-progress-text{font-size:.6rem}
+ .group-start-panel{margin-top:10px;margin-bottom:12px}
+ #title-screen .home-tools{gap:7px;margin-bottom:10px}
+ #title-screen .home-tool-section{padding:8px}
+ #title-screen .home-tool-section .menu-btn{min-height:54px}
+ .group-list-kanji{grid-template-columns:repeat(5,minmax(0,1fr))}
+ .kanji-group-list-content{padding:20px 12px 14px}
+}
