@@ -235,29 +235,17 @@ h1 { font-size: 3rem; margin: 0; background: linear-gradient(90deg, var(--primar
 #practice-area #character-target { max-width: 100%; }
 #practice-area .drawing-canvas-wrap { width: min(300px, calc(100vw - 64px)) !important; height: auto !important; aspect-ratio: 1; }
 #practice-area canvas { display: block; width: 100%; height: 100%; max-width: none; }
-/* 結果は画面中央に固定し、スクロールなしで次の操作へ進める */
+/* 結果は通常のレイアウト内に表示。タブレットでは書き取り欄のわきへ */
 .practice-result-panel {
-  position: fixed;
-  z-index: 150;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: min(420px, calc(100vw - 28px));
-  max-height: calc(100dvh - 28px);
-  overflow-y: auto;
-  margin: 0;
+  width: min(100%, 420px);
+  margin: 12px auto 0;
   padding: 16px;
   box-sizing: border-box;
   background: #fff;
   border: 2px solid #CDEED8;
   border-radius: 22px;
-  box-shadow: 0 0 0 100vmax rgba(20, 30, 45, 0.62), var(--shadow-soft);
+  box-shadow: var(--shadow-soft);
   color: var(--text);
-  animation: resultPanelIn 180ms ease-out;
-}
-@keyframes resultPanelIn {
-  from { opacity: 0; translate: 0 8px; }
-  to { opacity: 1; translate: 0 0; }
 }
 .practice-result-panel[hidden] { display: none !important; }
 .practice-result-panel h2 { margin: 0 0 4px; font-size: 1.7rem; }
@@ -778,6 +766,48 @@ h1 { font-size: 3rem; margin: 0; background: linear-gradient(90deg, var(--primar
     }
 }
 
+
+/* 結果表示中は、タブレットの書き取り欄のわきに操作を配置 */
+@media (min-width: 700px) {
+  #practice-screen:has(#practice-result-panel:not([hidden])) {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(190px, 230px);
+    grid-template-areas:
+      "header header"
+      "message message"
+      "reading reading"
+      "practice result"
+      "controls result";
+    align-items: center;
+    column-gap: 16px;
+    row-gap: 0;
+  }
+  #practice-screen:has(#practice-result-panel:not([hidden])) > .header-bar { grid-area: header; width: 100%; }
+  #practice-screen:has(#practice-result-panel:not([hidden])) > #message-area { grid-area: message; }
+  #practice-screen:has(#practice-result-panel:not([hidden])) > #current-reading { grid-area: reading; }
+  #practice-screen:has(#practice-result-panel:not([hidden])) > #practice-area {
+    grid-area: practice;
+    justify-self: center;
+    align-self: start;
+    min-width: 0;
+  }
+  #practice-screen:has(#practice-result-panel:not([hidden])) > .controls { grid-area: controls; justify-self: center; }
+  #practice-screen:has(#practice-result-panel:not([hidden])) > #practice-result-panel {
+    grid-area: result;
+    align-self: center;
+    width: 100%;
+    max-width: 230px;
+    margin: 0;
+    padding: 14px 10px;
+  }
+  #practice-screen:has(#practice-result-panel:not([hidden])) > #practice-result-panel h2 { font-size: 1.4rem; }
+  #practice-screen:has(#practice-result-panel:not([hidden])) > #practice-result-panel .inline-result-secondary {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  #practice-screen:has(#practice-result-panel:not([hidden])) > #practice-result-panel button { width: 100%; }
+}
 
 /* タブレット学習：上部の余白を整理し、書く面積を優先 */
 @media (min-width: 700px) {
