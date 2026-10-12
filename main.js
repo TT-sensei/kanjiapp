@@ -1020,6 +1020,27 @@ async function playAnimation() {
 // ============================================================
 // アプリ制御
 // ============================================================
+function prefetchNextKanji() {
+    let next = null;
+    if (isRandomTest) {
+        next = randomQueue[randomIndex + 1] || null;
+    } else {
+        let list = [];
+        if (currentMode==='tokkun'||currentMode==='nigate') {
+            const folder = currentMode==='tokkun' ? tokkunKanji : nigateKanji;
+            for (let grade=1; grade<=6; grade++) {
+                if (allKanjiData[grade]) list = list.concat(allKanjiData[grade].filter(item => folder[item.char]));
+            }
+            list = getAllowedList(list);
+        } else {
+            list = getAllowedList(allKanjiData[currentChar?._foundGrade||currentGrade] || []);
+        }
+        const index = list.findIndex(item => item.char === currentChar?.char);
+        if (index >= 0) next = list[index + 1] || null;
+    }
+    if (next && next.char !== currentChar?.char) fetchKanjiVG(next.char).catch(() => {});
+}
+
 let appLoadToken = 0;
 async function startApp(item, options = {}) {
     const loadToken = ++appLoadToken;
@@ -1095,6 +1116,8 @@ async function startApp(item, options = {}) {
         // 先に始めた漢字の通信が遅れても、後から選んだ問題を上書きしない。
         if (loadToken !== appLoadToken) return;
         currentKanjiPaths = loadedPaths;
+        // 今の問題を描画している間に、次の問題の線データを先読みする。
+        prefetchNextKanji();
         if (currentMode==='practice'||currentMode==='tokkun'||currentMode==='nigate'){
             bgCanvasCtx.save();
             bgCanvasCtx.translate(PADDING,PADDING); bgCanvasCtx.scale(SCALE,SCALE);
