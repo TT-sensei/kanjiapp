@@ -754,3 +754,50 @@ h1 { font-size: 3rem; margin: 0; background: linear-gradient(90deg, var(--primar
         white-space: nowrap;
     }
 }
+
+
+/* タブレット学習：上部の余白を整理し、書く面積を優先 */
+@media (min-width: 700px) {
+  #practice-screen { padding: 10px; }
+  #practice-screen .header-bar {
+    margin-bottom: 8px;
+    padding: 8px 12px;
+    gap: 8px;
+  }
+  #practice-screen #message-area {
+    margin: 4px 0;
+    min-height: 0;
+    font-size: 1.1rem;
+    line-height: 1.35;
+  }
+  #practice-screen #practice-area {
+    margin-top: 4px;
+    padding: 8px;
+  }
+  #practice-area .drawing-canvas-wrap {
+    width: min(460px, calc(100vw - 280px)) !important;
+  }
+  .sentence-panel {
+    max-width: 680px;
+    padding: 7px 12px;
+    margin-bottom: 8px;
+    border-width: 2px;
+    border-radius: 14px;
+  }
+  .sentence-mode-title {
+    margin-bottom: 3px;
+    font-size: .82rem;
+  }
+  .sentence-example {
+    margin-top: 3px;
+    padding: 5px 10px;
+    font-size: 1.08rem;
+    line-height: 1.4;
+  }
+  .reading-hint-btn {
+    margin-bottom: 6px;
+    padding: 6px 18px;
+  }
+  .controls { margin-top: 10px; gap: 14px; }
+  .control-btn { width: 56px; height: 56px; font-size: 1.5rem; }
+}
