@@ -106,6 +106,8 @@ const PADDING     = 15;
 const SCALE       = (CANVAS_SIZE - PADDING * 2) / KVG_SIZE;
 
 let isRandomTest          = false;
+let randomSessionType     = null; // group / daily / review / folder
+let randomSessionLabel    = '';
 let randomQueue           = [];
 let randomIndex           = 0;
 let levelBeforeRandomTest = 1;
@@ -379,6 +381,8 @@ function startKanjiGroup(group) {
     document.getElementById('search-box').value = '';
     randomQueue = [...items].sort(() => Math.random() - 0.5).slice(0, Math.min(10, items.length)).map(item => ({ ...item, _foundGrade: currentGrade }));
     randomIndex = 0;
+    randomSessionType = 'group';
+    randomSessionLabel = 'グループ';
     isRandomTest = selectedGroupMode === 'test';
     isGroupPractice = selectedGroupMode === 'practice';
     levelBeforeRandomTest = getStats().level;
@@ -854,6 +858,7 @@ function startFolderRandomTest(folderType) {
     if (!list.length) { alert(`${fname} に テストできる漢字が まだ ないよ！\nれんしゅう画面で登録するか、先生に確認してね。`); return; }
     randomQueue = [...list].sort(()=>0.5-Math.random()).slice(0,10);
     randomIndex = 0; isRandomTest=true; currentMode='test';
+    randomSessionType='folder'; randomSessionLabel=`${fname}テスト`;
     levelBeforeRandomTest = getStats().level; startApp(randomQueue[0]);
 }
 function handleBackFromPractice() {
@@ -1155,8 +1160,9 @@ async function startApp(item, options = {}) {
     updateFolderBtns();
     const msg=document.getElementById('message-area');
     const rd=document.getElementById('current-reading'); if(rd)rd.style.display='none';
-    if (isRandomTest){msg.innerText=`🎲 グループ${['①','②','③','④'][currentGroup-1]} テスト: ${randomIndex+1}/${randomQueue.length}問目`;msg.style.color="#9B59B6";}
+    if (isRandomTest && randomSessionType === 'group'){msg.innerText=`🎲 グループ${['①','②','③','④'][currentGroup-1]} テスト: ${randomIndex+1}/${randomQueue.length}問目`;msg.style.color="#9B59B6";}
     else if (isGroupPractice){msg.innerText=`✏️ グループ${['①','②','③','④'][currentGroup-1]} れんしゅう: ${randomIndex+1}/${randomQueue.length}字目`;msg.style.color="#00A878";}
+    else if (isRandomTest){msg.innerText=`🎲 ${randomSessionLabel || 'テスト'}: ${randomIndex+1}/${randomQueue.length}問目`;msg.style.color="#9B59B6";}
     else if (currentMode==='test'){msg.innerText=currentTestExample?"文の □に 入る かんじを かこう！":"この かんじ を かこう！";msg.style.color="#FF1493";}
     else{
         const roundGuides = [
@@ -1288,6 +1294,8 @@ function resetPendingResultNavigation() {
     pendingGoHome=false;
     isRandomTest=false;
     isGroupPractice=false;
+    randomSessionType=null;
+    randomSessionLabel='';
 }
 
 function retryFromResult() {
@@ -1325,14 +1333,25 @@ function moveToNextKanji() {
         randomIndex++;
         if (randomIndex<randomQueue.length){startApp(randomQueue[randomIndex]);return;}
         const completedGroupPractice = isGroupPractice;
-        isRandomTest=false; isGroupPractice=false; currentGroup=0; bonusXP+=10;
+        const completedSessionType = randomSessionType;
+        const completedSessionLabel = randomSessionLabel;
+        isRandomTest=false; isGroupPractice=false; currentGroup=0;
+        randomSessionType=null; randomSessionLabel='';
+        bonusXP+=10;
         localStorage.setItem('kanjiMasterBonusXP',bonusXP);
         // グループ学習は最大10問のランダム出題。学年全体の周回クリア判定は行わない。
         // 復習だけで周回数が増えるのを防ぐ。
         const clearOverlay = document.getElementById('random-clear-overlay');
         if (clearOverlay) {
             const title = clearOverlay.querySelector('h2');
-            if (title) title.textContent = completedGroupPractice ? 'グループれんしゅう かんりょう！' : 'グループテスト かんりょう！';
+            if (title) {
+                if (completedGroupPractice) title.textContent = 'グループれんしゅう かんりょう！';
+                else if (completedSessionType === 'group') title.textContent = 'グループテスト かんりょう！';
+                else if (completedSessionType === 'daily') title.textContent = 'きょうの10もん かんりょう！';
+                else if (completedSessionType === 'review') title.textContent = 'ふくしゅう かんりょう！';
+                else if (completedSessionType === 'folder') title.textContent = `${completedSessionLabel || 'とっくんテスト'} かんりょう！`;
+                else title.textContent = 'テスト かんりょう！';
+            }
             clearOverlay.classList.add('active');
         }
         playSound('levelup'); updateUI();
@@ -1451,7 +1470,9 @@ function startDailyChallenge() {
     const list = getAllowedList(allKanjiData[currentGrade] || []);
     if (!list.length) return;
     randomQueue = seededShuffle(list, `${dateKey}-${currentGrade}`).slice(0,10);
-    randomIndex=0; isRandomTest=true; currentMode='test'; levelBeforeRandomTest=getStats().level;
+    randomIndex=0; isRandomTest=true; currentMode='test';
+    randomSessionType='daily'; randomSessionLabel='きょうの10もん';
+    levelBeforeRandomTest=getStats().level;
     startApp(randomQueue[0]);
 }
 
@@ -1490,7 +1511,9 @@ function startReview() {
     list = getAllowedList(list);
     if (!list.length) { alert('この じょうけんの かんじは まだ ないよ！'); return; }
     randomQueue = kind==='mistakes' ? list.slice(0,10) : [...list].sort(()=>Math.random()-.5).slice(0,10);
-    randomIndex=0; isRandomTest=true; currentMode='test'; levelBeforeRandomTest=getStats().level;
+    randomIndex=0; isRandomTest=true; currentMode='test';
+    randomSessionType='review'; randomSessionLabel='ふくしゅう';
+    levelBeforeRandomTest=getStats().level;
     closeFeatureModal(); startApp(randomQueue[0]);
 }
 
