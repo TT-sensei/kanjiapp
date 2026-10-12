@@ -1181,7 +1181,8 @@ function moveToNextKanji() {
         if (randomIndex<randomQueue.length){startApp(randomQueue[randomIndex]);return;}
         isRandomTest=false; bonusXP+=10;
         localStorage.setItem('kanjiMasterBonusXP',bonusXP);
-        if (checkAndIncrementLap(currentGrade)){pendingLapUp=true;pendingLapGrade=currentGrade;}
+        // ランダムテストは最大10問の一部出題なので、学年全体の周回クリア判定は行わない。
+        // 復習だけで周回数が増えるのを防ぐ。
         document.getElementById('random-clear-overlay').classList.add('active');
         playSound('levelup'); updateUI();
     } else {
