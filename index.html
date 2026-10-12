@@ -247,6 +247,17 @@
   <button aria-label="リトライ" class="control-btn" onclick="retry()">↺</button>
 </div>
 
+<div id="practice-result-panel" class="practice-result-panel" hidden aria-live="polite">
+  <h2 id="inline-result-msg">だいせいかい！</h2>
+  <p>つぎは どうする？</p>
+  <button class="inline-result-next" onclick="handleNextClick()">つぎへ ➜</button>
+  <div class="inline-result-secondary">
+    <button onclick="retryFromResult()">↺ もういちど</button>
+    <button id="inline-result-mode-btn" onclick="switchResultMode('test')">🏅 テストへ</button>
+  </div>
+  <button class="inline-result-home" onclick="goHomeFromResult()">ホームへ</button>
+</div>
+
   </div>
 
   <div id="result-overlay" class="overlay">
