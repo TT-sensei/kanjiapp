@@ -81,6 +81,7 @@ let currentMode   = 'practice';
 let currentGrade  = 1;
 let currentGroup = 0; // 0=全体/一覧、1〜4=学年内の並列グループ
 let selectedGroupMode = null;
+let isGroupPractice = false;
 let practiceRound = 1;
 const PRACTICE_ROUNDS = 3;
 
@@ -370,11 +371,18 @@ function startKanjiGroup(group) {
         if (note) note.textContent = '先に「れんしゅう」か「テスト」をえらんでね。';
         return;
     }
+    const items = getAllowedList(getKanjiGroupItems(currentGrade, group));
+    if (!items.length) { alert('このグループには学習できる漢字がありません。先生に確認してね。'); return; }
     currentGroup = group;
     currentMode = selectedGroupMode;
     searchGradeFilter = 0;
     document.getElementById('search-box').value = '';
-    showScreen('list-screen');
+    randomQueue = [...items].sort(() => Math.random() - 0.5).slice(0, Math.min(10, items.length)).map(item => ({ ...item, _foundGrade: currentGrade }));
+    randomIndex = 0;
+    isRandomTest = selectedGroupMode === 'test';
+    isGroupPractice = selectedGroupMode === 'practice';
+    levelBeforeRandomTest = getStats().level;
+    startApp(randomQueue[0]);
 }
 
 function updateKanjiGroupCards() {
@@ -411,11 +419,20 @@ function updateTitleGradeButtons() {
 }
 
 function showScreen(screenId) {
-    window.scrollTo(0,0); isRandomTest=false;
+    window.scrollTo(0,0); isRandomTest=false; isGroupPractice=false;
     // 登録モードをリセット
     exitBulkRegisterMode();
     document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
     document.getElementById(screenId).classList.add('active');
+    if (screenId==='title-screen') {
+        const clearOverlay = document.getElementById('random-clear-overlay');
+        if (clearOverlay) {
+            const title = clearOverlay.querySelector('h2');
+            const message = clearOverlay.querySelector('p');
+            if (title) title.textContent = 'テストクリア！';
+            if (message) message.innerHTML = 'せいかい！<br>ボーナス経験値 +10 ゲット！';
+        }
+    }
     if (screenId==='list-screen') renderList();
     else if (screenId==='title-screen') {
         document.getElementById('home-search-input').value='';
@@ -1074,7 +1091,7 @@ async function playAnimation() {
 // ============================================================
 function prefetchNextKanji() {
     let next = null;
-    if (isRandomTest) {
+    if (isRandomTest || isGroupPractice) {
         next = randomQueue[randomIndex + 1] || null;
     } else {
         let list = [];
@@ -1117,7 +1134,8 @@ async function startApp(item, options = {}) {
     updateFolderBtns();
     const msg=document.getElementById('message-area');
     const rd=document.getElementById('current-reading'); if(rd)rd.style.display='none';
-    if (isRandomTest){msg.innerText=`🎲 テスト: ${randomIndex+1}/${randomQueue.length}問目`;msg.style.color="#9B59B6";}
+    if (isRandomTest){msg.innerText=`🎲 グループ${['①','②','③','④'][currentGroup-1]} テスト: ${randomIndex+1}/${randomQueue.length}問目`;msg.style.color="#9B59B6";}
+    else if (isGroupPractice){msg.innerText=`✏️ グループ${['①','②','③','④'][currentGroup-1]} れんしゅう: ${randomIndex+1}/${randomQueue.length}字目`;msg.style.color="#00A878";}
     else if (currentMode==='test'){msg.innerText=currentTestExample?"文の □に 入る かんじを かこう！":"この かんじ を かこう！";msg.style.color="#FF1493";}
     else{
         const roundGuides = [
@@ -1212,11 +1230,11 @@ function handleComplete() {
 
     const newLv=getStats().level;
 
-    if (!isRandomTest){
+    if (!isRandomTest && !isGroupPractice){
         const lappedUp=checkAndIncrementLap(grade);
         if (lappedUp){pendingLapUp=true;pendingLapGrade=grade;}
     }
-    if (!isRandomTest&&newLv>oldLv) pendingLevelUp=true;
+    if ((!isRandomTest || isGroupPractice)&&newLv>oldLv) pendingLevelUp=true;
 
     msg.innerText=isPractice?'できたー！':'だいせいかい！';
     msg.style.color=isPractice?'#16834A':'#D81B60';
@@ -1248,6 +1266,7 @@ function resetPendingResultNavigation() {
     pendingLevelUp=false;
     pendingGoHome=false;
     isRandomTest=false;
+    isGroupPractice=false;
 }
 
 function retryFromResult() {
@@ -1281,14 +1300,20 @@ function handleNextClick() {
 }
 
 function moveToNextKanji() {
-    if (isRandomTest){
+    if (isRandomTest || isGroupPractice){
         randomIndex++;
         if (randomIndex<randomQueue.length){startApp(randomQueue[randomIndex]);return;}
-        isRandomTest=false; bonusXP+=10;
+        const completedGroupPractice = isGroupPractice;
+        isRandomTest=false; isGroupPractice=false; currentGroup=0; bonusXP+=10;
         localStorage.setItem('kanjiMasterBonusXP',bonusXP);
-        // ランダムテストは最大10問の一部出題なので、学年全体の周回クリア判定は行わない。
+        // グループ学習は最大10問のランダム出題。学年全体の周回クリア判定は行わない。
         // 復習だけで周回数が増えるのを防ぐ。
-        document.getElementById('random-clear-overlay').classList.add('active');
+        const clearOverlay = document.getElementById('random-clear-overlay');
+        if (clearOverlay) {
+            const title = clearOverlay.querySelector('h2');
+            if (title) title.textContent = completedGroupPractice ? 'グループれんしゅう かんりょう！' : 'グループテスト かんりょう！';
+            clearOverlay.classList.add('active');
+        }
         playSound('levelup'); updateUI();
     } else {
         let list=[];
