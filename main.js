@@ -549,7 +549,6 @@ function renderPracticeExample() {
     const example = examples.find(item => item.level === exampleLevel) || examples[exampleLevel - 1];
     if (!example) return '';
     return `<div class="sentence-panel">
-        <div class="sentence-mode-title">📘 レベル${exampleLevel}の れいぶん</div>
         <div class="sentence-example active">${formatSentenceExample(currentChar.char, example, false)}</div>
     </div>`;
 }
