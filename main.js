@@ -424,6 +424,15 @@ function showScreen(screenId) {
     exitBulkRegisterMode();
     document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
     document.getElementById(screenId).classList.add('active');
+    if (screenId==='title-screen') {
+        const clearOverlay = document.getElementById('random-clear-overlay');
+        if (clearOverlay) {
+            const title = clearOverlay.querySelector('h2');
+            const message = clearOverlay.querySelector('p');
+            if (title) title.textContent = 'テストクリア！';
+            if (message) message.innerHTML = 'せいかい！<br>ボーナス経験値 +10 ゲット！';
+        }
+    }
     if (screenId==='list-screen') renderList();
     else if (screenId==='title-screen') {
         document.getElementById('home-search-input').value='';
