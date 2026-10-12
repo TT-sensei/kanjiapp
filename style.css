@@ -238,13 +238,13 @@ h1 { font-size: 3rem; margin: 0; background: linear-gradient(90deg, var(--primar
 .practice-result-panel[hidden] { display: none !important; }
 .practice-result-panel h2 { margin: 0 0 4px; font-size: 1.7rem; }
 .practice-result-panel p { margin: 4px 0 12px; color: #666; font-size: .9rem; }
-.inline-result-next { width: 100%; min-height: 54px; border: 0; border-radius: 16px; background: linear-gradient(135deg,#16834A,#2EAD68); color: white; font: 700 1.15rem inherit; cursor: pointer; box-shadow: 0 4px 0 rgba(0,0,0,.12); }
+.inline-result-next { width: 100%; min-height: 54px; border: 0; border-radius: 16px; background: linear-gradient(135deg,#16834A,#2EAD68); color: white; font-family: inherit; font-size: 1.15rem; font-weight: 700; cursor: pointer; box-shadow: 0 4px 0 rgba(0,0,0,.12); }
 .inline-result-secondary { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
-.inline-result-secondary button, .inline-result-home { min-height: 46px; padding: 8px; border: 1px solid #D8DEE3; border-radius: 14px; background: #F7F9FA; color: #37474F; font: 600 .95rem inherit; cursor: pointer; }
+.inline-result-secondary button, .inline-result-home { min-height: 46px; padding: 8px; border: 1px solid #D8DEE3; border-radius: 14px; background: #F7F9FA; color: #37474F; font-family: inherit; font-size: .95rem; font-weight: 600; cursor: pointer; }
 .inline-result-home { margin-top: 8px; min-height: 36px; border: 0; background: transparent; color: #777; font-size: .85rem; }
 @media (max-width: 500px) {
   #practice-area { padding: 8px; border-radius: 18px; margin-top: 8px; }
-  #practice-area canvas { max-width: calc(100vw - 88px); }
+  #practice-area canvas { max-width: calc(100vw - 64px); }
   .controls { margin-top: 12px; }
 }
 .controls { margin-top: 25px; display: flex; justify-content: center; gap: 20px; }
