@@ -42,19 +42,35 @@ function readStoredNumber(key, fallback = 0) {
     }
 }
 
+function readStoredObject(key, fallback = {}) {
+    const value = readStoredJSON(key, fallback);
+    if (value && typeof value === 'object' && !Array.isArray(value)) return value;
+    console.warn(`保存データ「${key}」の形式が正しくないため、初期値を使います。`);
+    return fallback;
+}
+
+function readStoredStringArray(key, fallback = []) {
+    const value = readStoredJSON(key, fallback);
+    if (!Array.isArray(value)) {
+        console.warn(`保存データ「${key}」の形式が正しくないため、初期値を使います。`);
+        return fallback;
+    }
+    return value.filter(item => typeof item === 'string');
+}
+
 // ============================================================
 // 状態管理
 // ============================================================
-let progressPractice = readStoredJSON('kanjiMasterPractice', {});
+let progressPractice = readStoredObject('kanjiMasterPractice', {});
 let kanjiExampleDataByGrade = {};
 let currentTestExample = null; // テストモードでランダムに選ばれた例文(1つ)
-let progressTest     = readStoredJSON('kanjiMasterTest', {});
-let tokkunKanji      = readStoredJSON('kanjiMasterTokkun', {});
-let nigateKanji      = readStoredJSON('kanjiMasterNigate', {});
+let progressTest     = readStoredObject('kanjiMasterTest', {});
+let tokkunKanji      = readStoredObject('kanjiMasterTokkun', {});
+let nigateKanji      = readStoredObject('kanjiMasterNigate', {});
 let bonusXP          = readStoredNumber('kanjiMasterBonusXP', 0);
-let lapCount         = readStoredJSON('kanjiMasterLap', {});
-let mistakeCount     = readStoredJSON('kanjiMasterMistakes', {});
-let learningStats    = readStoredJSON('kanjiMasterLearningStats', {});
+let lapCount         = readStoredObject('kanjiMasterLap', {});
+let mistakeCount     = readStoredObject('kanjiMasterMistakes', {});
+let learningStats    = readStoredObject('kanjiMasterLearningStats', {});
 let sharedKanjiScope = [];
 let shareSelection   = new Set();
 let sharePickerGrade = 1;
@@ -119,13 +135,13 @@ for (let g = 1; g <= 6; g++) {
 function getLapClearedList(grade) {
     const lap = getGradeLap(grade);
     const key = `kanjiMasterLP_${grade}_${lap}`;
-    return readStoredJSON(key, []);
+    return readStoredStringArray(key, []);
 }
 
 function addLapCleared(grade, char) {
     const lap = getGradeLap(grade);
     const key = `kanjiMasterLP_${grade}_${lap}`;
-    const list = readStoredJSON(key, []);
+    const list = readStoredStringArray(key, []);
     if (!list.includes(char)) {
         list.push(char);
         localStorage.setItem(key, JSON.stringify(list));
@@ -706,7 +722,7 @@ function getPracticeLap(char, grade) {
     const total = getGradeLap(grade);
     for (let l = total; l >= 0; l--) {
         const key  = `kanjiMasterLP_${grade}_${l}`;
-        const list = readStoredJSON(key, []);
+        const list = readStoredStringArray(key, []);
         if (list.includes(char)) return l;
     }
     return 0;
