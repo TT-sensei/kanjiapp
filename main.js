@@ -1193,6 +1193,8 @@ function moveToNextKanji() {
         if (currentMode==='tokkun'||currentMode==='nigate'){
             const f=currentMode==='tokkun'?tokkunKanji:nigateKanji;
             for (let g=1;g<=6;g++) if(allKanjiData[g]) list=list.concat(allKanjiData[g].filter(i=>f[i.char]));
+            // 共有URLの対象外の漢字へ、次の問題で移動しないようにする。
+            list = getAllowedList(list);
         } else { list=getAllowedList(allKanjiData[currentChar._foundGrade||currentGrade]||[]); }
         if (!list.length){showScreen('list-screen');return;}
         const idx=list.findIndex(k=>k.char===currentChar.char);
