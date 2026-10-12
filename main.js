@@ -1101,7 +1101,7 @@ async function startApp(item, options = {}) {
         <div class="kl${currentMode==='test' && currentTestExample ? ' test-readings-hidden' : ''}${isPractice && practiceRound > 1 ? ' practice-readings-hidden' : ''}" id="test-reading-panel">
             <div class="sc">${kunyomi.length>0?`<div class="yb kun">くんよみ</div><div class="ypc" style="color:#2874A6;">${dKP}</div>`:''}</div>
             <div class="ym">${kunyomi.length>0?`<div style="color:#2874A6;">${dKM}</div>`:''}${onyomi.length>0?`<div style="color:#B03A2E;">${dOM}</div>`:''}</div>
-            <div style="position:relative;width:${CANVAS_SIZE}px;height:${CANVAS_SIZE}px;margin:0;background:white;flex-shrink:0;border-radius:24px;box-shadow:0 4px 12px rgba(0,0,0,0.05);">
+            <div class="drawing-canvas-wrap" style="position:relative;width:${CANVAS_SIZE}px;height:${CANVAS_SIZE}px;margin:0;background:white;flex-shrink:0;border-radius:24px;box-shadow:0 4px 12px rgba(0,0,0,0.05);">
                 <canvas id="bg-canvas"    width="${CANVAS_SIZE}" height="${CANVAS_SIZE}" style="position:absolute;top:0;left:0;z-index:1;"></canvas>
                 <canvas id="fixed-canvas" width="${CANVAS_SIZE}" height="${CANVAS_SIZE}" style="position:absolute;top:0;left:0;z-index:2;"></canvas>
                 <canvas id="draw-canvas"  width="${CANVAS_SIZE}" height="${CANVAS_SIZE}" style="position:absolute;top:0;left:0;z-index:3;touch-action:none;cursor:crosshair;"></canvas>
