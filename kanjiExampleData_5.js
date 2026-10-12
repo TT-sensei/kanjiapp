@@ -819,6 +819,11 @@ const kanjiExampleData_5 = {
     { sentence: "教室の 備品を そろえる。", reading: "び", level: 2 },
     { sentence: "いつ 地しんが おきても うごけるよう、ひつような 物を 備えました。", reading: "そな", level: 3 },
   ],
+  "評": [
+    { sentence: "作品を 評価する。", reading: "ひょう", level: 1 },
+    { sentence: "よい 評判を 聞く。", reading: "ひょう", level: 2 },
+    { sentence: "発表の よかった 点を 評価しました。", reading: "ひょう", level: 3 },
+  ],
   "貧": [
     { sentence: "貧血を ふせぐ。", reading: "ひん", level: 1 },
     { sentence: "水が 貧しい 土地。", reading: "まず", level: 2 },
