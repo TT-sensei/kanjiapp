@@ -393,13 +393,34 @@ function updateKanjiGroupCards() {
         const cleared = items.filter(item => getLapClearedList(currentGrade).includes(item.char)).length;
         const percent = items.length ? Math.round(cleared / items.length * 100) : 0;
         const modeReady = !!selectedGroupMode;
-        return '<button type="button" class="' + (modeReady ? 'ready' : '') + '" onclick="startKanjiGroup(' + group + ')" aria-label="グループ' + group + '、' + items.length + '字">' +
+        const preview = items.slice(0, 5).map(item => item.char).join('・');
+        return '<button type="button" class="' + (modeReady ? 'ready' : '') + '" onclick="startKanjiGroup(' + group + ')" aria-label="グループ' + group + '、' + items.length + '字。漢字の例：' + preview + '">' +
           '<strong>グループ' + ['①','②','③','④'][group-1] + '</strong>' +
+          '<span class="group-kanji-preview">' + (preview || '漢字データなし') + '</span>' +
           '<span class="group-count">' + items.length + '字</span>' +
           '<span class="group-progress-text">' + cleared + '/' + items.length + '字できた</span>' +
           '<span class="group-progress-track"><i style="width:' + percent + '%"></i></span>' +
         '</button>';
     }).join('');
+}
+
+function openKanjiGroupList() {
+    const overlay = document.getElementById('kanji-group-list-overlay');
+    const body = document.getElementById('kanji-group-list-body');
+    const gradeLabel = document.getElementById('group-list-grade');
+    if (!overlay || !body) return;
+    if (gradeLabel) gradeLabel.textContent = currentGrade + '年生';
+    body.innerHTML = [1,2,3,4].map(group => {
+        const items = getKanjiGroupItems(currentGrade, group);
+        return '<section class="group-list-section"><h3>グループ' + ['①','②','③','④'][group-1] + ' <span>' + items.length + '字</span></h3>' +
+            '<div class="group-list-kanji">' + items.map(item => '<span>' + item.char + '</span>').join('') + '</div></section>';
+    }).join('');
+    overlay.classList.add('active');
+}
+
+function closeKanjiGroupList() {
+    const overlay = document.getElementById('kanji-group-list-overlay');
+    if (overlay) overlay.classList.remove('active');
 }
 
 function updateTitleGradeButtons() {

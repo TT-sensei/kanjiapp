@@ -107,6 +107,7 @@
        <button onclick="startKanjiGroup(4)"><strong>グループ④</strong><span>漢字をえらぶ</span></button>
      </div>
      <p id="kanji-group-mode-note" class="group-mode-note" aria-live="polite">まず「れんしゅう」か「テスト」をえらんでね。</p>
+     <button type="button" class="group-list-open" onclick="openKanjiGroupList()">漢字の一覧を見る</button>
    </section>
 
    <div class="home-tools">
@@ -331,6 +332,15 @@
     <h2 id="reward-title">おたのしみバッジ</h2>
     <p class="reward-subtitle">レベルアップでコレクションがふえていくよ</p>
     <div id="reward-gallery"></div>
+   </div>
+  </div>
+
+  <div id="kanji-group-list-overlay" class="overlay kanji-group-list-overlay" role="dialog" aria-modal="true" aria-labelledby="kanji-group-list-title">
+   <div class="kanji-group-list-content">
+    <button class="modal-close" aria-label="閉じる" onclick="closeKanjiGroupList()">×</button>
+    <h2 id="kanji-group-list-title">グループの漢字一覧</h2>
+    <p class="group-list-subtitle"><span id="group-list-grade">1年生</span>の漢字をグループごとに確認できるよ。</p>
+    <div id="kanji-group-list-body"></div>
    </div>
   </div>
 
