@@ -69,11 +69,6 @@ const kanjiExampleData_5 = {
     { sentence: "夜桜を ながめる。", reading: "ざくら", level: 2 },
     { sentence: "あたたかい 風が ふき、川ぞいの 桜が いっせいに さきました。", reading: "さくら", level: 3 },
   ],
-  "恩": [
-    { sentence: "恩を わすれない。", reading: "おん", level: 1 },
-    { sentence: "そだててくれた 恩。", reading: "おん", level: 2 },
-    { sentence: "おせわに なった 恩を わすれず、いつか おれいを したいです。", reading: "おん", level: 3 },
-  ],
   "可": [
     { sentence: "入る 許可を もらう。", reading: "か", level: 1 },
     { sentence: "じつげんが 可能だ。", reading: "か", level: 2 },
