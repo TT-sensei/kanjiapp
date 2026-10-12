@@ -97,7 +97,7 @@ let isAnimating = false;
 let hintTimeout = null;
 let bgCanvasCtx, fixedCanvasCtx, drawCanvasCtx;
 
-const CANVAS_SIZE = 250;
+const CANVAS_SIZE = 300;
 const KVG_SIZE    = 109;
 const PADDING     = 15;
 const SCALE       = (CANVAS_SIZE - PADDING * 2) / KVG_SIZE;
@@ -798,7 +798,7 @@ function initCanvasEngine() {
     drawCanvasCtx  = dc.getContext('2d');
     const setup=(ctx,col,w)=>{ctx.lineCap='round';ctx.lineJoin='round';ctx.strokeStyle=col;ctx.lineWidth=w;};
     setup(bgCanvasCtx,'#E0E0E0',5); setup(fixedCanvasCtx,'#333333',5); setup(drawCanvasCtx,'#FF6B35',5);
-    const pos=e=>{const r=dc.getBoundingClientRect();return{x:(e.clientX??(e.touches?e.touches[0].clientX:0))-r.left,y:(e.clientY??(e.touches?e.touches[0].clientY:0))-r.top};};
+    const pos=e=>{const r=dc.getBoundingClientRect();return{x:((e.clientX??(e.touches?e.touches[0].clientX:0))-r.left)*(dc.width/r.width),y:((e.clientY??(e.touches?e.touches[0].clientY:0))-r.top)*(dc.height/r.height)};};
     const sd=e=>{if(isAnimating||currentStrokeIndex>=currentKanjiPaths.length)return;isDrawing=true;userPoints=[pos(e)];drawCanvasCtx.beginPath();drawCanvasCtx.moveTo(userPoints[0].x,userPoints[0].y);};
     const dr=e=>{if(!isDrawing||isAnimating)return;const p=pos(e);userPoints.push(p);drawCanvasCtx.lineTo(p.x,p.y);drawCanvasCtx.stroke();};
     const ed=()=>{if(!isDrawing||isAnimating)return;isDrawing=false;evaluateStroke();};
@@ -1055,6 +1055,10 @@ async function startApp(item, options = {}) {
         currentTestExample = null;
     }
     window.scrollTo(0,0);
+    const resultPanel = document.getElementById('practice-result-panel');
+    if (resultPanel) resultPanel.hidden = true;
+    const practiceControls = document.querySelector('#practice-screen .controls');
+    if (practiceControls) practiceControls.hidden = false;
     document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
     document.getElementById('practice-screen').classList.add('active');
     updateFolderBtns();
@@ -1097,7 +1101,7 @@ async function startApp(item, options = {}) {
         <div class="kl${currentMode==='test' && currentTestExample ? ' test-readings-hidden' : ''}${isPractice && practiceRound > 1 ? ' practice-readings-hidden' : ''}" id="test-reading-panel">
             <div class="sc">${kunyomi.length>0?`<div class="yb kun">くんよみ</div><div class="ypc" style="color:#2874A6;">${dKP}</div>`:''}</div>
             <div class="ym">${kunyomi.length>0?`<div style="color:#2874A6;">${dKM}</div>`:''}${onyomi.length>0?`<div style="color:#B03A2E;">${dOM}</div>`:''}</div>
-            <div style="position:relative;width:${CANVAS_SIZE}px;height:${CANVAS_SIZE}px;margin:0;background:white;flex-shrink:0;border-radius:24px;box-shadow:0 4px 12px rgba(0,0,0,0.05);">
+            <div class="drawing-canvas-wrap" style="position:relative;width:${CANVAS_SIZE}px;height:${CANVAS_SIZE}px;margin:0;background:white;flex-shrink:0;border-radius:24px;box-shadow:0 4px 12px rgba(0,0,0,0.05);">
                 <canvas id="bg-canvas"    width="${CANVAS_SIZE}" height="${CANVAS_SIZE}" style="position:absolute;top:0;left:0;z-index:1;"></canvas>
                 <canvas id="fixed-canvas" width="${CANVAS_SIZE}" height="${CANVAS_SIZE}" style="position:absolute;top:0;left:0;z-index:2;"></canvas>
                 <canvas id="draw-canvas"  width="${CANVAS_SIZE}" height="${CANVAS_SIZE}" style="position:absolute;top:0;left:0;z-index:3;touch-action:none;cursor:crosshair;"></canvas>
@@ -1132,7 +1136,7 @@ async function startApp(item, options = {}) {
 // ============================================================
 function handleComplete() {
     playSound('complete');
-    const msg=document.getElementById('result-msg'),icon=document.getElementById('result-icon');
+    const msg=document.getElementById('inline-result-msg');
     const isPractice=(currentMode==='practice'||currentMode==='tokkun'||currentMode==='nigate');
 
     if (isPractice && practiceRound < PRACTICE_ROUNDS) {
@@ -1162,16 +1166,19 @@ function handleComplete() {
     if (!isRandomTest&&newLv>oldLv) pendingLevelUp=true;
 
     msg.innerText=isPractice?'できたー！':'だいせいかい！';
-    msg.style.color=isPractice?'#00D084':'#FF1493';
-    if(icon) icon.innerText='';
+    msg.style.color=isPractice?'#16834A':'#D81B60';
     updateResultActions(isPractice);
+    document.getElementById('practice-result-panel').hidden = false;
+    document.querySelector('#practice-screen .controls').hidden = true;
     showRandomNaviFace();
-    setTimeout(()=>document.getElementById('result-overlay').classList.add('active'),350);
 }
 
 function updateResultActions(isPractice) {
     document.getElementById('result-test-btn').hidden = !isPractice;
     document.getElementById('result-practice-btn').hidden = isPractice;
+    const modeButton = document.getElementById('inline-result-mode-btn');
+    modeButton.textContent = isPractice ? '🏅 テストへ' : '✏️ れんしゅうへ';
+    modeButton.onclick = () => switchResultMode(isPractice ? 'test' : 'practice');
 }
 
 function closeResultOverlay() {

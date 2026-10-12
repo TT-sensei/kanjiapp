@@ -230,7 +230,23 @@ h1 { font-size: 3rem; margin: 0; background: linear-gradient(90deg, var(--primar
 .nigate-mark  { background: linear-gradient(135deg, #9C27B0, #BA68C8); border-radius: 50%; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; position: absolute; bottom: -6px; right: -6px; font-size: 12px; border: 2px solid white; color: white; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
 
 /* 練習画面 */
-#practice-area { background: white; border-radius: 25px; padding: 25px; box-shadow: var(--shadow-soft); display: inline-block; margin-top: 20px; border: 4px solid white; touch-action: none; }
+#practice-area { background: white; border-radius: 25px; padding: 16px; box-shadow: var(--shadow-soft); display: inline-block; max-width: 100%; box-sizing: border-box; margin-top: 12px; border: 4px solid white; touch-action: none; }
+#practice-screen { text-align: center; }
+#practice-area #character-target { max-width: 100%; }
+#practice-area .drawing-canvas-wrap { width: min(300px, calc(100vw - 64px)) !important; height: auto !important; aspect-ratio: 1; }
+#practice-area canvas { display: block; width: 100%; height: 100%; max-width: none; }
+.practice-result-panel { width: min(100%, 420px); margin: 16px auto 0; padding: 16px; box-sizing: border-box; background: #fff; border: 2px solid #CDEED8; border-radius: 22px; box-shadow: var(--shadow-soft); color: var(--text); }
+.practice-result-panel[hidden] { display: none !important; }
+.practice-result-panel h2 { margin: 0 0 4px; font-size: 1.7rem; }
+.practice-result-panel p { margin: 4px 0 12px; color: #666; font-size: .9rem; }
+.inline-result-next { width: 100%; min-height: 54px; border: 0; border-radius: 16px; background: linear-gradient(135deg,#16834A,#2EAD68); color: white; font-family: inherit; font-size: 1.15rem; font-weight: 700; cursor: pointer; box-shadow: 0 4px 0 rgba(0,0,0,.12); }
+.inline-result-secondary { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+.inline-result-secondary button, .inline-result-home { min-height: 46px; padding: 8px; border: 1px solid #D8DEE3; border-radius: 14px; background: #F7F9FA; color: #37474F; font-family: inherit; font-size: .95rem; font-weight: 600; cursor: pointer; }
+.inline-result-home { margin-top: 8px; min-height: 36px; border: 0; background: transparent; color: #777; font-size: .85rem; }
+@media (max-width: 500px) {
+  #practice-area { padding: 8px; border-radius: 18px; margin-top: 8px; }
+  .controls { margin-top: 12px; }
+}
 .controls { margin-top: 25px; display: flex; justify-content: center; gap: 20px; }
 .control-btn { background: linear-gradient(135deg, var(--accent), #00E5FF); color: white; border: none; width: 70px; height: 70px; border-radius: 50%; font-size: 1.8rem; cursor: pointer; box-shadow: var(--shadow-pop); font-weight: 600; display: flex; align-items: center; justify-content: center; }
 .control-btn:active { transform: translateY(7px); box-shadow: 0 2px 0 #1976D2; }
