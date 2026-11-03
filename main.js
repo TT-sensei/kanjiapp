@@ -431,14 +431,18 @@ function updateTitleGradeButtons() {
     document.querySelectorAll('.grade-btn').forEach(btn => {
         const g=parseInt(btn.dataset.grade), lap=getGradeLap(g), theme=getLapTheme(lap);
         btn.classList.toggle('selected', g===currentGrade);
+        // 進捗数字はHTML側で薄いグレー固定のため、選択中（濃い背景）では白にして読みやすくする
+        const ptxt = btn.querySelector('[id^="grade-progress-text-"]');
         if (g===currentGrade) {
             btn.style.borderColor=theme.primary;
             btn.style.background=`linear-gradient(135deg,${theme.primary},${theme.secondary})`;
             btn.style.color='white';
+            if (ptxt) { ptxt.style.color='#fff'; ptxt.style.fontWeight='700'; }
         } else {
             btn.style.borderColor=theme.primary+'66';
             btn.style.background=theme.cardBg;
             btn.style.color='';
+            if (ptxt) { ptxt.style.color=''; ptxt.style.fontWeight=''; }
         }
     });
 }
@@ -1039,8 +1043,14 @@ function evaluateStroke() {
     const endRef  = getSVGEndPt(pd);
     const endPt   = userPoints[userPoints.length-1];
     const endDist = Math.hypot(endPt.x-endRef.x, endPt.y-endRef.y);
-    const ok = dtw < CANVAS_SIZE*0.20
-        && (endDist < CANVAS_SIZE*0.22*1.4 || dtw < CANVAS_SIZE*0.20*0.60);
+    // 落書き対策：ジグザグに振っただけの線は軌跡が極端に長くなる。
+    // まじめに書いた字（大きく震えた線でも実測で参照の約2.4倍まで）では
+    // 4倍を超えないため、その場合は形が近くても正解にしない。
+    // ※短い画は手の震えでも軌跡の長さが膨らみやすいため、この足切りは長い画だけに適用する。
+    const tooWiggly = refLen >= 100 && userLen > refLen * 4;
+    const ok = !tooWiggly
+        && dtw < CANVAS_SIZE*0.12
+        && (endDist < CANVAS_SIZE*0.22 || dtw < CANVAS_SIZE*0.12*0.60);
 
     drawCanvasCtx.clearRect(0,0,CANVAS_SIZE,CANVAS_SIZE);
 
@@ -1268,10 +1278,19 @@ function handleComplete() {
     const popupMessage = document.getElementById('result-msg');
     if (popupMessage) popupMessage.textContent = msg.innerText;
     updateResultActions(isPractice);
-    document.getElementById('practice-result-panel').hidden = true;
-    document.querySelector('#practice-screen .controls').hidden = true;
-    showRandomNaviFace();
-    document.getElementById('result-overlay').classList.add('active');
+    // 書けた字を子どもが眺める間を置いてから結果ポップアップを出す。
+    // 即時表示だと、最後の画を書き終えた瞬間に画面が切り替わってしまうため。
+    // その間は描画を受け付けず、別の字へ移っていたら表示しない。
+    const token = appLoadToken;
+    isAnimating = true;
+    setTimeout(() => {
+        if (token !== appLoadToken) return;
+        isAnimating = false;
+        document.getElementById('practice-result-panel').hidden = true;
+        document.querySelector('#practice-screen .controls').hidden = true;
+        showRandomNaviFace();
+        document.getElementById('result-overlay').classList.add('active');
+    }, 550);
 }
 
 function updateResultActions(isPractice) {
@@ -1440,7 +1459,14 @@ function showResetConfirm()  {playSound('click');document.getElementById('reset-
 function closeResetConfirm() {playSound('click');document.getElementById('reset-confirm').classList.remove('active');}
 function executeReset() {
     playSound('click');
-    localStorage.clear();
+    // このアプリの保存キー（kanjiMaster〜）だけを消す。
+    // localStorage は同じサイトの他アプリと共有されるため、clear() は使わない。
+    const ownKeys = [];
+    for (let i = 0; i < localStorage.length; i++) {
+        const k = localStorage.key(i);
+        if (k && k.startsWith('kanjiMaster')) ownKeys.push(k);
+    }
+    ownKeys.forEach(k => localStorage.removeItem(k));
     progressPractice={}; progressTest={}; tokkunKanji={}; nigateKanji={}; bonusXP=0; lapCount={}; mistakeCount={}; learningStats={};
     document.getElementById('reset-confirm').classList.remove('active');
     location.reload();
