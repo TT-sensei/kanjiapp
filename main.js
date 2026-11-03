@@ -1166,7 +1166,10 @@ async function startApp(item, options = {}) {
     const practiceControls = document.querySelector('#practice-screen .controls');
     if (practiceControls) practiceControls.hidden = false;
     document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
-    document.getElementById('practice-screen').classList.add('active');
+    const practiceScreen = document.getElementById('practice-screen');
+    practiceScreen.classList.add('active');
+    // テスト画面は文とヒントで縦に長いため、背の低い画面での調整用に目印を付ける
+    practiceScreen.classList.toggle('test-mode', currentMode==='test');
     updateFolderBtns();
     const msg=document.getElementById('message-area');
     const rd=document.getElementById('current-reading'); if(rd)rd.style.display='none';
@@ -1242,6 +1245,45 @@ async function startApp(item, options = {}) {
 // ============================================================
 // 完了処理
 // ============================================================
+// 結果ポップアップで「じぶんの字」と「お手本」を見比べられるようにする。
+// じぶんの字は、いま画面に出ている3枚のキャンバス（ガイド＋確定した画＋描きかけ）を重ねた姿。
+// お手本は、練習画面の薄いグレーの手本と同じ見た目で描き直す。
+function fillResultCompare() {
+    const wrap = document.getElementById('result-compare');
+    if (!wrap) return;
+    const userCv  = document.getElementById('compare-user-canvas');
+    const modelCv = document.getElementById('compare-model-canvas');
+    if (!userCv || !modelCv || !currentKanjiPaths.length) { wrap.hidden = true; return; }
+
+    const uctx = userCv.getContext('2d');
+    uctx.clearRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
+    uctx.fillStyle = '#FFFFFF';
+    uctx.fillRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
+    ['bg-canvas', 'fixed-canvas', 'draw-canvas'].forEach(id => {
+        const src = document.getElementById(id);
+        if (src) uctx.drawImage(src, 0, 0);
+    });
+
+    const mctx = modelCv.getContext('2d');
+    mctx.clearRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
+    mctx.fillStyle = '#FFFFFF';
+    mctx.fillRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
+    mctx.save();
+    mctx.strokeStyle = '#D6EAF8'; mctx.lineWidth = 3; mctx.setLineDash([8, 8]);
+    mctx.beginPath();
+    mctx.moveTo(CANVAS_SIZE / 2, 0); mctx.lineTo(CANVAS_SIZE / 2, CANVAS_SIZE);
+    mctx.moveTo(0, CANVAS_SIZE / 2); mctx.lineTo(CANVAS_SIZE, CANVAS_SIZE / 2);
+    mctx.stroke(); mctx.restore();
+    mctx.save();
+    mctx.translate(PADDING, PADDING); mctx.scale(SCALE, SCALE);
+    mctx.strokeStyle = '#E0E0E0'; mctx.lineWidth = 5;
+    mctx.lineCap = 'round'; mctx.lineJoin = 'round';
+    currentKanjiPaths.forEach(pd => mctx.stroke(new Path2D(pd)));
+    mctx.restore();
+
+    wrap.hidden = false;
+}
+
 function handleComplete() {
     playSound('complete');
     const msg=document.getElementById('inline-result-msg');
@@ -1278,6 +1320,7 @@ function handleComplete() {
     const popupMessage = document.getElementById('result-msg');
     if (popupMessage) popupMessage.textContent = msg.innerText;
     updateResultActions(isPractice);
+    fillResultCompare();
     // 書けた字を子どもが眺める間を置いてから結果ポップアップを出す。
     // 即時表示だと、最後の画を書き終えた瞬間に画面が切り替わってしまうため。
     // その間は描画を受け付けず、別の字へ移っていたら表示しない。

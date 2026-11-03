@@ -18,7 +18,7 @@
   <div id="title-screen" class="screen active">
    <div class="title-top-panel">
     <div class="title-brand-panel">
-   <h1>🌟 かんじマスター</h1>
+   <h1><span class="title-text">🌟 かんじマスター</span></h1>
    <div class="mascot-area image-mascot" id="title-mascot" aria-label="いまのコレクションバッジ"></div>
    <div class="level-title-area">
     <span class="level-value">Lv.<span id="title-level">1</span></span> 
@@ -274,8 +274,14 @@
 </div>
 
 <div class="controls">
-  <button aria-label="書き順再生" class="control-btn" onclick="playAnimation()">▶</button> 
-  <button aria-label="リトライ" class="control-btn" onclick="retry()">↺</button>
+  <div class="control-wrap">
+    <button aria-label="書き順再生" class="control-btn" onclick="playAnimation()">▶</button>
+    <span class="control-label">かきじゅん</span>
+  </div>
+  <div class="control-wrap">
+    <button aria-label="リトライ" class="control-btn" onclick="retry()">↺</button>
+    <span class="control-label">やりなおし</span>
+  </div>
 </div>
 
 <div id="practice-result-panel" class="practice-result-panel" hidden aria-live="polite">
@@ -295,6 +301,16 @@
    <div class="result-content">
     <div class="correct-navi-face" id="correct-navi-face" aria-hidden="true"></div>
     <h2 id="result-msg">できた！</h2>
+    <div class="result-compare" id="result-compare" hidden>
+      <figure class="compare-item">
+        <canvas id="compare-user-canvas" width="300" height="300" aria-label="じぶんが かいた字"></canvas>
+        <figcaption>じぶんの字</figcaption>
+      </figure>
+      <figure class="compare-item">
+        <canvas id="compare-model-canvas" width="300" height="300" aria-label="お手本の字"></canvas>
+        <figcaption>お手本</figcaption>
+      </figure>
+    </div>
     <div class="result-actions" aria-label="つぎの そうさ">
       <button id="result-test-btn" class="result-action result-action-test" onclick="switchResultMode('test')">🏅 テストへ</button>
       <button class="result-action result-action-retry" onclick="retryFromResult()">↺ もういちど</button>

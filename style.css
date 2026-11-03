@@ -262,7 +262,10 @@ h1 { font-size: 3rem; margin: 0; background: linear-gradient(90deg, var(--primar
 .controls[hidden] { display: none !important; }
 .control-btn { background: linear-gradient(135deg, var(--accent), #00E5FF); color: white; border: none; width: 70px; height: 70px; border-radius: 50%; font-size: 1.8rem; cursor: pointer; box-shadow: var(--shadow-pop); font-weight: 600; display: flex; align-items: center; justify-content: center; }
 .control-btn:active { transform: translateY(7px); box-shadow: 0 2px 0 #1976D2; }
-.control-btn:nth-child(2) { background: linear-gradient(135deg, var(--accent3), #FF8555); }
+.control-wrap:nth-child(2) .control-btn { background: linear-gradient(135deg, var(--accent3), #FF8555); }
+/* 丸ボタンの下に言葉のラベルを添えて、意味が伝わるようにする */
+.control-wrap { display: flex; flex-direction: column; align-items: center; gap: 5px; }
+.control-label { font-size: 0.8rem; font-weight: 700; color: #5d6c5f; line-height: 1.2; }
 
 /* フォルダボタン */
 .folder-btn { background: #EEE; color: #666; border: 2px solid #CCC; padding: 6px 12px; border-radius: 20px; cursor: pointer; font-weight: 600; font-family: inherit; transition: all 0.2s; font-size: 0.85rem; }
@@ -426,6 +429,15 @@ h1 { font-size: 3rem; margin: 0; background: linear-gradient(90deg, var(--primar
     -webkit-background-clip: border-box;
     -webkit-text-fill-color: #fff9e8;
     text-shadow: 0 3px 0 rgba(35, 61, 49, 0.82), 0 0 12px rgba(35, 61, 49, 0.42);
+}
+
+/* 明るいイラストに重なる場所でも読めるよう、タイトル文字の後ろに薄い土台を敷く */
+#title-screen h1 .title-text {
+    display: inline-block;
+    padding: 6px 22px 10px;
+    border-radius: 999px;
+    background: rgba(27, 58, 45, 0.45);
+    box-shadow: 0 4px 14px rgba(27, 58, 45, 0.28), inset 0 0 0 2px rgba(255, 249, 232, 0.35);
 }
 
 /* レベルと称号の「浮いている感じ」は残す */
@@ -908,6 +920,31 @@ h1 { font-size: 3rem; margin: 0; background: linear-gradient(90deg, var(--primar
   #result-overlay .result-content h2 { font-size: 1.45rem; margin: 2px 0 5px; }
   #result-overlay .result-actions { gap: 6px; margin-top: 8px; }
   #result-overlay .result-action { min-height: 42px; }
+}
+
+/* 結果ポップアップ内の「じぶんの字／お手本」見比べエリア */
+.result-compare { display: flex; justify-content: center; gap: 14px; margin: 8px 0 2px; }
+.result-compare[hidden] { display: none !important; }
+.result-compare figure { margin: 0; }
+.result-compare canvas {
+  width: 96px; height: 96px;
+  border: 2px solid #E3EFE7; border-radius: 14px;
+  background: #fff;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+}
+.result-compare figcaption { margin-top: 4px; font-size: 0.8rem; font-weight: 700; color: #5d6c5f; }
+@media (max-height: 520px) {
+  .result-compare canvas { width: 72px; height: 72px; }
+  .result-compare { margin: 4px 0 0; }
+}
+
+/* テスト画面は文とヒントボタンで縦に長いため、背の低い画面では
+   書く場所を少し縮めて、下の操作ボタンまでスクロールなしで見せる。
+   座標変換は表示サイズ比で行われるため、判定の座標系も連動する。 */
+@media (min-width: 700px) and (max-height: 860px) {
+  #practice-screen.test-mode #practice-area .drawing-canvas-wrap {
+    width: min(372px, calc(100vw - 280px)) !important;
+  }
 }
 
 
