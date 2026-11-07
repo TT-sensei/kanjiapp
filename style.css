@@ -927,14 +927,14 @@ h1 { font-size: 3rem; margin: 0; background: linear-gradient(90deg, var(--primar
 .result-compare[hidden] { display: none !important; }
 .result-compare figure { margin: 0; }
 .result-compare canvas {
-  width: 96px; height: 96px;
+  width: 200px; height: 200px;
   border: 2px solid #E3EFE7; border-radius: 14px;
   background: #fff;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
 }
 .result-compare figcaption { margin-top: 4px; font-size: 0.8rem; font-weight: 700; color: #5d6c5f; }
 @media (max-height: 520px) {
-  .result-compare canvas { width: 72px; height: 72px; }
+  .result-compare canvas { width: 150px; height: 150px; }
   .result-compare { margin: 4px 0 0; }
 }
 

@@ -1245,24 +1245,14 @@ async function startApp(item, options = {}) {
 // ============================================================
 // 完了処理
 // ============================================================
-// 結果ポップアップで「じぶんの字」と「お手本」を見比べられるようにする。
-// じぶんの字は、いま画面に出ている3枚のキャンバス（ガイド＋確定した画＋描きかけ）を重ねた姿。
-// お手本は、練習画面の薄いグレーの手本と同じ見た目で描き直す。
+// 結果ポップアップでは、お手本の字だけを大きく見せる。
+// 書いた字はお手本の画に吸着して確定する方式のため、自分の字と
+// 見比べても意味がない（お手本と一緒になる）ので、並べない。
 function fillResultCompare() {
     const wrap = document.getElementById('result-compare');
     if (!wrap) return;
-    const userCv  = document.getElementById('compare-user-canvas');
     const modelCv = document.getElementById('compare-model-canvas');
-    if (!userCv || !modelCv || !currentKanjiPaths.length) { wrap.hidden = true; return; }
-
-    const uctx = userCv.getContext('2d');
-    uctx.clearRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
-    uctx.fillStyle = '#FFFFFF';
-    uctx.fillRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
-    ['bg-canvas', 'fixed-canvas', 'draw-canvas'].forEach(id => {
-        const src = document.getElementById(id);
-        if (src) uctx.drawImage(src, 0, 0);
-    });
+    if (!modelCv || !currentKanjiPaths.length) { wrap.hidden = true; return; }
 
     const mctx = modelCv.getContext('2d');
     mctx.clearRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
@@ -1276,7 +1266,7 @@ function fillResultCompare() {
     mctx.stroke(); mctx.restore();
     mctx.save();
     mctx.translate(PADDING, PADDING); mctx.scale(SCALE, SCALE);
-    mctx.strokeStyle = '#E0E0E0'; mctx.lineWidth = 5;
+    mctx.strokeStyle = '#333333'; mctx.lineWidth = 5;
     mctx.lineCap = 'round'; mctx.lineJoin = 'round';
     currentKanjiPaths.forEach(pd => mctx.stroke(new Path2D(pd)));
     mctx.restore();
